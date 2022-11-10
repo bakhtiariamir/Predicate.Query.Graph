@@ -3,17 +3,22 @@
 namespace Parsis.Predicate.Sdk.Contract;
 public interface IPropertyInfo
 {
-    string Title
+    string Name
     {
         get;
     }
 
-    string ErrorMessage
+    PropertyDataType DataType
     {
         get;
     }
 
-    PropertyDataType Type
+    bool? Required
+    {
+        get;
+    }
+
+    string? ErrorMessage
     {
         get;
     }

@@ -1,11 +1,22 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
+using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public abstract class DatabaseQuery<TObject> : BaseQuery<TObject>, IDatabaseQuery<TObject> where TObject : class
+public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartCollection>, IDatabaseQuery<TObject> where TObject : class
 {
-    protected abstract DatabaseQueryContext<TObject> DatabaseQueryContext
+    public abstract DatabaseProviderType ProviderType
     {
         get;
+    }
+    protected DatabaseQuery(QueryObject<TObject> objectQuery) : base(objectQuery)
+    {
+    }
+
+    protected abstract DatabaseQueryPartCollection QueryPartCollection
+    {
+        get;
+        set;
     }
 
     public abstract Task GenerateColumn();

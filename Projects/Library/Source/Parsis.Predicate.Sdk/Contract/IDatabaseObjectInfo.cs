@@ -1,7 +1,9 @@
-﻿namespace Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.DataType;
+
+namespace Parsis.Predicate.Sdk.Contract;
 public interface IDatabaseObjectInfo<TObject> : IObjectInfo<TObject> where TObject : class
 {
-    string Table
+    string DataSet
     {
         get;
     }
@@ -11,5 +13,9 @@ public interface IDatabaseObjectInfo<TObject> : IObjectInfo<TObject> where TObje
         get;
     }
 
+    DataSetType DataSetType
+    {
+        get;
+    } 
 
 }

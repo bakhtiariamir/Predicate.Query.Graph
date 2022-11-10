@@ -19,14 +19,14 @@ public abstract class CacheObjectInfo<TObjectInfo, TObject> : ICacheObjectInfo<T
     }
 
 
-    public virtual TObjectInfo? GetObjectInfo()
+    public TObjectInfo? GetObjectInfo()
     {
         var key = $"{typeof(TObject)}_{ObjectInfoType}";
         var data = _memoryCache.Get(key);
         return data != null ? (TObjectInfo)data : default(TObjectInfo);
     }
 
-    public virtual void SaveObjectInfo(TObjectInfo objectInfo) => _memoryCache.Set($"{typeof(TObject)}_{ObjectInfoType}", objectInfo, options: _cacheCacheEntryOptions);
+    public void SaveObjectInfo(TObjectInfo objectInfo) => _memoryCache.Set($"{typeof(TObject)}_{ObjectInfoType}", objectInfo, options: _cacheCacheEntryOptions);
 
 
 }

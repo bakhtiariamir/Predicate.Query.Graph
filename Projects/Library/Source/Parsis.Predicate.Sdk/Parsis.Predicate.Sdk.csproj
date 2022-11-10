@@ -7,11 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Builder\Database\MySqlQuery.cs" />
-    <Compile Remove="Builder\Database\OracleQuery.cs" />
+    <Compile Remove="Info\Database\SqlServer\**" />
+    <Compile Remove="Info\Service\Attribute\**" />
+    <EmbeddedResource Remove="Info\Database\SqlServer\**" />
+    <EmbeddedResource Remove="Info\Service\Attribute\**" />
+    <None Remove="Info\Database\SqlServer\**" />
+    <None Remove="Info\Service\Attribute\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Builder\Database\MySqlQuery.cs" />
+    <Compile Remove="Builder\Database\OracleQuery.cs" />
+    <Compile Remove="Builder\Database\SqlServerQueryContext.cs" />
+    <Compile Remove="Builder\Database\SqlServerQueryContextBuilder.cs" />
+    <Compile Remove="Contract\ISqlServerQueryContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Info\Service\" />
+    <Folder Include="Manager\Service\" />
     <Folder Include="Parser\" />
   </ItemGroup>
 

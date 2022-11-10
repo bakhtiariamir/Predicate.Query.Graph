@@ -6,25 +6,43 @@ namespace Parsis.Predicate.Sdk.Info;
 
 public abstract class PropertyInfo : IPropertyInfo
 {
+    public string Name
+    {
+        get;
+    }
     public string Title
     {
         get;
     }
 
-    public string ErrorMessage
+
+    public PropertyDataType DataType
     {
         get;
     }
 
-    public PropertyDataType Type
+    public bool? Required
     {
         get;
     }
 
-    protected PropertyInfo(string title, string errorMessage, PropertyDataType type)
+    public string Alias
     {
-        Title = title;
+        get;
+    }
+
+    public string? ErrorMessage
+    {
+        get;
+    }
+
+    protected PropertyInfo(string name, PropertyDataType dataType, bool? required = null, string? title = null, string? @alias = null, string? errorMessage = null)
+    {
+        Name = name;
+        Title = title ?? Name;
+        DataType = dataType;
+        Required = required;
+        Alias = alias ?? Name;
         ErrorMessage = errorMessage;
-        Type = type;
     }
 }

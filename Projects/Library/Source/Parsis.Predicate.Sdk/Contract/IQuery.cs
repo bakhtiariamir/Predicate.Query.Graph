@@ -1,6 +1,13 @@
-﻿namespace Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.Query;
 
-public interface IQuery<TObject> where TObject : class
+namespace Parsis.Predicate.Sdk.Contract;
+
+public interface IQuery<TObject, TQueryResult> where TObject : class 
 {
-    Task Generate();
+    QueryObject<TObject> ObjectQuery
+    {
+        get;
+    }
+
+    Task<TQueryResult> Build();
 }

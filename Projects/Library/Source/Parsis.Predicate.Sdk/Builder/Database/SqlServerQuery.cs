@@ -1,15 +1,24 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Parsis.Predicate.Sdk.Helper;
+﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
+using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
 public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : class
 {
-    private readonly IMemoryCache _memoryCache;
-    protected override DatabaseQueryContext<TObject> DatabaseQueryContext => DatabaseQueryContextHelper.GenerateSqlServerQueryContext<TObject>(_memoryCache);
+    private readonly DatabaseQueryContext<TObject> _context;
 
-    public SqlServerQuery(IMemoryCache memoryCache)
+    public override DatabaseProviderType ProviderType => DatabaseProviderType.SqlServer;
+
+    protected override DatabaseQueryPartCollection QueryPartCollection
     {
-        _memoryCache = memoryCache;
+        get;
+        set;
+    } = new();
+
+
+    public SqlServerQuery(IQueryContext<TObject> context, QueryObject<TObject> query) : base(query)
+    {
+        _context = (DatabaseQueryContext<TObject>)context;
     }
 
     public override Task GenerateColumn()
@@ -42,13 +51,13 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : cl
         throw new NotImplementedException();
     }
 
-    public override Task Generate()
+    public override Task<DatabaseQueryPartCollection> Build()
     {
         Task.WaitAll(new[]
         {
             GenerateColumn(), GenerateWhereClause(), GenerateOrderByClause(), GenerateJoinClause()
         });
 
-        return Task.CompletedTask;
+        return Task.FromResult(QueryPartCollection);
     }
 }

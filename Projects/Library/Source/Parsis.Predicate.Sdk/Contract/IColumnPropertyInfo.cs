@@ -1,17 +1,29 @@
-﻿namespace Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.DataType;
+
+namespace Parsis.Predicate.Sdk.Contract;
 public interface IColumnPropertyInfo : IPropertyInfo
 {
-    bool IsNullable
+    DatabaseFieldType FieldType
     {
         get;
     }
 
-    string ColumnName
+    AggregationFunctionType? AggregationFunctionType
     {
         get;
     }
 
-    string Alias
+    string? FunctionName
+    {
+        get;
+    }
+
+    string? FkAlias
+    {
+        get;
+    }
+
+    RelationType? RelationType
     {
         get;
     }
