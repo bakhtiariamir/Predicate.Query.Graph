@@ -4,7 +4,10 @@ namespace Parsis.Predicate.Sdk.Info.Database.Attribute;
 [AttributeUsage(AttributeTargets.Property)]
 public class ColumnInfoAttribute : BasePropertyAttribute
 {
-
+    public bool IsPrimaryKey
+    {
+        get;
+    }
     public DatabaseFieldType Type
     {
         get;
@@ -36,8 +39,9 @@ public class ColumnInfoAttribute : BasePropertyAttribute
     }
 
 
-    public ColumnInfoAttribute(string name, PropertyDataType dataType, DatabaseFieldType type, AggregationFunctionType? aggregationFunctionType = null, string functionName = "", bool? required = null, string? @alias = null, string? title = null, string? errorMessage = null) : base(name, errorMessage, required)
+    public ColumnInfoAttribute(string name, bool isPrimaryKey, PropertyDataType dataType, DatabaseFieldType type, AggregationFunctionType? aggregationFunctionType = null, string functionName = "", bool? required = null, string? @alias = null, string? title = null, string? errorMessage = null) : base(name, errorMessage, required)
     {
+        IsPrimaryKey = isPrimaryKey;
         DataType = dataType;
         Type = type;
         AggregationFunctionType = aggregationFunctionType;

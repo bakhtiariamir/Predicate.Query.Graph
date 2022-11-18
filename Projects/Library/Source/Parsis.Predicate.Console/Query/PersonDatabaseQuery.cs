@@ -28,9 +28,9 @@ public class PersonDatabaseQuery : PersonQuery<DatabaseQueryPartCollection>
     public override async Task<string> SelectQueryAsync()
     {
         _queryObject = QueryObjectBuilder<Person>.Init(QueryType.Select).
-            SetSelecting(QueryObjectObjectSelecting<Person>.Init().Add(item => item.Id).Add(item => item.Age).Validation()).
-            SetFiltering(QueryObjectObjectFiltering<Person>.Init().AndPredicate(item => item.Age >= 12).Validation()).
-            SetSorting(QueryObjectObjectSorting<Person>.Init().Add(item => item.Age, DirectionType.Asc).Validation()).
+            SetSelecting(QueryObjectSelecting<Person>.Init().Add(item => item.Id).Add(item => item.Age).Validation()).
+            SetFiltering(QueryObjectFiltering<Person>.Init(item => item.Age >= 12).And(item => item.Age <= 25).Validation()).
+            SetSorting(QueryObjectSorting<Person>.Init().Add(item => item.Age, DirectionType.Asc).Validation()).
             Generate();
         await base.SelectQueryAsync();
 

@@ -6,6 +6,10 @@ namespace Parsis.Predicate.Sdk.Info.Database;
 
 public class ColumnPropertyInfo : PropertyInfo, IColumnPropertyInfo
 {
+    public bool IsPrimaryKey
+    {
+        get;
+    }
     public DatabaseFieldType FieldType
     {
         get;
@@ -31,8 +35,9 @@ public class ColumnPropertyInfo : PropertyInfo, IColumnPropertyInfo
         get;
     }
 
-    public ColumnPropertyInfo(string name, PropertyDataType dataType, DatabaseFieldType fieldType, string? functionName = null, string? fkAlias = null, AggregationFunctionType? aggregationFunctionType = null, RelationType? relationType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null) : base(name, dataType, required, title, alias, errorMessage)
+    public ColumnPropertyInfo(string name, bool isPrimaryKey, PropertyDataType dataType, DatabaseFieldType fieldType, string? functionName = null, string? fkAlias = null, AggregationFunctionType? aggregationFunctionType = null, RelationType? relationType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null) : base(name, dataType, required, title, alias, errorMessage)
     {
+        IsPrimaryKey = isPrimaryKey;
         FieldType = fieldType;
         AggregationFunctionType = aggregationFunctionType;
         FunctionName = functionName;

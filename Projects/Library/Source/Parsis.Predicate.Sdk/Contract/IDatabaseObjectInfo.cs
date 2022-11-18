@@ -16,6 +16,11 @@ public interface IDatabaseObjectInfo<TObject> : IObjectInfo<TObject> where TObje
     DataSetType DataSetType
     {
         get;
-    } 
+    }
+
+    new IEnumerable<IColumnPropertyInfo> PropertyInfos
+    {
+        get;
+    }
 
 }

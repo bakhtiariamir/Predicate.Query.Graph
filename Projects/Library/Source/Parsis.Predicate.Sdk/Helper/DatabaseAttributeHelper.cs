@@ -29,10 +29,12 @@ public static class DatabaseAttributeHelper
             var info = property.GetPropertyAttribute<ColumnInfoAttribute>();
             if (info != null)
             {
+                //ToDo : This field value should be generated
+                //toDo : Add PK Attribute and Identity with seed option
                 var fkAlias = "";
                 bool required = info.Required ?? false;
                 RelationType relationType = RelationType.Optional;
-                properties.Add(new ColumnPropertyInfo(info.Name, info.DataType, info.Type, info.FunctionName, fkAlias, info.AggregationFunctionType, relationType, required, info.Title, info.Alias, info.ErrorMessage));
+                properties.Add(new ColumnPropertyInfo(info.Name, info.IsPrimaryKey, info.DataType, info.Type, info.FunctionName, fkAlias, info.AggregationFunctionType, relationType, required, info.Title, info.Alias, info.ErrorMessage));
             }
         });
 

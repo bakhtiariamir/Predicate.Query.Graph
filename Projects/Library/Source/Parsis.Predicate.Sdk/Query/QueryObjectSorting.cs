@@ -4,17 +4,17 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectObjectSorting<TObject> : IQueryObjectPart<QueryObjectObjectSorting<TObject>> where TObject : class
+public class QueryObjectSorting<TObject> : IQueryObjectPart<QueryObjectSorting<TObject>> where TObject : class
 {
     private readonly IList<SortPredicate<TObject>> _orderPredicates;
-    private QueryObjectObjectSorting()
+    private QueryObjectSorting()
     {
         _orderPredicates = new List<SortPredicate<TObject>>();
     }
 
-    public static QueryObjectObjectSorting<TObject> Init() => new();
+    public static QueryObjectSorting<TObject> Init() => new();
 
-    public QueryObjectObjectSorting<TObject> Add(Expression<Func<TObject, object>> expression, DirectionType direction)
+    public QueryObjectSorting<TObject> Add(Expression<Func<TObject, object>> expression, DirectionType direction)
     {
         _orderPredicates.Add(new SortPredicate<TObject>(expression, direction));
         return this;
@@ -23,7 +23,7 @@ public class QueryObjectObjectSorting<TObject> : IQueryObjectPart<QueryObjectObj
     public IList<SortPredicate<TObject>> Return() => _orderPredicates;
 
 
-    public QueryObjectObjectSorting<TObject> Validation() => this;
+    public QueryObjectSorting<TObject> Validation() => this;
 }
 
 public class SortPredicate<TObject> where TObject : class

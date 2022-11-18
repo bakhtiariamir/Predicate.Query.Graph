@@ -1,0 +1,14 @@
+﻿using System.Data.SqlClient;
+using Parsis.Predicate.Sdk.DataType;
+
+namespace Parsis.Predicate.Sdk.Generator.Database;
+public class DatabaseOrderByClauseQueryPart<TObject> : DatabaseQueryPart<TObject, SqlParameter> where TObject : class
+{
+    public override string Text
+    {
+        get;
+        set;
+    } = string.Empty;
+
+    public override QueryPartType QueryPartType => QueryPartType.OrderBy;
+}

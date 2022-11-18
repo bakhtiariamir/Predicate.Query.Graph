@@ -3,18 +3,18 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectObjectGrouping<TObject> : IQueryObjectPart<QueryObjectObjectGrouping<TObject>> where TObject : class
+public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping<TObject>> where TObject : class
 {
     private readonly IList<GroupPredicate<TObject>> _groupPredicates;
 
-    private QueryObjectObjectGrouping()
+    private QueryObjectGrouping()
     {
         _groupPredicates = new List<GroupPredicate<TObject>>();
     }
 
-    public static QueryObjectObjectGrouping<TObject> Init() => new();
+    public static QueryObjectGrouping<TObject> Init() => new();
 
-    public QueryObjectObjectGrouping<TObject> Add(HavingType havingType, ConditionOperatorType conditionOperator, object conditionValue, ConnectorOperatorType connectorOperator = ConnectorOperatorType.And)
+    public QueryObjectGrouping<TObject> Add(HavingType havingType, ConditionOperatorType conditionOperator, object conditionValue, ConnectorOperatorType connectorOperator = ConnectorOperatorType.And)
     {
         _groupPredicates.Add(new GroupPredicate<TObject>(havingType, conditionOperator, conditionValue, connectorOperator));
         return this;
@@ -22,7 +22,7 @@ public class QueryObjectObjectGrouping<TObject> : IQueryObjectPart<QueryObjectOb
 
     public IList<GroupPredicate<TObject>> Return() => _groupPredicates;
 
-    public QueryObjectObjectGrouping<TObject> Validation() => this;
+    public QueryObjectGrouping<TObject> Validation() => this;
 }
 
 public class GroupPredicate<TObject> where TObject : class
