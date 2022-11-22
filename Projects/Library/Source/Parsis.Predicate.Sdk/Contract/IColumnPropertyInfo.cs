@@ -1,8 +1,27 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Contract;
-public interface IColumnPropertyInfo : IPropertyInfo
+public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
 {
+    bool IsPrimaryKey
+    {
+        get;
+    }
+
+    string DataSet
+    {
+        get;
+    }
+
+    string Schema
+    {
+        get;
+    }
+
+    string ColumnName
+    {
+        get;
+    }
     DatabaseFieldType FieldType
     {
         get;
@@ -18,13 +37,16 @@ public interface IColumnPropertyInfo : IPropertyInfo
         get;
     }
 
-    string? FkAlias
+    IColumnPropertyInfo? Parent
     {
         get;
+        set;
     }
+    void SetRelationalObject(IColumnPropertyInfo propertyInfo);
 
-    RelationType? RelationType
-    {
-        get;
-    }
+    string GetSelector();
+
+    string GetCombinedAlias();
+
+    void SetSchemaDataSet(string schema, string dataSet);
 }

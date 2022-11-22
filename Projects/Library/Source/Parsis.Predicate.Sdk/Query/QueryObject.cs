@@ -1,31 +1,35 @@
-﻿using Parsis.Predicate.Sdk.DataType;
-
-namespace Parsis.Predicate.Sdk.Query;
-public class QueryObject<TObject> where TObject : class
+﻿namespace Parsis.Predicate.Sdk.Query;
+public class QueryObject<TObject, TQueryType> where TObject : class where TQueryType : Enum
 {
-    public QueryType QueryType
+    public TQueryType QueryType
     {
         get;
         set;
     }
 
-    public IList<QueryColumn<TObject>>? Columns
+    public ICollection<QueryColumn<TObject>>? Columns
     {
         get;
         set;
     }
 
-    public IList<FilterPredicate<TObject>>? Filters
+    public ICollection<JoinPredicate>? Joins
     {
         get;
         set;
-    } = new List<FilterPredicate<TObject>>();
+    }
 
-    public IList<SortPredicate<TObject>> Sorts
+    public FilterPredicate<TObject>? Filters
     {
         get;
         set;
-    } = new List<SortPredicate<TObject>>();
+    }
+
+    public ICollection<SortPredicate<TObject>>? Sorts
+    {
+        get;
+        set;
+    }
 
     public PageSetting<TObject>? Paging
     {
@@ -33,11 +37,11 @@ public class QueryObject<TObject> where TObject : class
         set;
     }
 
-    public IList<GroupPredicate<TObject>> Groups
+    public ICollection<GroupPredicate<TObject>>? Groups
     {
         get;
         set;
-    } = new List<GroupPredicate<TObject>>();
+    }
 
-    public QueryObject(QueryType queryType) => QueryType = queryType;
+    public QueryObject(TQueryType queryType) => QueryType = queryType;
 }

@@ -1,31 +1,36 @@
 ﻿using Parsis.Predicate.Sdk.Builder.Database;
+using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
 public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : class
 {
-    public override Task<DatabaseQueryPartCollection> SelectAsync()
+    private readonly IDatabaseCacheInfoCollection _databaseCacheInfoCollection;
+
+    public SqlQueryOperation(IDatabaseCacheInfoCollection databaseCacheInfoCollection)
     {
-        throw new NotImplementedException();
+        _databaseCacheInfoCollection = databaseCacheInfoCollection;
     }
 
-    public override Task<DatabaseQueryPartCollection> InsertAsync()
+    protected override Task<bool> ValidateAsync()
     {
-        throw new NotImplementedException();
+        return Task.FromResult(true); // todo
     }
 
-    public override Task<DatabaseQueryPartCollection> UpdateAsync()
-    {
-        throw new NotImplementedException();
-    }
+    protected override async Task<DatabaseQueryPartCollection<TObject>> SelectAsync() => await RunQueryAsync(DatabaseQueryOperationType.Select);
+    protected override async Task<DatabaseQueryPartCollection<TObject>> InsertAsync() => await RunQueryAsync(DatabaseQueryOperationType.Insert);
+    protected override async Task<DatabaseQueryPartCollection<TObject>> UpdateAsync() => await RunQueryAsync(DatabaseQueryOperationType.Update);
+    protected override async Task<DatabaseQueryPartCollection<TObject>> DeleteAsync() => await RunQueryAsync(DatabaseQueryOperationType.Delete);
 
-    public override Task<DatabaseQueryPartCollection> DeleteAsync()
+    private async Task<DatabaseQueryPartCollection<TObject>> RunQueryAsync(DatabaseQueryOperationType queryOperationType)
     {
-        throw new NotImplementedException();
-    }
+        if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
 
-    public override Task<DatabaseQueryPartCollection> GetQueryPartsAsync()
-    {
-        throw new NotImplementedException();
+        var query = await (await (
+                    await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync())
+                .InitQueryAsync(queryOperationType))
+            .BuildAsync();
+        return await query.Build(QueryObject);
     }
 }

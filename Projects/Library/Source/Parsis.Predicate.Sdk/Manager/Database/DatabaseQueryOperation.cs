@@ -1,32 +1,47 @@
 ﻿using Parsis.Predicate.Sdk.Builder.Database;
-using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
+using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
-public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection, DatabaseQueryOperationType>, IDatabaseQueryOperation<TObject> where TObject : class
+public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection<TObject>, DatabaseQueryOperationType> where TObject : class
 {
-    public override async Task<DatabaseQueryPartCollection> RunAsync(DatabaseQueryOperationType operationType)
+    protected override QueryObject<TObject, DatabaseQueryOperationType>? QueryObject
     {
-        return operationType switch
-        {
-            DatabaseQueryOperationType.Select => await SelectAsync(),
-            DatabaseQueryOperationType.Insert => await InsertAsync(),
-            DatabaseQueryOperationType.Update => await UpdateAsync(),
-            DatabaseQueryOperationType.Delete => await DeleteAsync(),
-            _ => throw new System.Exception("Error")
-        };
+        get;
+        set;
     }
 
-    public abstract Task<DatabaseQueryPartCollection> SelectAsync();
+    public override async Task<DatabaseQueryPartCollection<TObject>> RunAsync(QueryObject<TObject, DatabaseQueryOperationType> queryObject, DatabaseQueryOperationType operationType)
+    {
+        QueryObject = queryObject ?? throw new System.Exception("Asd");
 
-    public abstract Task<DatabaseQueryPartCollection> InsertAsync();
+        QueryObject = QueryObjectReducer<TObject, DatabaseQueryOperationType>.Init(queryObject).Reduce().Return();
 
-    public abstract Task<DatabaseQueryPartCollection> UpdateAsync();
+          var validateQuery = await ValidateAsync();
+        if (validateQuery)
+        {
+            return operationType switch
+            {
+                DatabaseQueryOperationType.Select => await SelectAsync(),
+                DatabaseQueryOperationType.Insert => await InsertAsync(),
+                DatabaseQueryOperationType.Update => await UpdateAsync(),
+                DatabaseQueryOperationType.Delete => await DeleteAsync(),
+                _ => throw new System.Exception("Error")
+            };
 
-    public abstract Task<DatabaseQueryPartCollection> DeleteAsync();
+        }
 
-    public abstract Task<DatabaseQueryPartCollection> GetQueryPartsAsync();
+        throw new System.Exception("asd"); //ToDo
+    }
+
+    protected abstract Task<DatabaseQueryPartCollection<TObject>> SelectAsync();
+
+    protected abstract Task<DatabaseQueryPartCollection<TObject>> InsertAsync();
+
+    protected abstract Task<DatabaseQueryPartCollection<TObject>> UpdateAsync();
+
+    protected abstract Task<DatabaseQueryPartCollection<TObject>> DeleteAsync();
 }
 
 

@@ -3,6 +3,7 @@ using Autofac;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
+using Parsis.Predicate.Sdk.Info;
 using Parsis.Predicate.Sdk.Info.Database;
 
 namespace Parsis.Predicate.Sdk.Setup;
@@ -26,7 +27,7 @@ public class Setting
 
     public Setting SetupIoc(ContainerBuilder builder)
     {
-        builder.RegisterGeneric(typeof(IDatabaseCacheObjectInfo<>)).As(typeof(DatabaseCacheObjectInfo<>)).SingleInstance();
+        builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();
 
         return this;
     }

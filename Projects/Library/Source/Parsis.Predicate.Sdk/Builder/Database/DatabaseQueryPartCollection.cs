@@ -1,31 +1,33 @@
-﻿namespace Parsis.Predicate.Sdk.Builder.Database;
-public class DatabaseQueryPartCollection
+﻿using Parsis.Predicate.Sdk.Generator.Database;
+
+namespace Parsis.Predicate.Sdk.Builder.Database;
+public class DatabaseQueryPartCollection<TObject> where TObject : class
 {
-    public string Initializing
+    public string Main
     {
         get;
         set;
     } = string.Empty;
 
-    public string Selecting
+    public DatabaseColumnsClauseQueryPart<TObject>? Columns
+    {
+        get;
+        set;
+    }
+
+    public string WhereClause
     {
         get;
         set;
     } = string.Empty;
 
-    public string Filtering
+    public string OrderByClause
     {
         get;
         set;
     } = string.Empty;
 
-    public string Sorting
-    {
-        get;
-        set;
-    } = string.Empty;
-
-    public string Joining
+    public string JoinClause
     {
         get;
         set;
@@ -37,7 +39,7 @@ public class DatabaseQueryPartCollection
         set;
     } = string.Empty;
 
-    public string Grouping
+    public string GroupByClause
     {
         get;
         set;

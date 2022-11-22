@@ -61,11 +61,17 @@ public static class ExceptionCode
     /// Query generator 
     /// </summary>
     public static string QueryGenerator = "8000_{object_name}@{error_code}";
-    public static string QueryGeneratorLambdaNodeTypeNotSupported = "8000.1_{object_name}@{error_code}";
     public static string DatabaseQueryGenerator = "8000.1_{object_name}@{error_code}";
-    public static string ApiQueryGenerator = "8000.2_{object_name}@{error_code}";
+    public static string DatabaseQueryGeneratorGetProperty = "8000.1.1_{object_name}@{error_code}";
+    public static string DatabaseQuerySelectingGenerator = "8000.1.2_{object_name}@{error_code}";
+    public static string DatabaseQueryFilteringGenerator = "8000.1.3_{object_name}@{error_code}";
+    public static string ApiQueryGenerator = "8000.4_{object_name}@{error_code}";
+}
 
 
-
-
+public enum ErrorCode
+{
+    NotFound = 1,
+    BadRequest = 2,
+    NotSupported = 3
 }

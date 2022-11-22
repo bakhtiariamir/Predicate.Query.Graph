@@ -1,57 +1,55 @@
-﻿using Parsis.Predicate.Sdk.DataType;
-
-namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectBuilder<TObject> : IQueryObjectBuilder<TObject> where TObject : class
+﻿namespace Parsis.Predicate.Sdk.Query;
+public class QueryObjectBuilder<TObject, TQueryType> : IQueryObjectBuilder<TObject, TQueryType> where TObject : class where TQueryType : Enum
 {
-    private QueryObject<TObject> _object;
+    private QueryObject<TObject, TQueryType> _object;
 
-    private QueryObjectBuilder(QueryType queryType)
+    private QueryObjectBuilder(TQueryType queryType)
     {
-        _object = new QueryObject<TObject>(queryType);
+        _object = new QueryObject<TObject, TQueryType>(queryType);
     }
 
-    public static QueryObjectBuilder<TObject> Init(QueryType queryType) => new(queryType);
+    public static QueryObjectBuilder<TObject, TQueryType> Init(TQueryType queryType) => new(queryType);
 
-    public QueryObjectBuilder<TObject> SetSelecting(QueryObjectSelecting<TObject> objectSelecting)
+    public QueryObjectBuilder<TObject, TQueryType> SetSelecting(QueryObjectSelecting<TObject> objectSelecting)
     {
-        _object.Columns = objectSelecting.Return();
+        _object.Columns = objectSelecting.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetFiltering(QueryObjectFiltering<TObject> objectFiltering)
+    public QueryObjectBuilder<TObject, TQueryType> SetFiltering(QueryObjectFiltering<TObject> objectFiltering)
     {
-        _object.Filters = objectFiltering.Return();
+        _object.Filters = objectFiltering.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetSorting(QueryObjectSorting<TObject> objectSorting)
+    public QueryObjectBuilder<TObject, TQueryType> SetSorting(QueryObjectSorting<TObject> objectSorting)
     {
-        _object.Sorts = objectSorting.Return();
+        _object.Sorts = objectSorting.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetPaging(PageSetting<TObject> paging)
+    public QueryObjectBuilder<TObject, TQueryType> SetPaging(PageSetting<TObject> paging)
     {
         _object.Paging = paging;
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetGrouping(QueryObjectGrouping<TObject> objectGrouping)
+    public QueryObjectBuilder<TObject, TQueryType> SetGrouping(QueryObjectGrouping<TObject> objectGrouping)
     {
-        _object.Groups = objectGrouping.Return();
+        _object.Groups = objectGrouping.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> Validate()
+    public QueryObjectBuilder<TObject, TQueryType> Validate()
     {
         //do
         return this;
     }
 
-    public QueryObject<TObject> Generate() => _object;
+    public QueryObject<TObject, TQueryType> Generate() => Validate()._object;
 
 }
 
-public interface IQueryObjectBuilder<TObject> where TObject : class
+public interface IQueryObjectBuilder<TObject, TQueryType> where TObject : class where TQueryType : Enum
 {
 }

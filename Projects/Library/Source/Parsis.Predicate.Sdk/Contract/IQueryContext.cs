@@ -1,5 +1,5 @@
 ﻿namespace Parsis.Predicate.Sdk.Contract;
-public interface IQueryContext<TObject> where TObject : class
+public interface IQueryContext
 {
-    void UpdateCacheObjectInfo<TObjectInfo>();
+    void UpdateCacheObjectInfo();
 }

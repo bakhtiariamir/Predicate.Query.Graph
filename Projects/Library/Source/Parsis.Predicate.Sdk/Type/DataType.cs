@@ -1,6 +1,6 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
 
-public enum PropertyDataType
+public enum ColumnDataType
 {
     Char = 1,
     String = 2,
@@ -12,5 +12,6 @@ public enum PropertyDataType
     Float = 8,
     Decimal = 9,
     Double = 10,
-    DateTime = 11
+    DateTime = 11,
+    Object = 12
 }

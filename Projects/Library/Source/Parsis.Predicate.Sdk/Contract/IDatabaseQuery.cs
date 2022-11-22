@@ -1,7 +1,8 @@
 ﻿using Parsis.Predicate.Sdk.Builder.Database;
+using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Contract;
-public interface IDatabaseQuery<TObject> : IQuery<TObject, DatabaseQueryPartCollection> where TObject : class
+public interface IDatabaseQuery<TObject> : IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection> where TObject : class
 {
     Task GenerateColumn();
 

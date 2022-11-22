@@ -5,11 +5,10 @@ using Parsis.Predicate.Sdk.Helper;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFiltering<TObject>> where TObject : class
+public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFiltering<TObject>, FilterPredicate<TObject>> where TObject : class
 {
-    private Expression<Func<TObject, bool>> _expression;
-
-    public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _expression = expression;
+    private FilterPredicate<TObject> _filterPredicate;
+    public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
 
     public static QueryObjectFiltering<TObject> Init(Expression<Func<TObject, bool>> expression) => new(expression);
 
@@ -17,20 +16,20 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
 
     public QueryObjectFiltering<TObject> Or(Expression<Func<TObject, bool>> expression) => CreatePredicate(expression, ConnectorOperatorType.Or);
 
-    public Expression<Func<TObject, bool>> Return() => _expression;
+    public FilterPredicate<TObject> Return() => _filterPredicate;
 
     private QueryObjectFiltering<TObject> CreatePredicate(Expression<Func<TObject, bool>> expression, ConnectorOperatorType connectorOperatorType)
     {
-        _expression = connectorOperatorType switch
+        _filterPredicate.Expression = connectorOperatorType switch
         {
-            ConnectorOperatorType.And => _expression.AndAlsoExpression<TObject>(expression),
-            ConnectorOperatorType.Or => _expression.OrElseExpression<TObject>(expression),
-            _ => _expression
+            ConnectorOperatorType.And => _filterPredicate.Expression.AndAlsoExpression<TObject>(expression),
+            ConnectorOperatorType.Or => _filterPredicate.Expression.OrElseExpression<TObject>(expression),
+            _ => _filterPredicate.Expression
         };
         return this;
     }
 
-    public QueryObjectFiltering<TObject> Validation() => this;
+    public QueryObjectFiltering<TObject> Validate() => this;
 }
 
 public class FilterPredicate<TObject> where TObject : class
@@ -38,16 +37,11 @@ public class FilterPredicate<TObject> where TObject : class
     public Expression<Func<TObject, bool>> Expression
     {
         get;
+        set;
     }
 
-    public ConnectorOperatorType ConnectorOperator
-    {
-        get;
-    }
-
-    public FilterPredicate(Expression<Func<TObject, bool>> expression, ConnectorOperatorType connectorOperatorq)
+    public FilterPredicate(Expression<Func<TObject, bool>> expression)
     {
         Expression = expression;
-        ConnectorOperator = connectorOperatorq;
     }
 }

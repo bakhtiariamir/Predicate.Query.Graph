@@ -1,7 +1,7 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Contract;
-public interface IDatabaseObjectInfo<TObject> : IObjectInfo<TObject> where TObject : class
+public interface IDatabaseObjectInfo : IObjectInfo<IColumnPropertyInfo>
 {
     string DataSet
     {
@@ -17,10 +17,4 @@ public interface IDatabaseObjectInfo<TObject> : IObjectInfo<TObject> where TObje
     {
         get;
     }
-
-    new IEnumerable<IColumnPropertyInfo> PropertyInfos
-    {
-        get;
-    }
-
 }

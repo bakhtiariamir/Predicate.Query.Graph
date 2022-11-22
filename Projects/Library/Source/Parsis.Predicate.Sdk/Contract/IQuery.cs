@@ -2,12 +2,12 @@
 
 namespace Parsis.Predicate.Sdk.Contract;
 
-public interface IQuery<TObject, TQueryResult> where TObject : class 
+public interface IQuery<TObject, TQueryType, TQueryResult> where TObject : class where TQueryType : Enum
 {
-    QueryObject<TObject> ObjectQuery
+    TQueryType QueryType
     {
         get;
+        set;
     }
-
-    Task<TQueryResult> Build();
+    Task<TQueryResult> Build(QueryObject<TObject, TQueryType> query);
 }

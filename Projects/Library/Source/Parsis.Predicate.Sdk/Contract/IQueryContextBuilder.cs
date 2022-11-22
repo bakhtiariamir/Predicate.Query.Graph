@@ -1,7 +1,5 @@
-﻿using Parsis.Predicate.Sdk.Builder;
-
-namespace Parsis.Predicate.Sdk.Contract;
-public interface IQueryContextBuilder<TObject> where TObject : class
+﻿namespace Parsis.Predicate.Sdk.Contract;
+public interface IQueryContextBuilder
 {
-    Task<IQueryContext<TObject>> Build();
+    Task<IQueryContext> Build();
 }

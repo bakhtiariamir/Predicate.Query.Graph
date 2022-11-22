@@ -20,13 +20,18 @@
     <Compile Remove="Builder\Database\OracleQuery.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContext.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContextBuilder.cs" />
+    <Compile Remove="Contract\ICacheObjectInfo.cs" />
+    <Compile Remove="Contract\IDatabaseCacheObjectInfo.cs" />
+    <Compile Remove="Contract\IDatabaseQuery.cs" />
+    <Compile Remove="Contract\IDatabaseQueryOperation.cs" />
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
+    <Compile Remove="Info\CacheObjectInfo.cs" />
+    <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Info\Service\" />
     <Folder Include="Manager\Service\" />
-    <Folder Include="Parser\" />
   </ItemGroup>
 
   <ItemGroup>

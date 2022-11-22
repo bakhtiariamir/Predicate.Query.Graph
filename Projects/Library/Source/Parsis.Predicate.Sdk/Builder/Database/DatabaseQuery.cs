@@ -3,32 +3,64 @@ using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartCollection>, IDatabaseQuery<TObject> where TObject : class
+public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOperationType,  DatabaseQueryPartCollection<TObject>> where TObject : class
 {
-    public abstract DatabaseProviderType ProviderType
+    protected QueryObjectJoining QueryObjectJoining
     {
         get;
     }
-    protected DatabaseQuery(QueryObject<TObject> objectQuery) : base(objectQuery)
-    {
-    }
 
-    protected abstract DatabaseQueryPartCollection QueryPartCollection
+protected DatabaseQueryContext Context
     {
         get;
         set;
     }
+    protected DatabaseQueryPartCollection<TObject> QueryPartCollection
+    {
+        get;
+        set;
+    } = new();
 
-    public abstract Task GenerateColumn();
+    protected DatabaseQuery(IQueryContext context, DatabaseQueryOperationType queryTypr) : base(queryTypr)
+    {
+        QueryObjectJoining = QueryObjectJoining.Init();
+        Context = (DatabaseQueryContext)context;
+    }
 
-    public abstract Task GenerateWhereClause();
+    public override async Task<DatabaseQueryPartCollection<TObject>> Build(QueryObject<TObject, DatabaseQueryOperationType> query)
+    {
+        switch (QueryType)
+        {
+            case DatabaseQueryOperationType.Select:
+                await GenerateColumn(query);
+                await GenerateWhereClause(query);
+                break;
+            case DatabaseQueryOperationType.Insert:
+                Task.WaitAll(new[]
+                {
+                    GenerateColumn(query), GenerateWhereClause(query), GenerateOrderByClause(query), GenerateJoinClause(query)
+                });
+                break;
+            case DatabaseQueryOperationType.Update:
 
-    public abstract Task GeneratePagingClause();
+            case DatabaseQueryOperationType.Delete:
 
-    public abstract Task GenerateOrderByClause();
+                break;
+        }
 
-    public abstract Task GenerateJoinClause();
+        return QueryPartCollection;
+    }
 
-    public abstract Task GenerateGroupByClause();
+    protected abstract Task GenerateColumn(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateWhereClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GeneratePagingClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateOrderByClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateJoinClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateGroupByClause(QueryObject<TObject, DatabaseQueryOperationType> query);
 }
 

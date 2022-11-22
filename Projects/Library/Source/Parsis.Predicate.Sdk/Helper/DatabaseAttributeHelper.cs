@@ -9,7 +9,7 @@ namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseAttributeHelper
 {
 
-    public static IDatabaseObjectInfo<TObject> GetObjectInfo<TObject>(this Type type) where TObject : class
+    public static IDatabaseObjectInfo GetObjectInfo(this Type type)
     {
         var dataSetInfo = type.GetClassAttribute<DataSetInfoAttribute>();
         string dataSet = "";
@@ -22,23 +22,28 @@ public static class DatabaseAttributeHelper
             schema = dataSetInfo.SchemaName;
         }
 
-
         var properties = new List<IColumnPropertyInfo>();
         type.GetProperties().ToList().ForEach(property =>
         {
             var info = property.GetPropertyAttribute<ColumnInfoAttribute>();
             if (info != null)
             {
-                //ToDo : This field value should be generated
-                //toDo : Add PK Attribute and Identity with seed option
-                var fkAlias = "";
                 bool required = info.Required ?? false;
-                RelationType relationType = RelationType.Optional;
-                properties.Add(new ColumnPropertyInfo(info.Name, info.IsPrimaryKey, info.DataType, info.Type, info.FunctionName, fkAlias, info.AggregationFunctionType, relationType, required, info.Title, info.Alias, info.ErrorMessage));
+                RelationType relationType = required ?  RelationType.Required : RelationType.Optional;
+                properties.Add(new ColumnPropertyInfo(schema, dataSet,info.ColumnName, info.Name, info.IsPrimaryKey, info.DataType, info.Type, info.FunctionName, info.AggregationFunctionType, relationType, required, info.Title, info.ErrorMessage));
             }
         });
 
-        return new DatabaseObjectInfo<TObject>(dataSet, dataSetType, properties, schema);
+        return new DatabaseObjectInfo(dataSet, dataSetType, type, properties, schema);
+    }
+
+    public static IEnumerable<IColumnPropertyInfo> GetProperties(this IEnumerable<IColumnPropertyInfo> columnPropertyInfos, IColumnPropertyInfo parent, bool setParent = true)
+    {
+        foreach (var column in columnPropertyInfos)
+        {
+            if (setParent)  column.SetRelationalObject(parent);
+            yield return column;
+        }
     }
 
     public static (string dataSetName, string schemaName, DataSetType dataSetType) DataSetInfo<TObject>(this Type type) where TObject : class => type.GetClassAttribute<DataSetInfoAttribute, (string dataSetName, string schemaName, DataSetType dataSetType)>(item => (item.DataSetName, item.SchemaName, item.Type));
@@ -53,12 +58,9 @@ public static class DatabaseAttributeHelper
 
     public static TValue? GetPropertyAttribute<TAttribute, TValue>(this PropertyInfo property, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => property.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
 
-
     public static TValue? GetPropertyAttribute<TAttribute, TValue>(this MemberInfo member, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => member.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
-
 
     public static TAttribute? GetPropertyAttribute<TAttribute>(this MemberInfo member) where TAttribute : Attribute => (TAttribute?)member.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
 
     public static TAttribute? GetPropertyAttribute<TAttribute>(this PropertyInfo property) where TAttribute : Attribute => (TAttribute?)property.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
-
 }

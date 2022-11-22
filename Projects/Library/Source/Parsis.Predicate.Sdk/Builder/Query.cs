@@ -2,18 +2,21 @@
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Builder;
-public abstract class Query<TObject, TQueryResult> : IQuery<TObject, TQueryResult> where TObject : class
+public abstract class Query<TObject, TQueryType, TQueryResult> : IQuery<TObject, TQueryType, TQueryResult> where TObject : class where TQueryType : Enum
 {
-    public QueryObject<TObject> ObjectQuery
+    public TQueryType QueryType
     {
         get;
+        set;
     }
 
-    protected Query(QueryObject<TObject> objectQuery)
+    protected Query(TQueryType queryType)
     {
-        ObjectQuery = objectQuery;
+        QueryType = queryType;
     }
 
-    public abstract Task<TQueryResult> Build();
+    public abstract Task<TQueryResult> Build(QueryObject<TObject, TQueryType> query);
+
+
 }
 

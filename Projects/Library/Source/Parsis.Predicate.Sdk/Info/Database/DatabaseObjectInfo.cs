@@ -4,8 +4,9 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info.Database;
 
-public class DatabaseObjectInfo<TObject> : ObjectInfo<TObject>, IDatabaseObjectInfo<TObject> where TObject : class
+public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObjectInfo
 {
+    
     public string DataSet 
     {
         get;
@@ -23,19 +24,25 @@ public class DatabaseObjectInfo<TObject> : ObjectInfo<TObject>, IDatabaseObjectI
         get;
     }
 
-    public override IEnumerable<IColumnPropertyInfo> PropertyInfos
+    public override Type ObjectType
     {
         get;
     }
 
+    public override IEnumerable<IColumnPropertyInfo> PropertyInfos
+    {
+        get;
+    }
     public override ObjectInfoType Type => ObjectInfoType.Database;
 
-    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
+    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
     {
         DataSet = dataSet;
         DataSetType = dataSetType;
+        ObjectType = objectType;
         PropertyInfos = propertyInfos;
         Schema = schema;
     }
 
+    public override string ToString() => $"[{Schema}.{DataSet}]";
 }

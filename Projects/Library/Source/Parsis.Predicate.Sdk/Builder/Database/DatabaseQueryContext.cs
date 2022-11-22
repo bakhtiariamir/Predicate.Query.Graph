@@ -1,20 +1,19 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.Helper;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public class DatabaseQueryContext<TObject> : QueryContext<TObject>, IDatabaseQueryContext<TObject> where TObject : class 
+public class DatabaseQueryContext : QueryContext, IDatabaseQueryContext
 {
-    public IDatabaseCacheObjectInfo<TObject> Info
+    public IDatabaseCacheInfoCollection DatabaseCacheInfoCollection
     {
         get;
     }
 
-    public DatabaseQueryContext(IDatabaseCacheObjectInfo<TObject> info)
+    public DatabaseQueryContext(IDatabaseCacheInfoCollection databaseCacheCacheInfoCollection)
     {
-        Info = info;
+        DatabaseCacheInfoCollection = databaseCacheCacheInfoCollection;
     }
 
-    public override void UpdateCacheObjectInfo<TObjectInfo>()
+    public override void UpdateCacheObjectInfo()
     {
         throw new NotImplementedException();
     }

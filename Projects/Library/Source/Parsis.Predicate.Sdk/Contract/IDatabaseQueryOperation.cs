@@ -10,8 +10,4 @@ public interface IDatabaseQueryOperation<TObject> where TObject : class
     Task<DatabaseQueryPartCollection> UpdateAsync();
 
     Task<DatabaseQueryPartCollection> DeleteAsync();
-
-    Task<DatabaseQueryPartCollection> GetQueryPartsAsync();
-
-
 }

@@ -3,9 +3,9 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping<TObject>> where TObject : class
+public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping<TObject>, ICollection<GroupPredicate<TObject>>> where TObject : class
 {
-    private readonly IList<GroupPredicate<TObject>> _groupPredicates;
+    private readonly ICollection<GroupPredicate<TObject>> _groupPredicates;
 
     private QueryObjectGrouping()
     {
@@ -20,9 +20,9 @@ public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping
         return this;
     }
 
-    public IList<GroupPredicate<TObject>> Return() => _groupPredicates;
+    public ICollection<GroupPredicate<TObject>> Return() => _groupPredicates;
 
-    public QueryObjectGrouping<TObject> Validation() => this;
+    public QueryObjectGrouping<TObject> Validate() => this;
 }
 
 public class GroupPredicate<TObject> where TObject : class

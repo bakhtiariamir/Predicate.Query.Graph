@@ -10,5 +10,5 @@ public class DatabaseMainClauseQueryPart<TObject> : DatabaseQueryPart<TObject, S
         set;
     } = string.Empty;
 
-    public override QueryPartType QueryPartType => QueryPartType.Main;
+    protected override QueryPartType QueryPartType => QueryPartType.Main;
 }

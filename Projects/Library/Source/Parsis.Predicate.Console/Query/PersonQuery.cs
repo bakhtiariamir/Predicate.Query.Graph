@@ -1,27 +1,22 @@
 ﻿using Parsis.Predicate.Console.Model;
+using Parsis.Predicate.Sdk.Builder.Database;
 using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.Query;
+using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Console.Query;
-public abstract class PersonQuery<TResult>
+public abstract class PersonQuery<TOperationType, TResult> where TOperationType : Enum
 {
-    protected abstract IQueryBuilder<Person, TResult>? QueryBuilder
+    protected abstract IQueryOperation<Person, TOperationType, DatabaseQueryPartCollection<Person>> Operation
     {
         get;
+        init;
     }
 
-    protected abstract QueryObject<Person>? QueryObject
-    {
-        get;
-    }
-
-    public IQuery<Person, TResult>? Query
+    public IQuery<Person, DatabaseQueryOperationType, TResult>? Query
     {
         get;
         private set;
     }
-
-    public virtual async Task SelectQueryAsync() => Query = await QueryBuilder.Build(QueryObject);
 
 }
 

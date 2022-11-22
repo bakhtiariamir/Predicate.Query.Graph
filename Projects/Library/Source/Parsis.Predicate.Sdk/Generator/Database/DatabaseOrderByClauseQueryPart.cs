@@ -10,5 +10,5 @@ public class DatabaseOrderByClauseQueryPart<TObject> : DatabaseQueryPart<TObject
         set;
     } = string.Empty;
 
-    public override QueryPartType QueryPartType => QueryPartType.OrderBy;
+    protected override QueryPartType QueryPartType => QueryPartType.OrderBy;
 }

@@ -9,12 +9,12 @@ public abstract class DatabaseQueryPart<TObject, TParameter> : IDatabaseQueryPar
         set;
     }
 
-    public IEnumerable<TParameter> Parameters
+    public ICollection<TParameter> Parameters
     {
         get;
         set;
     }
-
+    //Warn ToDo  Add IColumnPropertyInfo
     protected abstract QueryPartType QueryPartType
     {
         get;
@@ -23,16 +23,18 @@ public abstract class DatabaseQueryPart<TObject, TParameter> : IDatabaseQueryPar
     protected DatabaseQueryPart() => Parameters = new List<TParameter>();
 
     public override string ToString() => Text;
+
+    public void AddParameter(TParameter parameter) => Parameters.Add(parameter);
 }
 
-public interface IDatabaseQueryPart<TObject, out TParameter> where TObject : class
+public interface IDatabaseQueryPart<TObject, TParameter> where TObject : class
 {
     string Text
     {
         get;
     }
 
-    IEnumerable<TParameter> Parameters
+    ICollection<TParameter> Parameters
     {
         get;
     }

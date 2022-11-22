@@ -1,4 +1,8 @@
 ﻿namespace Parsis.Predicate.Sdk.Contract;
-public interface IDatabaseQueryContext<TObject> : IQueryContext<TObject> where TObject : class
+public interface IDatabaseQueryContext : IQueryContext
 {
+    IDatabaseCacheInfoCollection DatabaseCacheInfoCollection
+    {
+        get;
+    }
 }

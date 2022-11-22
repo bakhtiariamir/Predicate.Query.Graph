@@ -2,7 +2,7 @@
 
 namespace Parsis.Predicate.Sdk.ExpressionHandler.Visitors
 {
-    public abstract class DatabaseVisitor<TObject, TResult> : Visitor<TObject, TResult, IDatabaseQueryContext<TObject>> where TObject : class
+    public abstract class DatabaseVisitor<TObject, TResult> : Visitor<TResult, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TObject : class where TResult : class, new()
     {
 
     }

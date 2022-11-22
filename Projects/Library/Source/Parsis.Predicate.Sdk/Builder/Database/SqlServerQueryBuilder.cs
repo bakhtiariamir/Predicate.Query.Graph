@@ -1,4 +1,5 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Query;
 
@@ -7,30 +8,40 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
 {
     private readonly DatabaseQueryContextBuilder<TObject> _contextBuilder;
 
-    private IQueryContext<TObject>? _queryContext;
+    private IQueryContext? _queryContext;
 
-    private IQuery<TObject, DatabaseQueryPartCollection>? _query;
+    private IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection<TObject>>? _query;
 
-    public SqlServerQueryBuilder(IDatabaseCacheObjectInfo<TObject> info)
+    private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info)
     {
-        var cacheObjectInfo = info.GetLastObjectInfo();
-        _contextBuilder = new DatabaseQueryContextBuilder<TObject>(cacheObjectInfo);
+        _contextBuilder = new DatabaseQueryContextBuilder<TObject>(info);
     }
 
-    public static Task<SqlServerQueryBuilder<TObject>> Build(IDatabaseCacheObjectInfo<TObject> info) => Task.FromResult(new SqlServerQueryBuilder<TObject>(info));
+    public static SqlServerQueryBuilder<TObject> Init(IDatabaseCacheInfoCollection info) => new(info);
 
-    public async Task<SqlServerQueryBuilder<TObject>> InitContext()
+    public async Task<SqlServerQueryBuilder<TObject>> InitContextAsync()
     {
         _queryContext = await _contextBuilder.Build();
         return this;
     }
 
-    public override Task<IQuery<TObject, DatabaseQueryPartCollection>> Build(QueryObject<TObject> query)
+    public Task<SqlServerQueryBuilder<TObject>> InitQueryAsync(DatabaseQueryOperationType queryType)
     {
         if (_queryContext == null)
-            throw new System.Exception("asd");
+            throw new System.Exception("asdas"); //ToDo
 
-        _query = new SqlServerQuery<TObject>(_queryContext, query);
+        _query = new SqlServerQuery<TObject>(_queryContext, queryType);
+        return Task.FromResult(this);
+    }
+
+    public override Task<IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection<TObject>>> BuildAsync()
+    {
+        if (_queryContext == null)
+            throw new System.Exception("asd"); //ToDo : Exception
+
+        if (_query == null)
+            throw new System.Exception("asda"); //ToDo
+
         return Task.FromResult(_query);
     }
 }

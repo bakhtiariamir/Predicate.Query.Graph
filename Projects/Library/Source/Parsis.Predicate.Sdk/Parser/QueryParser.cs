@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Parsis.Predicate.Sdk.Setup
+namespace Parsis.Predicate.Sdk.Parser
 {
-    public class IocRegistration
+    public class QueryParser
     {
-        
+
     }
 }

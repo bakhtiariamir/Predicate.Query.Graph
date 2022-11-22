@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInitializing<TObject>> where TObject : class
+public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInitializing<TObject>, ObjectInitializing<TObject>> where TObject : class
 {
     private ObjectInitializing<TObject> _initializing;
     public QueryInitializeType InitializeType
@@ -46,7 +46,7 @@ public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInit
     //ToDo :1) If is DaaTable and dataTable is empty throw exception
     //ToDo :2) If is Object and object is empty throw exception
     //ToDo :3) At the same time just one state can has value 
-    public QueryObjectInitializing<TObject> Validation() => this;
+    public QueryObjectInitializing<TObject> Validate() => this;
 }
 
 

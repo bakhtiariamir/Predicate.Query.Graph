@@ -3,7 +3,7 @@ using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info;
-public abstract class CacheObjectInfo<TObjectInfo, TObject> : ICacheObjectInfo<TObjectInfo, TObject> where TObjectInfo : IObjectInfo<TObject> where TObject : class
+public abstract class CacheObjectInfo<TObjectInfo, TObject> : ICacheObjectInfo<TObjectInfo>
 {
     private readonly IMemoryCache _memoryCache;
     private readonly MemoryCacheEntryOptions _cacheCacheEntryOptions;
@@ -27,6 +27,6 @@ public abstract class CacheObjectInfo<TObjectInfo, TObject> : ICacheObjectInfo<T
     }
 
     public void SaveObjectInfo(TObjectInfo objectInfo) => _memoryCache.Set($"{typeof(TObject)}_{ObjectInfoType}", objectInfo, options: _cacheCacheEntryOptions);
-
-
 }
+
+

@@ -4,36 +4,34 @@ using Parsis.Predicate.Sdk.Contract;
 namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseQueryHelper
 {
-    public static IDatabaseCacheObjectInfo<TObject> GetLastObjectInfo<TObject>(this IDatabaseCacheObjectInfo<TObject> cacheObjectInfo) where TObject : class
+    public static IDatabaseObjectInfo? GetLastObjectInfo<TObject>(this IDatabaseCacheInfoCollection databaseCacheInfoCollection) where TObject : class
     {
         var type = typeof(TObject);
-        var objectInfo = cacheObjectInfo.GetObjectInfo();
-        if (objectInfo == null)
+        if (!databaseCacheInfoCollection.TryGet(databaseCacheInfoCollection.GetKey(type.Name), out IDatabaseObjectInfo? objectInfo))
         {
-            //ToDo : Exception
-            objectInfo = type.GetObjectInfo<TObject>();
-            cacheObjectInfo.SaveObjectInfo(objectInfo);
+            objectInfo = type.GetObjectInfo();
+            databaseCacheInfoCollection.InitCache(type.Name, objectInfo);
         }
 
-        return cacheObjectInfo;
+        return objectInfo;
     }
 
-    public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts)
+    public static string GetSelectQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : class
     {
         return string.Empty;
     }
 
-    public static string GetInsertQuery(this DatabaseQueryPartCollection queryParts)
+    public static string GetInsertQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : class
     {
         return string.Empty;
     }
 
-    public static string GetUpdateQuery(this DatabaseQueryPartCollection queryParts)
+    public static string GetUpdateQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : class
     {
         return string.Empty;
     }
 
-    public static string GetDeleteQuery(this DatabaseQueryPartCollection queryParts)
+    public static string GetDeleteQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : class
     {
         return string.Empty;
     }
