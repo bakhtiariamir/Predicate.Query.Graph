@@ -1,47 +1,47 @@
-﻿using Parsis.Predicate.Sdk.Generator.Database;
+﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.Generator.Database;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public class DatabaseQueryPartCollection<TObject> where TObject : class
+public class DatabaseQueryPartCollection<TObject> where TObject : IQueryableObject
 {
-    public string Main
+    public IDatabaseObjectInfo DatabaseObjectInfo
     {
         get;
         set;
-    } = string.Empty;
-
-    public DatabaseColumnsClauseQueryPart<TObject>? Columns
+    }
+    public DatabaseColumnsClauseQueryPart? Columns
     {
         get;
         set;
     }
 
-    public string WhereClause
+    public DatabaseWhereClauseQueryPart? WhereClause
     {
         get;
         set;
-    } = string.Empty;
+    }
 
-    public string OrderByClause
+    public DatabaseOrdersByClauseQueryPart? OrderByClause
     {
         get;
         set;
-    } = string.Empty;
+    }
 
-    public string JoinClause
+    public DatabaseJoinsClauseQueryPart? JoinClause
     {
         get;
         set;
-    } = string.Empty;
+    }
 
-    public string Paging
+    public DatabasePagingClauseQueryPart? Paging
     {
         get;
         set;
-    } = string.Empty;
+    }
 
-    public string GroupByClause
+    public DatabaseGroupByClauseQueryPart? GroupByClause
     {
         get;
         set;
-    } = string.Empty;
+    }
 }

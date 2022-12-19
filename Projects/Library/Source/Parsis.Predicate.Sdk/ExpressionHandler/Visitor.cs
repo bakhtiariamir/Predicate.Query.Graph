@@ -16,6 +16,26 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
     {
         get;
     }
+
+    protected IDictionary<string, object> Options
+    {
+        get;
+        set;
+    }
+
+    protected Visitor()
+    {
+        Options = new Dictionary<string, object>();
+    }
+
+    internal void AddOption(string key, object value) => Options.Add(key, value);
+
+    internal void RemoveOption(string key) => Options.Remove(key);
+
+    internal bool GetOption(string key, out object value) => Options.TryGetValue(key, out value);
+
+    internal TResult Generate(Expression expression) => Visit(expression);
+
     protected virtual TResult Visit(Expression expression, string? parameterName = null)
     {
         switch (expression.NodeType)
@@ -48,7 +68,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
                 return VisitLessThanOrEqual((BinaryExpression)expression);
 
             case ExpressionType.Constant:
-                return VisitConstant((ConstantExpression)expression, parameterName);
+                return VisitConstant((ConstantExpression)expression);
 
             case ExpressionType.Convert:
                 return VisitConvert((UnaryExpression)expression);
@@ -139,7 +159,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         throw new NotImplementedException();
     }
 
-    protected virtual TResult VisitConstant(ConstantExpression expression, string? parameterName = null)
+    protected virtual TResult VisitConstant(ConstantExpression expression)
     {
         throw new NotImplementedException();
     }
@@ -177,7 +197,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
 
     protected virtual TResult VisitLambda(LambdaExpression expression)
     {
-        throw new NotImplementedException();
+        return Visit(expression.Body);
     }
 
     protected virtual TResult VisitMember(MemberExpression expression)

@@ -1,14 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using Autofac;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Parsis.Predicate.Console.Model;
 using Parsis.Predicate.Console.Query;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Info;
-using Parsis.Predicate.Sdk.Info.Database;
 
 Console.WriteLine("Start-----");
 
@@ -16,6 +14,8 @@ Console.WriteLine("Start-----");
 // Snip : Inject dependency with Autofac
 // Warn : 
 // Samp : asdas 
+// ToDo : 1. Get All Object with GenericType Assembilies and Create Object info and Cache. if has error return exception
+// ToDo : 2. Cache Query Structure, after create query for first time before run cache object of query.
 new ServiceCollection().AddMemoryCache();
 var builder = new Autofac.ContainerBuilder();
 builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();

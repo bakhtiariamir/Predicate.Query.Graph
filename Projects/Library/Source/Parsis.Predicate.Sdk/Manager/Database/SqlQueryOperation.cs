@@ -4,7 +4,7 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
-public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : class
+public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : IQueryableObject
 {
     private readonly IDatabaseCacheInfoCollection _databaseCacheInfoCollection;
 

@@ -52,10 +52,17 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         set;
     }
 
+    public string? ParameterName
+    {
+        get;
+    }
+
     public ColumnPropertyInfo()
     {
 
     }
+
+    public ColumnPropertyInfo(string parameterName, object value) : base(value) => ParameterName = parameterName;
 
     public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, ColumnDataType dataType, DatabaseFieldType fieldType, string? functionName = null, AggregationFunctionType? aggregationFunctionType = null, RelationType? relationType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null) : base(name, dataType, required, title, alias, errorMessage)
     {
@@ -93,6 +100,34 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
             return true;
 
         return false;
+    }
+
+    protected bool Equals(ColumnPropertyInfo other)
+    {
+        return DataSet == other.DataSet && Schema == other.Schema && ColumnName == other.ColumnName && IsPrimaryKey == other.IsPrimaryKey && FieldType == other.FieldType && AggregationFunctionType == other.AggregationFunctionType && FunctionName == other.FunctionName && Equals(Parent, other.Parent) && ParameterName == other.ParameterName;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(DataSet);
+        hashCode.Add(Schema);
+        hashCode.Add(ColumnName);
+        hashCode.Add(IsPrimaryKey);
+        hashCode.Add((int)FieldType);
+        hashCode.Add(AggregationFunctionType);
+        hashCode.Add(FunctionName);
+        hashCode.Add(Parent);
+        hashCode.Add(ParameterName);
+        return hashCode.ToHashCode();
+    }
+
+    public void SetParameterData(string schema, string dataSet, string name, string columnName, ColumnDataType objectType)
+    {
+        this.Schema = schema;
+        this.DataSet = dataSet;
+        this.ColumnName = columnName;
+        this.Name = name;
     }
 
     public override IColumnPropertyInfo Clone() =>

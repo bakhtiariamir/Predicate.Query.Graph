@@ -14,7 +14,7 @@ public interface IObjectInfo<out TPropertyInfo> where TPropertyInfo : IPropertyI
     }
 
 
-    Type ObjectType
+    System.Type ObjectType
     {
         get;
     }

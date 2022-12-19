@@ -1,8 +1,9 @@
-﻿using Parsis.Predicate.Sdk.DataType;
+﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 public abstract class QueryObjectPartReducer<TObject, TQueryType>
-    where TObject : class
+    where TObject : IQueryableObject
     where TQueryType : Enum
 {
     protected virtual QueryObject<TObject, TQueryType> Visit(QueryObject<TObject, TQueryType> query, ReduceType type)

@@ -2,7 +2,7 @@
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager;
-public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryOperation<TObject, TOperationType, TResult> where TObject : class where TOperationType : Enum
+public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryOperation<TObject, TOperationType, TResult> where TObject : IQueryableObject where TOperationType : Enum
 {
     protected abstract QueryObject<TObject, TOperationType>? QueryObject
     {

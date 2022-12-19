@@ -24,7 +24,7 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
         get;
     }
 
-    public override Type ObjectType
+    public override System.Type ObjectType
     {
         get;
     }
@@ -35,7 +35,7 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
     }
     public override ObjectInfoType Type => ObjectInfoType.Database;
 
-    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
+    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, System.Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
     {
         DataSet = dataSet;
         DataSetType = dataSetType;
@@ -44,5 +44,5 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
         Schema = schema;
     }
 
-    public override string ToString() => $"[{Schema}.{DataSet}]";
+    public override string ToString() => $"[{Schema}].[{DataSet}]";
 }

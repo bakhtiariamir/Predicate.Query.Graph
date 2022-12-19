@@ -14,7 +14,7 @@ public abstract class ObjectInfo<TPropertyInfo> : IObjectInfo<TPropertyInfo> whe
         get;
     }
 
-    public abstract Type ObjectType
+    public abstract System.Type ObjectType
     {
         get;
     }

@@ -1,130 +1,138 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.ExpressionHandler;
-using Parsis.Predicate.Sdk.Helper;
-using System.Linq.Expressions;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
+using Parsis.Predicate.Sdk.Helper;
+using Parsis.Predicate.Sdk.Info.Database;
+using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
-public class SqlServerFilteringGenerator<TObject> : Visitor<DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TObject : class
+public class SqlServerFilteringGenerator : SqlServerVisitor<DatabaseWhereClauseQueryPart>
 {
-    protected override IDatabaseCacheInfoCollection CacheObjectCollection
+    private int _index = 0;
+
+    public SqlServerFilteringGenerator(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
-        get;
     }
 
-    protected override IDatabaseObjectInfo ObjectInfo
+    protected override DatabaseWhereClauseQueryPart VisitAndAlso(BinaryExpression expression)
     {
-        get;
+        var whereClause = VisitBinary(expression, ConditionOperatorType.And);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    protected override ParameterExpression ParameterExpression
+    protected override DatabaseWhereClauseQueryPart VisitOrElse(BinaryExpression expression)
     {
-        get;
+        var whereClause = VisitBinary(expression, ConditionOperatorType.Or);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    public SqlServerFilteringGenerator(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression)
+    protected override DatabaseWhereClauseQueryPart VisitGreaterThan(BinaryExpression expression)
     {
-        CacheObjectCollection = cacheObjectCollection;
-        ObjectInfo = objectInfo;
-        ParameterExpression = parameterExpression;
+        var whereClause = VisitBinary(expression, ConditionOperatorType.GreaterThan);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    public DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> Generate(Expression expression) => Visit(expression);
-
-    protected override DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> VisitAndAlso(BinaryExpression expression)
+    protected override DatabaseWhereClauseQueryPart VisitGreaterThanOrEqual(BinaryExpression expression)
     {
-        var left = Visit(expression.Left);
-        var right = Visit(expression.Right);
-        return DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>.CreateMerged($"{left} AND {right}", new[] { left, right });
+        var whereClause = VisitBinary(expression, ConditionOperatorType.GreaterThanEqual);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    protected override DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> VisitOrElse(BinaryExpression expression)
+    protected override DatabaseWhereClauseQueryPart VisitLessThan(BinaryExpression expression)
     {
-        var left = Visit(expression.Left);
-        var right = Visit(expression.Right);
-        return DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>.CreateMerged($"{left} OR {right}", new[] { left, right });
+        var whereClause = VisitBinary(expression, ConditionOperatorType.LessThan);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    protected override DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> VisitGreaterThan(BinaryExpression expression)
+    protected override DatabaseWhereClauseQueryPart VisitLessThanOrEqual(BinaryExpression expression)
     {
-        var left = Visit(expression.Left);
-        var right = Visit(expression.Right);
-        return DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>.CreateMerged($"{left} > {right}", new[] { left, right });
-
+        var whereClause = VisitBinary(expression, ConditionOperatorType.LessThanEqual);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    protected override DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> VisitMember(MemberExpression expression)
+    protected override DatabaseWhereClauseQueryPart VisitEndsWith(MethodCallExpression expression)
+    {
+        var whereClause = VisitCall(expression, ConditionOperatorType.RightLike);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitStartsWith(MethodCallExpression expression)
+    {
+        var whereClause = VisitCall(expression, ConditionOperatorType.LeftLike);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitContain(MethodCallExpression expression)
+    {
+        var whereClause = VisitCall(expression, ConditionOperatorType.Like);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitNotEqual(BinaryExpression expression)
+    {
+        return base.VisitNotEqual(expression);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitEqual(BinaryExpression expression)
+    {
+        return base.VisitEqual(expression);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitNot(UnaryExpression expression)
+    {
+        return base.VisitNot(expression);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitInclude(MethodCallExpression expression, bool condition)
+    {
+        return base.VisitInclude(expression, condition);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitMember(MemberExpression expression)
     {
         IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(expression.ToString(), expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        return DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>.Create(fields);
+        var field = fields.FirstOrDefault() ?? throw new NotFoundException(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
+
+        return DatabaseWhereClauseQueryPart.Create(new WhereClause(field, clauseType: field.AggregationFunctionType != AggregationFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }
 
-    //protected override DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> VisitConstant(ConstantExpression expression, string parameterName)
-    //{
-    //    return GetValue(expression.Value, parameterName);
-    //}
+    protected override DatabaseWhereClauseQueryPart VisitConstant(ConstantExpression expression)
+    {
+        var property = new ColumnPropertyInfo();
+        var value = expression.Value ?? null;
+        return DatabaseWhereClauseQueryPart.Create(new WhereClause(property, value, partType: PartType.ParameterInfo, clauseType: ClauseType.None));
+    }
 
-    //private DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo> GetValue(object value, string parameterName = null)
-    //{
-    //    if (value is bool)
-    //        return DatabaseWhereClauseQueryPart<TObject, IColumnPropertyInfo>.Create((bool)value ? "(1 = 1)" : "(1 <> 1)");
+    private DatabaseWhereClauseQueryPart VisitCall(MethodCallExpression expression, ConditionOperatorType operatorType = ConditionOperatorType.And)
+    {
+        var left = Visit(expression.Arguments[0]);
+        var right = Visit(expression.Arguments[1]);
+        if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
+            right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
 
-    //    if (value is byte)
-    //        return SqlClause.Create(context.CreateParameter(value, SqlDbType.TinyInt));
+        var clauseType = ClauseType.None;
+        if (left.Parameter.ClauseType == ClauseType.Having || right.Parameter.ClauseType == ClauseType.Having)
+            clauseType = ClauseType.Having;
+        if (left.Parameter.ClauseType is ClauseType.Where or ClauseType.None || right.Parameter.ClauseType is ClauseType.Where or ClauseType.None)
+            clauseType = ClauseType.Where;
 
-    //    if (value is int)
-    //        return SqlClause.Create(context.CreateParameter(value, SqlDbType.Int));
+        return DatabaseWhereClauseQueryPart.Create(new WhereClause(left.Parameter, right.Parameter, operatorType, clauseType));
+    }
 
-    //    if (value is long)
-    //        return SqlClause.Create(context.CreateParameter(value, SqlDbType.BigInt));
+    private DatabaseWhereClauseQueryPart VisitBinary(BinaryExpression expression, ConditionOperatorType operatorType = ConditionOperatorType.And)
+    {
+        var left = Visit(expression.Left);
+        var right = Visit(expression.Right);
+        if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
+            right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
 
-    //    if (value is decimal)
-    //        return SqlClause.Create(context.CreateParameter(value, SqlDbType.Decimal));
+        var clauseType = ClauseType.None;
+        if (left.Parameter.ColumnPropertyInfo != null && (left.Parameter.ClauseType == ClauseType.Having || right.Parameter.ClauseType == ClauseType.Having))
+            clauseType = ClauseType.Having;
+        if (left.Parameter.ColumnPropertyInfo != null && left.Parameter.ClauseType is ClauseType.Where or ClauseType.None || right.Parameter.ClauseType is ClauseType.Where or ClauseType.None)
+            clauseType = ClauseType.Where;
 
-    //    if (value is string)
-    //        return SqlClause.Create(context.CreateParameter(value, SqlDbType.NVarChar));
-
-    //    if (value is JalaliDateTime)
-    //        return SqlClause.Create(context.CreateParameter(((JalaliDateTime)value).Value, SqlDbType.BigInt));
-
-    //    if (value is IEntity)
-    //        return SqlClause.Create(context.CreateParameter(((IEntity)value).Id, SqlDbType.Int));
-
-    //    if (value is IEnumerable)
-    //    {
-    //        var sqlClauses = ((IEnumerable)value).Cast<object>().Select(item => GetValue(item, context)).ToArray();
-
-    //        var ids = new List<string>();
-    //        foreach (var parameters in sqlClauses.Select(x => x.Parameters))
-    //        {
-    //            foreach (var parameter in parameters)
-    //                ids.Add(parameter.Value.ToString());
-    //        }
-
-    //        var paramName = parameterName ?? "@ValueList";
-
-
-    //        return new SqlClause(paramName, new List<SqlParameter>
-    //            {
-    //                new SqlParameter(paramName, string.Join(",", ids))
-    //            });
-    //    }
-
-    //    throw new NotSupportedException($"valueType: {value.GetType()}, is not supported.");
-    //}
-
-    //protected override DatabaseWhereClauseQueryPart<TObject, SqlParameter> VisitEqual(BinaryExpression expression)
-    //{
-    //    //ToDo : Implement recursive
-    //    /*
-    //     * Select * from Portfolio
-    //     * Where Portfolio.AccountId in (
-    //     * Select Id from Account
-    //     * Inner join User on User.Id = Account.UserId
-    //     * Where User.Username in ("Ali", "Pedram", "Saman")
-    //     * )
-    //     */
-    //    return base.VisitEqual(expression);
-    //}
+        return DatabaseWhereClauseQueryPart.Create(new WhereClause(left.Parameter, right.Parameter, operatorType, clauseType));
+    }
 }

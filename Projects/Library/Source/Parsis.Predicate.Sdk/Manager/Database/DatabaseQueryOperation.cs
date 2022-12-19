@@ -1,10 +1,11 @@
 ﻿using Parsis.Predicate.Sdk.Builder.Database;
+using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
-public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection<TObject>, DatabaseQueryOperationType> where TObject : class
+public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection<TObject>, DatabaseQueryOperationType> where TObject : IQueryableObject
 {
     protected override QueryObject<TObject, DatabaseQueryOperationType>? QueryObject
     {

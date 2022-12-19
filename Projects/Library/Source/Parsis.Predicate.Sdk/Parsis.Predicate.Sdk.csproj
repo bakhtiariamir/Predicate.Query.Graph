@@ -27,6 +27,7 @@
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
     <Compile Remove="Info\CacheObjectInfo.cs" />
     <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
+    <Compile Remove="Query\QueryObjectGrouping.cs" />
   </ItemGroup>
 
   <ItemGroup>

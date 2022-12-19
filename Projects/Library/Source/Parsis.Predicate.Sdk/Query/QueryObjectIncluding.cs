@@ -1,5 +1,7 @@
-﻿namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectIncluding<TObject> where TObject : class
+﻿using Parsis.Predicate.Sdk.Contract;
+
+namespace Parsis.Predicate.Sdk.Query;
+public class QueryObjectIncluding<TObject> where TObject : IQueryableObject
 {
     public QueryObjectIncluding(Func<TObject, object> property)
     {

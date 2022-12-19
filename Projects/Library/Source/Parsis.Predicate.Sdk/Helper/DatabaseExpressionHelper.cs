@@ -2,17 +2,17 @@
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Info.Database;
+using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
-using Autofac.Core;
 
 namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseExpressionHelper
 {
-    public static IEnumerable<IColumnPropertyInfo>? GetProperty(this Expression expression, IDatabaseObjectInfo objectInfo, IDatabaseCacheInfoCollection cacheObjectCollection)
+    public static IEnumerable<IColumnPropertyInfo>? GetProperty(this Expression expression, IDatabaseObjectInfo objectInfo, IDatabaseCacheInfoCollection cacheObjectCollection, bool isJoinColumn = false)
     {
         Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
 
-        Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions  = null;
+        Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
 
         getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
         {
@@ -94,10 +94,15 @@ public static class DatabaseExpressionHelper
 
         foreach (var property in properties)
         {
-            if (property.TryExpandProperty(cacheObjectCollection, out ICollection<IColumnPropertyInfo>? childProperties))
+            if (!isJoinColumn)
             {
-                foreach (var childProperty in childProperties)
-                    yield return childProperty;
+                if (property.TryExpandProperty(cacheObjectCollection, out ICollection<IColumnPropertyInfo>? childProperties))
+                {
+                    foreach (var childProperty in childProperties)
+                        yield return childProperty;
+                }
+                else
+                    yield return property;
             }
             else
                 yield return property;
@@ -120,60 +125,42 @@ public static class DatabaseExpressionHelper
         return expandedProperties.Count > 0;
     }
 
-    //ToDo : split expression => create MemberExpression based on itemExpression 
-    /// <summary>
-    /// item => new object[] { Id, Username , Person.Id, Person.Name }
-    /// item.Id , item.Username, item.Person.Id, item.Person.Name
-    /// </summary>
-    /// <param name="expression"></param>
-    /// <returns></returns>
-    public static IEnumerable<Expression<Func<TObject, object>>> SplittingArrayExpression<TObject>(this Expression<Func<TObject, IEnumerable<object>>> expression)
-    {
-
-        if (expression.Body.NodeType == ExpressionType.NewArrayInit)
-        {
-            foreach (var itemExpression in ((NewArrayExpression)expression.Body).Expressions)
-            {
-                if (itemExpression.NodeType == ExpressionType.MemberAccess)
-                {
-                    yield return itemExpression.CastExpression<TObject, object>();
-                }
-                if (itemExpression.NodeType == ExpressionType.Convert)
-                {
-                    var operandExpression = ((MemberExpression)((UnaryExpression)itemExpression).Operand) ?? throw new NotFoundException(itemExpression.ToString(), ExceptionCode.DatabaseQueryGenerator);
-
-                    Type objectType = operandExpression.Type ?? throw new NotFoundException(operandExpression.Member.Name, ExceptionCode.DatabaseQueryGenerator);
-                    //var parameterExpression = Expression.Parameter(objectType, ((ParameterExpression)(MemberExpression)operandExpression.Expression).Name)
-                    var parameterExpression = ((ParameterExpression)((MemberExpression)operandExpression.Expression!)?.Expression)?.Name;
-                    //yield return objectType?.GenerateGetPropertyExpression("asda", "Asda");
-                }
-            }
-        }
-        yield break;
-        ;
-    }
-
-
     public static LambdaExpression GenerateGetPropertyExpression(this IColumnPropertyInfo @join, IDatabaseObjectInfo propertyObjectInfo, string? indexer = null) => propertyObjectInfo.ObjectType.GenerateGetPropertyExpression($"{@join.DataSet}{@join.Name}{indexer}", @join.Name);
-    //{
-    //    ParameterExpression parameter = Expression.Parameter(propertyObjectInfo.ObjectType, $"{@join.DataSet}{@join.Name}{indexer}");
-    //    MemberExpression member = Expression.Property(parameter, @join.Name);
-    //    var funcMember = typeof(Func<,>).MakeGenericType(propertyObjectInfo.ObjectType, typeof(object));
-    //    var expression = Expression.Lambda(funcMember, member, parameter);
-    //    return expression;
-    //}
 
-    private static LambdaExpression GenerateGetPropertyExpression(this Type objectType, string parameterName, string memberName)
+    private static LambdaExpression GenerateGetPropertyExpression(this System.Type objectType, string parameterName, string memberName)
     {
         ParameterExpression parameter = Expression.Parameter(objectType, parameterName);
         MemberExpression member = Expression.Property(parameter, memberName);
         return GenerateGetPropertyExpression(objectType, parameter, member);
     }
 
-    private static LambdaExpression GenerateGetPropertyExpression(this Type objectType, ParameterExpression parameter, MemberExpression member)
+    private static LambdaExpression GenerateGetPropertyExpression(this System.Type objectType, ParameterExpression parameter, MemberExpression member)
     {
         var funcMember = typeof(Func<,>).MakeGenericType(objectType, typeof(object));
         var expression = Expression.Lambda(funcMember, member, parameter);
         return expression;
     }
-}   
+
+
+    public static LambdaExpression GenerateJoinExpression(this IColumnPropertyInfo @join, System.Type propertyObjectType, JoinType joinType, string? indexer = null)
+    {
+        var parameter = GenerateParameterExpression(propertyObjectType, $"{@join.Parent.DataSet}{@join.DataSet}{indexer}", @join.Parent.Name, out var member);
+        var returnType = member.Type;
+        return member.GenerateJoinExpression(propertyObjectType, returnType, parameter);
+    }
+
+    private static ParameterExpression GenerateParameterExpression(Type objectType, string parameterName, string memberName, out MemberExpression member)
+    {
+        ParameterExpression parameter = Expression.Parameter(objectType, parameterName);
+        member = Expression.Property(parameter, memberName);
+        return parameter;
+    }
+
+    private static LambdaExpression GenerateJoinExpression(this Expression body, System.Type objectInfo, System.Type returnType, params ParameterExpression[] parameters)
+    {
+        var funcMember = typeof(Func<,>).MakeGenericType(objectInfo, returnType);
+        var expression = Expression.Lambda(funcMember, body, parameters);
+        return expression;
+    }
+
+}

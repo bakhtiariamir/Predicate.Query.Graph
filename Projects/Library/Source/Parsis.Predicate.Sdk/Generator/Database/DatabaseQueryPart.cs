@@ -1,41 +1,41 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
-public abstract class DatabaseQueryPart<TObject, TParameter> : IDatabaseQueryPart<TObject, TParameter> where TObject : class
+public abstract class DatabaseQueryPart<TParameter> : IDatabaseQueryPart<TParameter> where TParameter : class
 {
-    public abstract string Text
+    public abstract string? Text
     {
         get;
         set;
     }
 
-    public ICollection<TParameter> Parameters
+    public TParameter Parameter
     {
         get;
         set;
     }
-    //Warn ToDo  Add IColumnPropertyInfo
+
     protected abstract QueryPartType QueryPartType
     {
         get;
     }
 
-    protected DatabaseQueryPart() => Parameters = new List<TParameter>();
-
-    public override string ToString() => Text;
-
-    public void AddParameter(TParameter parameter) => Parameters.Add(parameter);
+    public override string? ToString() => Text;
 }
 
-public interface IDatabaseQueryPart<TObject, TParameter> where TObject : class
+public interface IDatabaseQueryPart<out TParameter> : IDatabaseQueryPart where TParameter : class
 {
-    string Text
+    TParameter Parameter
+    {
+        get;
+    }
+}
+
+public interface IDatabaseQueryPart
+{
+    string? Text
     {
         get;
     }
 
-    ICollection<TParameter> Parameters
-    {
-        get;
-    }
 }

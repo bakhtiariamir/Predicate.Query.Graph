@@ -1,10 +1,8 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Info;
-using Parsis.Predicate.Sdk.Info.Database;
 
 namespace Parsis.Predicate.Sdk.Setup;
 public class Setting

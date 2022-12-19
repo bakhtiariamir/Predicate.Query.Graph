@@ -13,9 +13,9 @@ public class QueryObjectJoining : IQueryObjectPart<QueryObjectJoining, ICollecti
 
     public static QueryObjectJoining Init() => new();
 
-    public QueryObjectJoining Add(Expression predicate, IColumnPropertyInfo primaryKey, JoinType joinType)
+    public QueryObjectJoining Add(Expression predicate, JoinType joinType, int order)
     {
-        _joinPredicates.Add(new JoinPredicate(predicate, primaryKey, joinType));
+        _joinPredicates.Add(new JoinPredicate(predicate, joinType, order));
         return this;
     }
 
@@ -39,21 +39,20 @@ public class JoinPredicate
         get;
     }
 
-    public IColumnPropertyInfo PrimaryKey
-    {
-        get;
-        set;
-    }
-
     public JoinType Type
     {
         get;
     }
 
-    public JoinPredicate(Expression propertyExpression, IColumnPropertyInfo primaryKey, JoinType type)
+    public int Order
+    {
+        get;
+    }
+
+    public JoinPredicate(Expression propertyExpression, JoinType type, int order)
     {
         PropertyExpression = propertyExpression;
-        PrimaryKey = primaryKey;
         Type = type;
+        Order = order;
     }
 }

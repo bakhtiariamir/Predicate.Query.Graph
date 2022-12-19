@@ -42,11 +42,15 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
         get;
         set;
     }
+
+    string? ParameterName
+    {
+        get;
+    }
+
     void SetRelationalObject(IColumnPropertyInfo propertyInfo);
-
     string GetSelector();
-
     string GetCombinedAlias();
-
+    void SetParameterData(string schema, string dataSet, string name, string columnName, ColumnDataType objectType);
     void SetSchemaDataSet(string schema, string dataSet);
 }

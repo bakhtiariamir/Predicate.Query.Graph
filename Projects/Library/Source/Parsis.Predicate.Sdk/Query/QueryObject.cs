@@ -1,5 +1,7 @@
-﻿namespace Parsis.Predicate.Sdk.Query;
-public class QueryObject<TObject, TQueryType> where TObject : class where TQueryType : Enum
+﻿using Parsis.Predicate.Sdk.Contract;
+
+namespace Parsis.Predicate.Sdk.Query;
+public class QueryObject<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
 {
     public TQueryType QueryType
     {
@@ -31,13 +33,7 @@ public class QueryObject<TObject, TQueryType> where TObject : class where TQuery
         set;
     }
 
-    public PageSetting<TObject>? Paging
-    {
-        get;
-        set;
-    }
-
-    public ICollection<GroupPredicate<TObject>>? Groups
+    public PagePredicate? Paging
     {
         get;
         set;

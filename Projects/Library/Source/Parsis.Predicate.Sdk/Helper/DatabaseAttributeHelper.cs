@@ -9,7 +9,7 @@ namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseAttributeHelper
 {
 
-    public static IDatabaseObjectInfo GetObjectInfo(this Type type)
+    public static IDatabaseObjectInfo GetObjectInfo(this System.Type type)
     {
         var dataSetInfo = type.GetClassAttribute<DataSetInfoAttribute>();
         string dataSet = "";
@@ -29,8 +29,12 @@ public static class DatabaseAttributeHelper
             if (info != null)
             {
                 bool required = info.Required ?? false;
-                RelationType relationType = required ?  RelationType.Required : RelationType.Optional;
-                properties.Add(new ColumnPropertyInfo(schema, dataSet,info.ColumnName, info.Name, info.IsPrimaryKey, info.DataType, info.Type, info.FunctionName, info.AggregationFunctionType, relationType, required, info.Title, info.ErrorMessage));
+                RelationType relationType = required ? RelationType.Required : RelationType.Optional;
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.IsPrimaryKey, info.DataType, info.Type, info.FunctionName, info.AggregationFunctionType, relationType, required, info.Title, info.ErrorMessage));
+            }
+            else
+            {
+                //ToDo : Set default config for columns
             }
         });
 
@@ -41,20 +45,20 @@ public static class DatabaseAttributeHelper
     {
         foreach (var column in columnPropertyInfos)
         {
-            if (setParent)  column.SetRelationalObject(parent);
+            if (setParent) column.SetRelationalObject(parent);
             yield return column;
         }
     }
 
-    public static (string dataSetName, string schemaName, DataSetType dataSetType) DataSetInfo<TObject>(this Type type) where TObject : class => type.GetClassAttribute<DataSetInfoAttribute, (string dataSetName, string schemaName, DataSetType dataSetType)>(item => (item.DataSetName, item.SchemaName, item.Type));
+    public static (string dataSetName, string schemaName, DataSetType dataSetType) DataSetInfo<TObject>(this System.Type type) where TObject : IQueryableObject => type.GetClassAttribute<DataSetInfoAttribute, (string dataSetName, string schemaName, DataSetType dataSetType)>(item => (item.DataSetName, item.SchemaName, item.Type));
 
-    public static TValue? GetClassAttribute<TAttribute, TValue>(this Type type, Func<TAttribute, TValue> valueSelector)
+    public static TValue? GetClassAttribute<TAttribute, TValue>(this System.Type type, Func<TAttribute, TValue> valueSelector)
         where TAttribute : Attribute => type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
 
-    public static TAttribute? GetClassAttribute<TAttribute>(this Type type) => (TAttribute?)type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
+    public static TAttribute? GetClassAttribute<TAttribute>(this System.Type type) => (TAttribute?)type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
 
     public static TValue? GetPropertyAttribute<TObject, TAttribute, TValue>(this Expression<Func<TObject, object>> propertyExpression, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute
-        where TObject : class => ((MemberExpression)propertyExpression.Body).Member.GetPropertyAttribute(valueSelector);
+        where TObject : IQueryableObject => ((MemberExpression)propertyExpression.Body).Member.GetPropertyAttribute(valueSelector);
 
     public static TValue? GetPropertyAttribute<TAttribute, TValue>(this PropertyInfo property, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => property.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
 

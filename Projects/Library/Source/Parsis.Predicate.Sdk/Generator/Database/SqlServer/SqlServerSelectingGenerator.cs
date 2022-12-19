@@ -1,56 +1,33 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.ExpressionHandler;
+using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
 using System.Linq.Expressions;
-using Parsis.Predicate.Sdk.Exception;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
 
-public class SqlServerSelectingGenerator<TObject> : Visitor<DatabaseColumnsClauseQueryPart<TObject>, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TObject : class
+public class SqlServerSelectingGenerator : SqlServerVisitor<DatabaseColumnsClauseQueryPart>
 {
-    protected override IDatabaseCacheInfoCollection CacheObjectCollection
+    public SqlServerSelectingGenerator(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
-        get;
-    }
-    protected override IDatabaseObjectInfo ObjectInfo
-    {
-        get;
     }
 
-    protected override ParameterExpression ParameterExpression
-    {
-        get;
-    }
 
-    public SqlServerSelectingGenerator(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression)
-    {
-        ObjectInfo = objectInfo;
-        ParameterExpression = parameterExpression;
-        CacheObjectCollection = cacheObjectCollection;
-    }
 
-    public DatabaseColumnsClauseQueryPart<TObject> Generate(Expression expression) => Visit(expression);
-
-    protected override DatabaseColumnsClauseQueryPart<TObject> VisitConvert(UnaryExpression expression)
-    {
-        return Visit(expression.Operand);
-    }
-
-    protected override DatabaseColumnsClauseQueryPart<TObject> VisitMember(MemberExpression expression)
+    protected override DatabaseColumnsClauseQueryPart VisitMember(MemberExpression expression)
     {
         IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
-        return DatabaseColumnsClauseQueryPart<TObject>.Create(fields);
+        return DatabaseColumnsClauseQueryPart.Create(fields);
     }
 
-    protected override DatabaseColumnsClauseQueryPart<TObject> VisitParameter(ParameterExpression expression)
+    protected override DatabaseColumnsClauseQueryPart VisitParameter(ParameterExpression expression)
     {
         IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
-        return DatabaseColumnsClauseQueryPart<TObject>.Create(fields);
+        return DatabaseColumnsClauseQueryPart.Create(fields);
     }
 
-    protected override DatabaseColumnsClauseQueryPart<TObject> VisitNewArray(NewArrayExpression expression)
+    protected override DatabaseColumnsClauseQueryPart VisitNewArray(NewArrayExpression expression)
     {
         IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
-        return DatabaseColumnsClauseQueryPart<TObject>.Create(fields);
+        return DatabaseColumnsClauseQueryPart.Create(fields);
     }
 }

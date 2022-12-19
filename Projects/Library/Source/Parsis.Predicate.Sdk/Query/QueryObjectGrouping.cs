@@ -3,7 +3,7 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping<TObject>, ICollection<GroupPredicate<TObject>>> where TObject : class
+public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping<TObject>, ICollection<GroupPredicate<TObject>>> where TObject : IQueryableObject
 {
     private readonly ICollection<GroupPredicate<TObject>> _groupPredicates;
 
@@ -25,7 +25,7 @@ public class QueryObjectGrouping<TObject> : IQueryObjectPart<QueryObjectGrouping
     public QueryObjectGrouping<TObject> Validate() => this;
 }
 
-public class GroupPredicate<TObject> where TObject : class
+public class GroupPredicate<TObject> where TObject : IQueryableObject
 {
     public HavingType HavingType
     {

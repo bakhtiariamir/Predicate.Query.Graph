@@ -1,7 +1,7 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public class DatabaseQueryContextBuilder<TObject> : QueryContextBuilder<TObject> where TObject : class
+public class DatabaseQueryContextBuilder<TObject> : QueryContextBuilder<TObject> where TObject : IQueryableObject
 {
     private readonly IDatabaseCacheInfoCollection _info;
     public DatabaseQueryContextBuilder(IDatabaseCacheInfoCollection info) => _info = info;

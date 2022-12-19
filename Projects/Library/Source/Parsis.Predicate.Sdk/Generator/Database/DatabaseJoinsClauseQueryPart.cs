@@ -1,8 +1,10 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
+using Parsis.Predicate.Sdk.Exception;
+using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
-public class DatabaseJoinsClauseQueryPart<TObject> : DatabaseQueryPart<TObject, IColumnPropertyInfo> where TObject : class
+public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPredicate>>
 {
     private string? _text;
     public override string? Text
@@ -11,50 +13,80 @@ public class DatabaseJoinsClauseQueryPart<TObject> : DatabaseQueryPart<TObject, 
         set => _text = value;
     }
 
-    protected override QueryPartType QueryPartType => QueryPartType.Columns;
+    protected override QueryPartType QueryPartType => QueryPartType.Join;
 
-    public DatabaseJoinsClauseQueryPart() { }
-
-    DatabaseJoinsClauseQueryPart(string? text) => _text = text;
-
-    DatabaseJoinsClauseQueryPart(string? text, IColumnPropertyInfo property)
+    DatabaseJoinsClauseQueryPart(ICollection<JoinPredicate> joinPredicates)
     {
-        _text = text;
-        Parameters = new[] { property };
+        Parameter = joinPredicates;
     }
 
-    DatabaseJoinsClauseQueryPart(IColumnPropertyInfo property) => Parameters = new[] { property };
-
-    DatabaseJoinsClauseQueryPart(IList<IColumnPropertyInfo> properties) =>  Parameters = properties;
-
-    private string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}] As {item.Alias ?? item.GetCombinedAlias()}";
-
-    private string SetText() => _text = string.Join(", ", Parameters.Select(SetColumnName));
-
-    DatabaseJoinsClauseQueryPart(string? text, IList<IColumnPropertyInfo> properties)
+    DatabaseJoinsClauseQueryPart(JoinPredicate joinPredicate)
     {
-        _text = text;
-        Parameters = properties;
+        Parameter = new[] { joinPredicate };
+        SetText();
+
     }
 
-    public static DatabaseJoinsClauseQueryPart<TObject> Create(string? text) => new(text);
-    public static DatabaseJoinsClauseQueryPart<TObject> Create(params IColumnPropertyInfo[] properties) => new(properties);
 
-    public static DatabaseJoinsClauseQueryPart<TObject> Create(string? text, params IColumnPropertyInfo[] properties) => new(text, properties);
-    public static DatabaseJoinsClauseQueryPart<TObject> CreateMerged(string? text, params DatabaseJoinsClauseQueryPart<TObject>[] sqlClauses) => new(text, sqlClauses.SelectMany(properties => properties.Parameters).ToList());
-    public static DatabaseJoinsClauseQueryPart<TObject> CreateMerged(string? text, IEnumerable<DatabaseJoinsClauseQueryPart<TObject>> sqlQueries) => new(text, sqlQueries.SelectMany(properties => properties.Parameters).ToList());
+    private static string SetColumnName(IColumnPropertyInfo item) => $"{item.Alias ?? item.GetCombinedAlias()}.{item.ColumnName}";
 
-    public static DatabaseJoinsClauseQueryPart<TObject> CreateMerged(IEnumerable<DatabaseJoinsClauseQueryPart<TObject>> sqlQueries)
+    private void SetText() => _text = string.Join(" ", Parameter.Select(SetJoinText));
+
+    private string SetJoinText(JoinPredicate joinPredicate)
     {
-        var column = new DatabaseJoinsClauseQueryPart<TObject>(sqlQueries.SelectMany(properties => properties.Parameters).DistinctBy(item => new
+        var joinString = joinPredicate.JoinType switch
         {
-            item.Schema,
-            item.DataSet,
-            item.Name,
-            item.ColumnName
-        }).ToList()).SetText();
-
-        return new(column);
+            JoinType.Inner => "INNER JOIN",
+            JoinType.Left => "LEFT JOIN",
+            JoinType.Right => "RIGHT JOIN",
+            JoinType.Outer => "OUTER JOIN",
+            _ => throw new Parsis.Predicate.Sdk.Exception.NotSupportedException(joinPredicate.JoinType.ToString(),ExceptionCode.DatabaseQueryJoiningGenerator)
+        };
+        //ToDo : Need PersonObjectInfo For Get id
+        var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey);
+        return $"{joinString} {joinPredicate.JoinObjectInfo} ON {joinPredicate.JoinColumn.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}] = {joinProperty.GetSelector()}.[{joinProperty.ColumnName}]";
     }
 
+    public static DatabaseJoinsClauseQueryPart Create(params JoinPredicate[] joinPredicates) => new(joinPredicates);
+
+    public static DatabaseJoinsClauseQueryPart CreateMerged(params DatabaseJoinsClauseQueryPart[] sqlClauses) => new(sqlClauses.SelectMany(properties => properties.Parameter).ToList());
+
+    public static DatabaseJoinsClauseQueryPart CreateMerged(IEnumerable<DatabaseJoinsClauseQueryPart> sqlQueries)
+    {
+        var column = new DatabaseJoinsClauseQueryPart(sqlQueries.SelectMany(properties => properties.Parameter).DistinctBy(item => new
+        {
+            JoinColumn = item.JoinColumn,
+            item.JoinType
+        }).ToList());
+        column.SetText();
+
+        return column;
+    }
+
+}
+
+
+public class JoinPredicate
+{
+    public IColumnPropertyInfo JoinColumn
+    {
+        get;
+    }
+
+    public JoinType JoinType
+    {
+        get;
+    }
+
+    public IDatabaseObjectInfo JoinObjectInfo
+    {
+        get;
+    }
+
+    public JoinPredicate(IColumnPropertyInfo joinColumn, JoinType joinType, IDatabaseObjectInfo joinObjectInfo)
+    {
+        JoinColumn = joinColumn;
+        JoinType = joinType;
+        JoinObjectInfo = joinObjectInfo;
+    }
 }

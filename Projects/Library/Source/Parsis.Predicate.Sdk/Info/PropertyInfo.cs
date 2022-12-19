@@ -46,6 +46,10 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
 
     }
 
+    protected PropertyInfo(object value)
+    {
+    }
+
     protected PropertyInfo(string name, ColumnDataType dataType, bool? required = null, string? title = null, string? @alias = null, string? errorMessage = null)
     {
         Name = name;

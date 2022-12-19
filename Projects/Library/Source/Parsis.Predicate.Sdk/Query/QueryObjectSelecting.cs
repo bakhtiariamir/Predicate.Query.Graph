@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecting<TObject>, ICollection<QueryColumn<TObject>>> where TObject : class
+public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecting<TObject>, ICollection<QueryColumn<TObject>>> where TObject : IQueryableObject
 {
     private ICollection<QueryColumn<TObject>> _columns;
 

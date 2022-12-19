@@ -65,7 +65,11 @@ public static class ExceptionCode
     public static string DatabaseQueryGeneratorGetProperty = "8000.1.1_{object_name}@{error_code}";
     public static string DatabaseQuerySelectingGenerator = "8000.1.2_{object_name}@{error_code}";
     public static string DatabaseQueryFilteringGenerator = "8000.1.3_{object_name}@{error_code}";
-    public static string ApiQueryGenerator = "8000.4_{object_name}@{error_code}";
+    public static string DatabaseQuerySortingGenerator = "8000.1.4_{object_name}@{error_code}";
+    public static string DatabaseQueryPagingGenerator = "8000.1.5_{object_name}@{error_code}";
+    public static string DatabaseQueryJoiningGenerator = "8000.1.6_{object_name}@{error_code}";
+    public static string DatabaseQueryGroupByGenerator = "8000.1.7_{object_name}@{error_code}";
+    public static string ApiQueryGenerator = "8000.2_{object_name}@{error_code}";
 }
 
 

@@ -5,7 +5,7 @@ using Parsis.Predicate.Sdk.Helper;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFiltering<TObject>, FilterPredicate<TObject>> where TObject : class
+public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFiltering<TObject>, FilterPredicate<TObject>> where TObject : IQueryableObject
 {
     private FilterPredicate<TObject> _filterPredicate;
     public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
@@ -32,7 +32,7 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
     public QueryObjectFiltering<TObject> Validate() => this;
 }
 
-public class FilterPredicate<TObject> where TObject : class
+public class FilterPredicate<TObject> where TObject : IQueryableObject
 {
     public Expression<Func<TObject, bool>> Expression
     {

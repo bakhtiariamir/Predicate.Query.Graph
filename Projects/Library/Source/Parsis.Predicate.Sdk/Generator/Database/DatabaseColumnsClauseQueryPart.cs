@@ -2,7 +2,7 @@
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
-public class DatabaseColumnsClauseQueryPart<TObject> : DatabaseQueryPart<TObject, IColumnPropertyInfo> where TObject : class
+public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<IColumnPropertyInfo>>
 {
     private string? _text;
     public override string? Text
@@ -13,44 +13,34 @@ public class DatabaseColumnsClauseQueryPart<TObject> : DatabaseQueryPart<TObject
 
     protected override QueryPartType QueryPartType => QueryPartType.Columns;
 
-    public DatabaseColumnsClauseQueryPart() { }
+    private DatabaseColumnsClauseQueryPart(ICollection<IColumnPropertyInfo> properties) => Parameter = properties;
 
-    DatabaseColumnsClauseQueryPart(string? text) => _text = text;
-
-    DatabaseColumnsClauseQueryPart(string? text, IColumnPropertyInfo property)
+    private string SetColumnName(IColumnPropertyInfo item)
     {
-        _text = text;
-        Parameters = new[] { property };
+        return item.AggregationFunctionType switch
+        {
+            AggregationFunctionType.Count => $"COUNT(*) AS COUNT",
+            AggregationFunctionType.Average => $"AVG({SetColumnSelector(item)}) AS AVG_{item.GetCombinedAlias()}",
+            AggregationFunctionType.Max => $"MAX({SetColumnSelector(item)}) AS MAX_{item.GetCombinedAlias()}",
+            AggregationFunctionType.Min => $"MIN({SetColumnSelector(item)}) AS MIN_{item.GetCombinedAlias()}",
+            AggregationFunctionType.Sum => $"SUM({SetColumnSelector(item)}) AS SUM_{item.GetCombinedAlias()}",
+            AggregationFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
+        };
     }
 
-    DatabaseColumnsClauseQueryPart(IColumnPropertyInfo property) => Parameters = new[] { property };
-
-    DatabaseColumnsClauseQueryPart(IList<IColumnPropertyInfo> properties) =>  Parameters = properties;
-
-    private string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}] As {item.Alias ?? item.GetCombinedAlias()}";
+    private string SetColumnSelector(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
     private void SetText()
     {
-        _text = string.Join(", ", Parameters.Select(SetColumnName));
+        _text = string.Join(", ", Parameter.Select(SetColumnName));
     }
 
-    DatabaseColumnsClauseQueryPart(string? text, IList<IColumnPropertyInfo> properties)
-    {
-        _text = text;
-        Parameters = properties;
-    }
+    public static DatabaseColumnsClauseQueryPart Create(params IColumnPropertyInfo[] properties) => new(properties);
 
-    public static DatabaseColumnsClauseQueryPart<TObject> Create(string? text) => new(text);
-    public static DatabaseColumnsClauseQueryPart<TObject> Create(params IColumnPropertyInfo[] properties) => new(properties);
-
-    public static DatabaseColumnsClauseQueryPart<TObject> Create(string? text, params IColumnPropertyInfo[] properties) => new(text, properties);
-    public static DatabaseColumnsClauseQueryPart<TObject> CreateMerged(string? text, params DatabaseColumnsClauseQueryPart<TObject>[] sqlClauses) => new(text, sqlClauses.SelectMany(properties => properties.Parameters).ToList());
-    public static DatabaseColumnsClauseQueryPart<TObject> CreateMerged(string? text, IEnumerable<DatabaseColumnsClauseQueryPart<TObject>> sqlQueries) => new(text, sqlQueries.SelectMany(properties => properties.Parameters).ToList());
-
-    public static DatabaseColumnsClauseQueryPart<TObject> CreateMerged(IEnumerable<DatabaseColumnsClauseQueryPart<TObject>> sqlQueries)
+    public static DatabaseColumnsClauseQueryPart CreateMerged(IEnumerable<DatabaseColumnsClauseQueryPart> columnsClause)
     {
         var columns = new List<IColumnPropertyInfo>();
-        var list = sqlQueries.SelectMany(properties => properties.Parameters).DistinctBy(item => new
+        var list = columnsClause.SelectMany(properties => properties.Parameter).DistinctBy(item => new
         {
             item.Schema,
             item.DataSet,
@@ -64,7 +54,7 @@ public class DatabaseColumnsClauseQueryPart<TObject> : DatabaseQueryPart<TObject
                 columns.Add(property);
         }
 
-        var column = new DatabaseColumnsClauseQueryPart<TObject>(columns);
+        var column = new DatabaseColumnsClauseQueryPart(columns);
         column.SetText();
 
         return column;

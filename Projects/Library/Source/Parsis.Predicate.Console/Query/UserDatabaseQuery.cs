@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Parsis.Predicate.Console.Model;
+﻿using Parsis.Predicate.Console.Model;
 using Parsis.Predicate.Sdk.Builder.Database;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
@@ -29,10 +28,12 @@ public class UserDatabaseQuery : UserQuery<DatabaseQueryOperationType, DatabaseQ
                 Add(item => item.Person.Status.Name)
             ).
             SetFiltering(QueryObjectFiltering<User>.
-                Init(item => item.Person.Name.RightContains("ali")).
-                Or(item => item.Person.Age > 123).
-                And(item => item.Person.Age< 112)).
-                
+                Init(item => item.Person.Sum > 10).
+                And(item => item.Person.Name.RightContains("ali")).
+            Or(item => item.Person.Age > 123).
+            And(item => item.Person.Age < 112)).
+            SetSorting(QueryObjectSorting<User>.Init().Add(item => item.IsActive, DirectionType.Desc)).
+            SetPaging(QueryObjectPaging.Init(10, 1)).
             Validate().Generate();
 
         var queryPartCollection = await Operation.RunAsync(queryObject, DatabaseQueryOperationType.Select);

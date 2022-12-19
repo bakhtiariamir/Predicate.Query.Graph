@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInitializing<TObject>, ObjectInitializing<TObject>> where TObject : class
+public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInitializing<TObject>, ObjectInitializing<TObject>> where TObject : IQueryableObject
 {
     private ObjectInitializing<TObject> _initializing;
     public QueryInitializeType InitializeType
@@ -50,7 +50,7 @@ public class QueryObjectInitializing<TObject> : IQueryObjectPart<QueryObjectInit
 }
 
 
-public class ObjectInitializing<TObject> where TObject : class
+public class ObjectInitializing<TObject> where TObject : IQueryableObject
 {
     public IList<InitializeColumn<TObject>> Columns
     {
@@ -76,7 +76,7 @@ public class ObjectInitializing<TObject> where TObject : class
 
 }
 
-public class InitializeColumn<TObject> where TObject : class
+public class InitializeColumn<TObject> where TObject : IQueryableObject
 {
     public Expression<Func<TObject, object>> Expression
     {
