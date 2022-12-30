@@ -2,7 +2,9 @@
 public enum DatabaseFieldType
 {
     Column = 1,
-    Aggregation = 2,
-    Functional = 3,
-    NotMapped = 4
+    AggregateWindowFunction = 2,
+    RankingWindowFunction = 3,
+    ValueWindowFunction = 4,
+    Functional = 5,
+    NotMapped = 6
 }

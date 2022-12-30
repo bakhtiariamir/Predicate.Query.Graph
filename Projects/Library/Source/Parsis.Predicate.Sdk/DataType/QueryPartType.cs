@@ -1,13 +1,16 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
 public enum QueryPartType
 {
-    Main = 1,
-    Columns = 2,
-    From = 3,
-    Where = 4,
-    Join = 5,
-    GroupBy = 6,
-    Having = 7,
-    OrderBy = 8,
-    Paging = 9
+    Insert = 1,
+    Update = 2,
+    Delete = 3,
+    Merge = 4,
+    Columns = 5,
+    Where = 6,
+    Join = 7,
+    GroupBy = 8,
+    Having = 9,
+    OrderBy = 10,
+    Paging = 11
+    
 }

@@ -1,5 +1,5 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
-public enum AggregationFunctionType
+public enum AggregateFunctionType
 {
     None = 0,
     Sum = 1,
@@ -7,4 +7,11 @@ public enum AggregationFunctionType
     Average = 3,
     Max = 4,
     Min = 5
+}
+
+
+public enum RankingFunctionType
+{
+    None = 0,
+    RowNumber = 1,
 }

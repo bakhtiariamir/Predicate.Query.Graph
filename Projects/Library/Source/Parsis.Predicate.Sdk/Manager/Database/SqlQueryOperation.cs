@@ -18,12 +18,12 @@ public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where 
         return Task.FromResult(true); // todo
     }
 
-    protected override async Task<DatabaseQueryPartCollection<TObject>> SelectAsync() => await RunQueryAsync(DatabaseQueryOperationType.Select);
-    protected override async Task<DatabaseQueryPartCollection<TObject>> InsertAsync() => await RunQueryAsync(DatabaseQueryOperationType.Insert);
-    protected override async Task<DatabaseQueryPartCollection<TObject>> UpdateAsync() => await RunQueryAsync(DatabaseQueryOperationType.Update);
-    protected override async Task<DatabaseQueryPartCollection<TObject>> DeleteAsync() => await RunQueryAsync(DatabaseQueryOperationType.Delete);
+    protected override async Task<DatabaseQueryPartCollection> SelectAsync() => await RunQueryAsync(DatabaseQueryOperationType.Select);
+    protected override async Task<DatabaseQueryPartCollection> InsertAsync() => await RunQueryAsync(DatabaseQueryOperationType.Insert);
+    protected override async Task<DatabaseQueryPartCollection> UpdateAsync() => await RunQueryAsync(DatabaseQueryOperationType.Update);
+    protected override async Task<DatabaseQueryPartCollection> DeleteAsync() => await RunQueryAsync(DatabaseQueryOperationType.Delete);
 
-    private async Task<DatabaseQueryPartCollection<TObject>> RunQueryAsync(DatabaseQueryOperationType queryOperationType)
+    private async Task<DatabaseQueryPartCollection> RunQueryAsync(DatabaseQueryOperationType queryOperationType)
     {
         if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
 

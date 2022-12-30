@@ -18,7 +18,7 @@ public class User : IQueryableObject
         Count = count;
     }
 
-    [ColumnInfo("Id", ColumnDataType.Int, DatabaseFieldType.Column, isPrimaryKey: true, required: true)]
+    [ColumnInfo("Id", ColumnDataType.Int, DatabaseFieldType.Column, isPrimaryKey: true, isIdentity:true, required: true)]
     public int Id
     {
         get;
@@ -53,19 +53,16 @@ public class User : IQueryableObject
         set;
     }
 
-    [ColumnInfo("IsActive", ColumnDataType.Boolean, DatabaseFieldType.Column, required: true)]
+    [ColumnInfo("IsActive", ColumnDataType.Boolean, DatabaseFieldType.Column, readOnly:true)]
     public bool IsActive
     {
         get;
         set;
     }
-    [ColumnInfo("Count", ColumnDataType.Int, DatabaseFieldType.Aggregation, "Count", false, false, AggregationFunctionType.Count)]
+    [ColumnInfo("Count", ColumnDataType.Int, DatabaseFieldType.AggregateWindowFunction, "Count", false, required: false, aggregateFunctionType: AggregateFunctionType.Count)]
     public int Count
     {
         get;
         set;
     }
-
-
-
 }

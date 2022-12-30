@@ -28,16 +28,51 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         get;
         set;
     }
+
+    public bool IsIdentity
+    {
+        get;
+        set;
+    }
+
+    public bool ReadOnly
+    {
+        get;
+        set;
+    }
+
+    public bool NotMapped
+    {
+        get;
+        set;
+    }
+
     public DatabaseFieldType FieldType
     {
         get;
         set;
     }
 
-    public AggregationFunctionType? AggregationFunctionType
+    public AggregateFunctionType? AggregateFunctionType
     {
         get;
         set;
+    }
+
+    public RankingFunctionType? RankingFunctionType
+    {
+        get;
+        set;
+    }
+
+    public string[]? WindowPartitionColumns
+    {
+        get;
+    }
+
+    public string[]? WindowOrderColumns
+    {
+        get;
     }
 
     public string? FunctionName
@@ -51,27 +86,23 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         get;
         set;
     }
-
-    public string? ParameterName
-    {
-        get;
-    }
-
     public ColumnPropertyInfo()
     {
-
     }
-
-    public ColumnPropertyInfo(string parameterName, object value) : base(value) => ParameterName = parameterName;
-
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, ColumnDataType dataType, DatabaseFieldType fieldType, string? functionName = null, AggregationFunctionType? aggregationFunctionType = null, RelationType? relationType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null) : base(name, dataType, required, title, alias, errorMessage)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null) : base(name, dataType, required, title, alias, errorMessage)
     {
         Schema = schema;
         DataSet = dataSet;
         ColumnName = columnName;
         IsPrimaryKey = isPrimaryKey;
         FieldType = fieldType;
-        AggregationFunctionType = aggregationFunctionType;
+        IsIdentity = isIdentity;
+        ReadOnly = readOnly;
+        NotMapped = notMapped;
+        WindowPartitionColumns = windowPartitionColumns;
+        WindowOrderColumns = windowOrderColumns;
+        AggregateFunctionType = aggregateFunctionType;
+        RankingFunctionType = rankingFunctionType;
         FunctionName = functionName;
     }
 
@@ -102,50 +133,14 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         return false;
     }
 
-    protected bool Equals(ColumnPropertyInfo other)
-    {
-        return DataSet == other.DataSet && Schema == other.Schema && ColumnName == other.ColumnName && IsPrimaryKey == other.IsPrimaryKey && FieldType == other.FieldType && AggregationFunctionType == other.AggregationFunctionType && FunctionName == other.FunctionName && Equals(Parent, other.Parent) && ParameterName == other.ParameterName;
-    }
-
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add(DataSet);
-        hashCode.Add(Schema);
-        hashCode.Add(ColumnName);
-        hashCode.Add(IsPrimaryKey);
-        hashCode.Add((int)FieldType);
-        hashCode.Add(AggregationFunctionType);
-        hashCode.Add(FunctionName);
-        hashCode.Add(Parent);
-        hashCode.Add(ParameterName);
-        return hashCode.ToHashCode();
-    }
-
     public void SetParameterData(string schema, string dataSet, string name, string columnName, ColumnDataType objectType)
     {
-        this.Schema = schema;
-        this.DataSet = dataSet;
-        this.ColumnName = columnName;
-        this.Name = name;
+        Schema = schema;
+        DataSet = dataSet;
+        ColumnName = columnName;
+        Name = name;
     }
 
-    public override IColumnPropertyInfo Clone() =>
-        new ColumnPropertyInfo
-        {
-            Name = this.Name,
-            Title = this.Title,
-            AggregationFunctionType = this.AggregationFunctionType,
-            DataSet = this.DataSet,
-            Alias = this.Alias,
-            ColumnName = this.ColumnName,
-            DataType = this.DataType,
-            ErrorMessage = this.ErrorMessage,
-            FieldType = this.FieldType,
-            Parent = this.Parent,
-            FunctionName = this.FunctionName,
-            IsPrimaryKey = this.IsPrimaryKey,
-            Schema = this.Schema,
-            Required = this.Required
-        };
+    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, IsPrimaryKey, IsIdentity, DataType, FieldType, IsIdentity, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, Alias, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
+
 }

@@ -22,8 +22,6 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
         set => _having = value;
     }
 
-    protected override QueryPartType QueryPartType => QueryPartType.GroupBy;
-
     private DatabaseGroupByClauseQueryPart(GroupingPredicate parameter)
     {
         Parameter = parameter;
@@ -33,12 +31,12 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
 
     public void GroupingText() => _text = $"{string.Join(", ", Parameter.GroupingColumns.Select(SetColumnSelector))}";
 
-    public void HavingText() => _having = string.Join(" AND ", Parameter.GroupingHaving.Select(GetHavingText));
+    public void HavingText() => _having = Parameter.GroupingHaving is not null ? string.Join(" AND ", Parameter.GroupingHaving.Select(GetHavingText)) : "";
 
     private string GetHavingText(WhereClause clause)
 
     {
-        if (clause.ColumnPropertyInfo == null) throw new NotFoundException(ExceptionCode.DatabaseQueryGroupByGenerator);
+        if (clause.ColumnPropertyInfo == null) throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
         return clause.Operator switch
         {
             ConditionOperatorType.NotEqual => $"{GetHavingColumn(clause.ColumnPropertyInfo)} <> {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
@@ -48,20 +46,20 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
             ConditionOperatorType.LessThanEqual => $"{GetHavingColumn(clause.ColumnPropertyInfo)} <= {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
             //I think we should define parameter name in this item
             ConditionOperatorType.Set => $"",
-            ConditionOperatorType.Between or _ => throw new Exception.NotSupportedException(ExceptionCode.DatabaseQueryFilteringGenerator)
+            ConditionOperatorType.Between or _ => throw new Exception.NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator)
         };
     }
 
     private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"@P_{item.GetCombinedAlias()}_{index ?? 0}";
 
-    private string GetHavingColumn(IColumnPropertyInfo property) => property.AggregationFunctionType switch
+    private string GetHavingColumn(IColumnPropertyInfo property) => property.AggregateFunctionType switch
     {
-        AggregationFunctionType.Count => $"COUNT(*)",
-        AggregationFunctionType.Average => $"AVG({SetColumnSelector(property)})",
-        AggregationFunctionType.Max => $"MAX({SetColumnSelector(property)})",
-        AggregationFunctionType.Min => $"MIN({SetColumnSelector(property)})",
-        AggregationFunctionType.Sum => $"SUM({SetColumnSelector(property)})",
-        AggregationFunctionType.None or _ or null => $"{SetColumnSelector(property)}"
+        AggregateFunctionType.Count => $"COUNT(*)",
+        AggregateFunctionType.Average => $"AVG({SetColumnSelector(property)})",
+        AggregateFunctionType.Max => $"MAX({SetColumnSelector(property)})",
+        AggregateFunctionType.Min => $"MIN({SetColumnSelector(property)})",
+        AggregateFunctionType.Sum => $"SUM({SetColumnSelector(property)})",
+        AggregateFunctionType.None or _ or null => $"{SetColumnSelector(property)}"
     };
 
     private string SetColumnSelector(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";

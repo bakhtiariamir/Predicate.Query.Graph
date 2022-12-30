@@ -2,13 +2,20 @@
 using Parsis.Predicate.Sdk.Generator.Database;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public class DatabaseQueryPartCollection<TObject> where TObject : IQueryableObject
+public class DatabaseQueryPartCollection
 {
-    public IDatabaseObjectInfo DatabaseObjectInfo
+    public IDatabaseObjectInfo? DatabaseObjectInfo
     {
         get;
         set;
     }
+
+    public DatabaseCommandQueryPart? Command
+    {
+        get;
+        set;
+    }
+
     public DatabaseColumnsClauseQueryPart? Columns
     {
         get;

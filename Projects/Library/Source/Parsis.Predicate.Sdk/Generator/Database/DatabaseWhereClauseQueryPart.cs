@@ -1,6 +1,9 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
+using Parsis.Predicate.Sdk.Helper;
+using System.Data.SqlClient;
+
 namespace Parsis.Predicate.Sdk.Generator.Database;
 public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 {
@@ -11,12 +14,8 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         get => _text;
         set => _text = value;
     }
-    protected override QueryPartType QueryPartType => QueryPartType.Where;
 
-    private DatabaseWhereClauseQueryPart(WhereClause parameter)
-    {
-        Parameter = parameter;
-    }
+    private DatabaseWhereClauseQueryPart(WhereClause parameter) => Parameter = parameter;
 
     public static DatabaseWhereClauseQueryPart Create(WhereClause property) => new(property);
 
@@ -43,10 +42,10 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         var columnProperties = new List<WhereClause>();
         var left = parameter.Left ?? throw new System.Exception("asd");
         var right = parameter.Right ?? throw new System.Exception("asd");
- 
+
         if (left.PartType == PartType.ColumnInfo && left.ColumnPropertyInfo != null)
         {
-            if (left.ClauseType == ClauseType.Having)
+            if (left.ClauseType == ClauseType.Having && left.ColumnPropertyInfo.WindowPartitionColumns?.Length == 0)
             {
                 left.SetValue(right.Value);
                 left.SetOperator(parameter.Operator);
@@ -73,7 +72,30 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         return columnProperties;
     }
 
-    private bool CheckHavingClause(WhereClause parameter) => parameter.ClauseType == ClauseType.Having;
+    public static IEnumerable<SqlParameter> GetParameters(WhereClause? parameter)
+    {
+        if (parameter == null) yield break;
+
+        var whereClause = ReduceWhereClause(parameter);
+        if (whereClause != null && whereClause.Left.PartType == PartType.ColumnInfo)
+        {
+            var wherePart = (WhereClause)whereClause;
+            if (wherePart.Left is not null)
+            {
+                if (wherePart.Left.PartType == PartType.ColumnInfo)
+                {
+                    var parameterName = $"@{SetParameterName(whereClause.Left?.ColumnPropertyInfo, whereClause.Index)}";
+                    var dbType = wherePart.Left.ColumnPropertyInfo.DataType.GetSqlDbType();
+                    var sqlParameter = new SqlParameter(parameterName, dbType);
+                    sqlParameter.Value = whereClause.Right.Value;
+                    yield return sqlParameter;
+                }
+            }
+            else
+                throw new Exception.NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+
+        }
+    }
 
     private static string? SetWhereClauseText(WhereClause? parameter)
     {
@@ -92,21 +114,20 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                     {
                         var left = SetWhereClauseText(wherePart.Left);
                         if (wherePart.Right is null && wherePart.Operator != ConditionOperatorType.None)
-                            throw new Parsis.Predicate.Sdk.Exception.NotFoundException(whereClause.ToString(), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                            throw new Parsis.Predicate.Sdk.Exception.NotFound(whereClause.ToString(), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
 
                         var right = SetWhereClauseText(wherePart.Right);
-                        var isString = wherePart.Left.ColumnPropertyInfo != null && new[] {ColumnDataType.Char, ColumnDataType.String}.Contains(wherePart.Left.ColumnPropertyInfo.DataType);
+                        var isString = wherePart.Left.ColumnPropertyInfo != null && new[] { ColumnDataType.Char, ColumnDataType.String }.Contains(wherePart.Left.ColumnPropertyInfo.DataType);
                         return GenerateClausePhrase(left, wherePart.Operator, right, isString);
                     }
                     else
-                        throw new Exception.NotFoundException(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                        throw new Exception.NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
                 case PartType.ParameterInfo:
-                    if (whereClause.ColumnPropertyInfo == null) throw new NotFoundException(ExceptionCode.DatabaseQueryFilteringGenerator);
-                    if (whereClause.Index == null) throw new NotFoundException(ExceptionCode.DatabaseQueryFilteringGenerator);
+                    if (whereClause.ColumnPropertyInfo == null) throw new NotFound(ExceptionCode.DatabaseQueryFilteringGenerator);
 
-                    return SetParameterName(whereClause.ColumnPropertyInfo, whereClause.Index);
+                    return $"@{SetParameterName(whereClause.ColumnPropertyInfo, whereClause.Index)}";
                 default:
-                    throw new Exception.NotFoundException(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new Exception.NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
             }
         }
 
@@ -119,12 +140,12 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         switch (parameter.PartType)
         {
             case PartType.ColumnInfo when parameter.ColumnPropertyInfo != null:
-            {
-                if (parameter.ClauseType != ClauseType.Having)
-                    return parameter;
+                {
+                    if (parameter.ClauseType != ClauseType.Having)
+                        return parameter;
 
-                return null;
-            }
+                    return null;
+                }
             case PartType.ParameterInfo:
                 return parameter;
             case PartType.WhereClause:
@@ -167,33 +188,33 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             ConditionOperatorType.NotIn => $"{left} NOT IN ({right})",
             ConditionOperatorType.IsNull => $"{left} IS NULL {right}",
             ConditionOperatorType.NotIsNull => $"{left} IS NOT NULL {right}",
-            ConditionOperatorType.Or => right == null ? $"({right})" :  $"({left} OR {right})",
+            ConditionOperatorType.Or => right == null ? $"({right})" : $"({left} OR {right})",
             ConditionOperatorType.And => right == null ? $"({right})" : $"({left} AND {right})",
             ConditionOperatorType.None => $"({left})",
             //I think we should define parameter name in this item
             ConditionOperatorType.Set => $"",
-            ConditionOperatorType.Between or _ => throw new Exception.NotSupportedException(left, ExceptionCode.DatabaseQueryFilteringGenerator)
+            ConditionOperatorType.Between or _ => throw new Exception.NotSupported(left, ExceptionCode.DatabaseQueryFilteringGenerator)
         };
     }
 
     //ToDo : add these methods in helper for use by all QueryPart
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
-    private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"@P_{item.GetCombinedAlias()}_{index ?? 0}";
+    private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"P_{item.GetCombinedAlias()}_{index ?? 0}";
 
-    public  void ReduceParameter(WhereClause? parameter = null)
+    public void ReduceParameter(WhereClause? parameter = null)
     {
         parameter ??= Parameter;
-        if (parameter.Left is {PartType: PartType.ParameterInfo})
+        if (parameter.Left is { PartType: PartType.ParameterInfo })
         {
             parameter.Left.SetIndex(_index++);
         }
-        else if (parameter.Left is {PartType: PartType.WhereClause})
+        else if (parameter.Left is { PartType: PartType.WhereClause })
         {
             ReduceParameter(parameter.Left);
         }
 
-        if (parameter.Right is {PartType: PartType.ParameterInfo})
+        if (parameter.Right is { PartType: PartType.ParameterInfo })
         {
             parameter.Right.SetIndex(_index++);
         }
@@ -271,7 +292,7 @@ public class WhereClause
 
     public void SetOperator(ConditionOperatorType operatorType) => Operator = operatorType;
 
-    public void SetValue(object value) => Value = value;
+    public void SetValue(object? value) => Value = value;
 
     public void SetIndex(int index) => Index = index;
 }

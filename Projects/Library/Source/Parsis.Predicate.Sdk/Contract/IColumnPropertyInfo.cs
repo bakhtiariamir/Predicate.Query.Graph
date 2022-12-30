@@ -8,6 +8,21 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
         get;
     }
 
+    bool IsIdentity
+    {
+        get;
+    }
+
+    bool ReadOnly
+    {
+        get;
+    }
+
+    bool NotMapped
+    {
+        get;
+    }
+
     string DataSet
     {
         get;
@@ -27,7 +42,22 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
         get;
     }
 
-    AggregationFunctionType? AggregationFunctionType
+    AggregateFunctionType? AggregateFunctionType
+    {
+        get;
+    }
+
+    RankingFunctionType? RankingFunctionType
+    {
+        get;
+    }
+
+    string[]? WindowPartitionColumns
+    {
+        get;
+    }
+
+    string[]? WindowOrderColumns
     {
         get;
     }
@@ -41,11 +71,6 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
     {
         get;
         set;
-    }
-
-    string? ParameterName
-    {
-        get;
     }
 
     void SetRelationalObject(IColumnPropertyInfo propertyInfo);

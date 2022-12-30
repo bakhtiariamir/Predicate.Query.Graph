@@ -1,9 +1,35 @@
-﻿using Parsis.Predicate.Sdk.Contract;
+﻿using System.Linq.Expressions;
+using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.Generator.Database;
 
-namespace Parsis.Predicate.Sdk.ExpressionHandler.Visitors
+namespace Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
+
+public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TResult : IDatabaseQueryPart
 {
-    public abstract class DatabaseVisitor<TObject, TResult> : Visitor<TResult, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TObject : IQueryableObject where TResult : class, new()
+    protected DatabaseVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression)
     {
+        CacheObjectCollection = cacheObjectCollection;
+        ObjectInfo = objectInfo;
+        ParameterExpression = parameterExpression;
+    }
 
+    protected override IDatabaseCacheInfoCollection CacheObjectCollection
+    {
+        get;
+    }
+
+    protected override IDatabaseObjectInfo ObjectInfo
+    {
+        get;
+    }
+
+    protected override ParameterExpression? ParameterExpression
+    {
+        get;
+    }
+
+    protected override TResult VisitConvert(UnaryExpression expression)
+    {
+        return Visit(expression.Operand);
     }
 }

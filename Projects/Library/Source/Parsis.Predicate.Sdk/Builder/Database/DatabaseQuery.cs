@@ -2,9 +2,10 @@
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Generator.Database;
 using Parsis.Predicate.Sdk.Query;
+using System.Runtime.InteropServices;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
-public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection<TObject>> where TObject : IQueryableObject
+public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -18,7 +19,7 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
         set;
     }
 
-    protected DatabaseQueryPartCollection<TObject> QueryPartCollection
+    protected DatabaseQueryPartCollection QueryPartCollection
     {
         get;
         set;
@@ -30,44 +31,48 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<DatabaseQueryPartCollection<TObject>> Build(QueryObject<TObject, DatabaseQueryOperationType> query)
+    public override async Task<DatabaseQueryPartCollection> Build(QueryObject<TObject, DatabaseQueryOperationType> query)
     {
         switch (QueryType)
         {
             case DatabaseQueryOperationType.Select:
-                await GenerateColumn(query);
-                await GenerateWhereClause(query);
-                await GenerateOrderByClause(query);
-                await GenerateJoinClause();
-                await GeneratePagingClause(query);
-                await GenerateGroupByClause();
+                await GenerateColumnAsync(query);
+                await GenerateWhereAsync(query);
+                await GenerateOrderByAsync(query);
+                await GenerateJoinAsync();
+                await GeneratePagingAsync(query);
+                await GenerateFunctionByClause();
                 break;
             case DatabaseQueryOperationType.Insert:
-                Task.WaitAll(new[]
-                {
-                    GenerateColumn(query), GenerateWhereClause(query), GenerateOrderByClause(query)
-                });
+                await GenerateInsertAsync(query);
                 break;
             case DatabaseQueryOperationType.Update:
-
+                await GenerateUpdateAsync(query);
+                break;
             case DatabaseQueryOperationType.Delete:
-
+                await GenerateDeleteAsync(query);
                 break;
         }
 
         return QueryPartCollection;
     }
 
-    protected abstract Task GenerateColumn(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateInsertAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
 
-    protected abstract Task GenerateWhereClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateUpdateAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
 
-    protected abstract Task GeneratePagingClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateDeleteAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
 
-    protected abstract Task GenerateOrderByClause(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateColumnAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
 
-    protected abstract Task GenerateJoinClause();
+    protected abstract Task GenerateWhereAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
 
-    protected abstract Task GenerateGroupByClause();
+    protected abstract Task GeneratePagingAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateOrderByAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+
+    protected abstract Task GenerateJoinAsync();
+
+    protected abstract Task GenerateFunctionByClause();
 }
 

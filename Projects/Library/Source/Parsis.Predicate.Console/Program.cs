@@ -34,10 +34,90 @@ databaseCacheInfoCollection.InitCache(nameof(Person), personObjectInfo);
 databaseCacheInfoCollection.InitCache(nameof(Status), statusObjectInfo);
 //ToDo : add validation for init Cache when object info has error in Attribute return exception
 //var query = new PersonDatabaseQuery(databaseCacheInfoCollection);
-//var select = await query.SelectQueryAsync();
 
 var query = new UserDatabaseQuery(databaseCacheInfoCollection);
-var select = await query.SelectQueryAsync();
+
+var listOfQuery = new Dictionary<string, string>();
+
+listOfQuery.Add("Select", await query.SelectQueryAsync());
+listOfQuery.Add("SingleInsert", await query.InsertQueryAsync(new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+{
+    Id = 1,
+    Name = "test"
+}, 12), "asdad", "asdadad", DateTime.Now, true, 12)));
+
+listOfQuery.Add("MultipleInsert", await query.BulkInsertQueryAsync(new[]
+{
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12)
+}));
+
+listOfQuery.Add("SingleUpdate", await query.UpdateCommandAsync(new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+{
+    Id = 1,
+    Name = "test"
+}, 12), "asdad", "asdadad", DateTime.Now, true, 12)));
+
+
+
+listOfQuery.Add("MultipleUpdate", await query.BulkUpdateCommandAsync(new[]
+{
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12)
+}));
+
+listOfQuery.Add("SingleDelete", await query.DeleteCommandAsync(new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+{
+    Id = 1,
+    Name = "test"
+}, 12), "asdad", "asdadad", DateTime.Now, true, 12)));
+
+listOfQuery.Add("MultipleDelete", await query.BulkDeleteCommandAsync(new[]
+{
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12),
+    new User(1, new Person(1, "asdad", "adasd", 123, GenderType.Male, new Status
+    {
+        Id = 1,
+        Name = "test"
+    }, 12), "asdad", "asdadad", DateTime.Now, true, 12)
+}));
+
+Console.Write("Final-test");
 
 
 // Snip : Select Query sample on multi entities with main entity result 
@@ -49,7 +129,7 @@ var select = await query.SelectQueryAsync();
 
 
 
-// Snip : Select Query sample on multi entities with Aggregation columns
+// Snip : Select Query sample on multi entities with AggregateWindowFunction columns
 
 
 

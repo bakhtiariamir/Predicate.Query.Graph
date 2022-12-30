@@ -6,7 +6,7 @@ using Parsis.Predicate.Sdk.DataType;
 namespace Parsis.Predicate.Console.Query;
 public abstract class PersonQuery<TOperationType, TResult> where TOperationType : Enum
 {
-    protected abstract IQueryOperation<Person, TOperationType, DatabaseQueryPartCollection<Person>> Operation
+    protected abstract IQueryOperation<Person, TOperationType, DatabaseQueryPartCollection> Operation
     {
         get;
         init;

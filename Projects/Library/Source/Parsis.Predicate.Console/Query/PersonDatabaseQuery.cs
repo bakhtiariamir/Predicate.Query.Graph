@@ -1,4 +1,5 @@
-﻿using Parsis.Predicate.Console.Model;
+﻿using System.Data.SqlClient;
+using Parsis.Predicate.Console.Model;
 using Parsis.Predicate.Sdk.Builder.Database;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
@@ -7,10 +8,10 @@ using Parsis.Predicate.Sdk.Manager.Database;
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Console.Query;
-public class PersonDatabaseQuery : PersonQuery<DatabaseQueryOperationType, DatabaseQueryPartCollection<Person>>
+public class PersonDatabaseQuery : PersonQuery<DatabaseQueryOperationType, DatabaseQueryPartCollection>
 {
     //Virtual member called in constructor ==> use sealed
-    protected sealed override IQueryOperation<Person, DatabaseQueryOperationType, DatabaseQueryPartCollection<Person>> Operation
+    protected sealed override IQueryOperation<Person, DatabaseQueryOperationType, DatabaseQueryPartCollection> Operation
     {
         get;
         init;
@@ -33,8 +34,8 @@ public class PersonDatabaseQuery : PersonQuery<DatabaseQueryOperationType, Datab
                 And(item => item.Age< 112)).
             Validate().Generate();
 
-        var queryPartCollection = await Operation.RunAsync(queryObject, DatabaseQueryOperationType.Select);
-        var select = queryPartCollection.GetSelectQuery();
+        var queryPartCollection = await Operation.RunAsync(queryObject);
+        var select = queryPartCollection.GetSelectQuery(out IEnumerable<SqlParameter>? parameters);
         return select;
     }
 }

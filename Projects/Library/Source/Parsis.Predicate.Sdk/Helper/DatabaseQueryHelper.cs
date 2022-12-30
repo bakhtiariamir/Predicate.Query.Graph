@@ -1,26 +1,17 @@
-﻿using System.Text;
-using Parsis.Predicate.Sdk.Builder.Database;
-using Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.Builder.Database;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
+using Parsis.Predicate.Sdk.Generator.Database;
+using System.Data.SqlClient;
+using System.Text;
 
 namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseQueryHelper
 {
-    public static IDatabaseObjectInfo? GetLastObjectInfo<TObject>(this IDatabaseCacheInfoCollection databaseCacheInfoCollection) where TObject : IQueryableObject
+    public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts, out IEnumerable<SqlParameter>? parameters)
     {
-        var type = typeof(TObject);
-        if (!databaseCacheInfoCollection.TryGet(databaseCacheInfoCollection.GetKey(type.Name), out IDatabaseObjectInfo? objectInfo))
-        {
-            objectInfo = type.GetObjectInfo();
-            databaseCacheInfoCollection.InitCache(type.Name, objectInfo);
-        }
-
-        return objectInfo;
-    }
-
-    public static string GetSelectQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : IQueryableObject
-    {
-        if (queryParts.Columns == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (queryParts.Columns == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        parameters = queryParts.SelectParameters();
 
         var select = new StringBuilder();
         select.Append($"SELECT {queryParts.Columns.Text} ");
@@ -28,23 +19,144 @@ public static class DatabaseQueryHelper
         select.Append($"{queryParts.JoinClause?.Text} ");
         select.Append(queryParts.WhereClause != null ? $"WHERE {queryParts.WhereClause.Text} " : "");
         select.Append(queryParts.GroupByClause != null ? $"GROUP BY {queryParts.GroupByClause.Text} " : "");
-        select.Append(queryParts.GroupByClause is {Having: { }} ?  $"HAVING {queryParts.GroupByClause?.Having} " : "");
+        select.Append(queryParts.GroupByClause is { Having: { } } ? $"HAVING {queryParts.GroupByClause?.Having} " : "");
         select.Append(queryParts.OrderByClause != null ? $"{queryParts.OrderByClause.Text}" : "");
 
         return select.ToString();
     }
 
-    public static string GetInsertQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : IQueryableObject
+    public static string GetCommandQuery(this DatabaseQueryPartCollection queryParts, out IEnumerable<SqlParameter> parameters)
     {
-        return string.Empty;
+        if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        parameters = queryParts.Command.SqlParameters;
+
+        if (parameters != null && !parameters.Any())
+            throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
+
+        return queryParts.Command.OperationType switch
+        {
+            DatabaseQueryOperationType.Insert => queryParts.Command.GetInsertQuery(),
+            DatabaseQueryOperationType.Delete => queryParts.Command.GetDeleteQuery(),
+            DatabaseQueryOperationType.Update => queryParts.Command.GetUpdateQuery(),
+            DatabaseQueryOperationType.Merge => queryParts.Command.GetMergeQuery(),
+            DatabaseQueryOperationType.Select or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
+        };
     }
 
-    public static string GetUpdateQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : IQueryableObject
+
+    private static string GetInsertQuery(this DatabaseCommandQueryPart command)
     {
-        return string.Empty;
+        var commandParts = command.CommandParts;
+        var insert = new StringBuilder();
+
+        switch (command.CommandValueType)
+        {
+            case CommandValueType.Record:
+                insert.Append($"INSERT INTO {commandParts["Selector"]} ");
+                insert.Append($"({commandParts["Columns"]}) ");
+                string? value;
+                if (commandParts["Values"] is IEnumerable<string> values)
+                    value = string.Join(", ", values);
+                else
+                    value = commandParts["Values"].ToString();
+
+                if (value == null)
+                    throw new NotSupported(ExceptionCode.DatabaseObjectInfo); //todo
+
+                insert.Append($"VALUES {value}");
+                break;
+            case CommandValueType.Bulk:
+
+                break;
+        }
+        return insert.ToString();
     }
 
-    public static string GetDeleteQuery<TObject>(this DatabaseQueryPartCollection<TObject> queryParts) where TObject : IQueryableObject
+    private static string GetUpdateQuery(this DatabaseCommandQueryPart command)
+    {
+        var commandParts = command.CommandParts;
+        var update = new StringBuilder();
+
+        switch (command.CommandValueType)
+        {
+            case CommandValueType.Record:
+                {
+                    var selector = commandParts["Selector"];
+                    if (commandParts.TryGetValue("RecordsValue", out var valueList))
+                    {
+                        var recordsValue = valueList as ICollection<Tuple<int, string>>;
+                        if (recordsValue == null && recordsValue!.Count == 0)
+                            throw new NotSupported("asd"); // todo
+
+                        if (commandParts.TryGetValue("RecordsWhere", out var whereList))
+                        {
+                            if (whereList is ICollection<Tuple<int, string>> recordsWhere && recordsValue!.Count > 0)
+                            {
+                                foreach (var (index, columns) in recordsValue)
+                                {
+                                    update.Append($"UPDATE {selector} ");
+                                    update.Append($"SET {columns} ");
+                                    var where = recordsWhere.FirstOrDefault(item => item.Item1 == index)?.Item2 ?? throw new NotSupported("asd"); // todo
+
+                                    update.Append($"WHERE {where}; ");
+                                }
+                            }
+                        }
+                        else
+                            throw new NotSupported(""); // todo
+                    }
+                    else if (commandParts.TryGetValue("Values", out var values))
+                    {
+                        update.Append($"UPDATE {selector} ");
+                        update.Append($"SET {values} ");
+
+                        if (commandParts.TryGetValue("Where", out var where))
+                            update.Append($"WHERE {where}");
+                    }
+                    else
+                        throw new NotSupported(""); // todo
+
+                    break;
+                }
+            case CommandValueType.Bulk:
+                update.Append($"UPDATE {commandParts["Selectors"]} ");
+                update.Append($"SET {commandParts["Values"]} ");
+                update.Append($"{commandParts["Join"]} ");
+                update.Append($"WHERE {commandParts["Where"]}");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return update.ToString();
+    }
+
+    private static string GetDeleteQuery(this DatabaseCommandQueryPart command)
+    {
+        var commandParts = command.CommandParts;
+        var delete = new StringBuilder();
+
+        var selector = commandParts["Selector"];
+
+        switch (command.CommandValueType)
+        {
+            case CommandValueType.Record:
+                delete.Append($"DELETE FROM {selector} ");
+                delete.Append($"WHERE {commandParts["Where"]}");
+                break;
+            case CommandValueType.Bulk:
+                delete.Append($"DELETE {selector} ");
+                delete.Append($"{commandParts["Joins"]} ");
+                delete.Append($"WHERE {commandParts["WHERE"]} ");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return delete.ToString();
+    }
+
+    private static string GetMergeQuery(this DatabaseCommandQueryPart command)
     {
         return string.Empty;
     }

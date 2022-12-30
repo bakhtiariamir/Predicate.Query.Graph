@@ -1,5 +1,4 @@
-﻿using Parsis.Predicate.Sdk.DataType;
-using Parsis.Predicate.Sdk.Query;
+﻿using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
 public class DatabasePagingClauseQueryPart : DatabaseQueryPart<Page>
@@ -11,8 +10,6 @@ public class DatabasePagingClauseQueryPart : DatabaseQueryPart<Page>
         get => _text;
         set => _text = value;
     }
-
-    protected override QueryPartType QueryPartType => QueryPartType.Paging;
 
     public DatabasePagingClauseQueryPart(int pageNumber, int pageRows)
     {

@@ -1,9 +1,10 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
 using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
-public class SqlServerPagingVisitor : SqlServerVisitor<DatabasePagingClauseQueryPart>
+public class SqlServerPagingVisitor : DatabaseVisitor<DatabasePagingClauseQueryPart>
 {
     public SqlServerPagingVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {

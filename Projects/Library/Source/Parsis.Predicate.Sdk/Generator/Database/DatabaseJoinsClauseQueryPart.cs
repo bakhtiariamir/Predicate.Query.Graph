@@ -1,5 +1,4 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Query;
 
@@ -12,8 +11,6 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
         get => _text;
         set => _text = value;
     }
-
-    protected override QueryPartType QueryPartType => QueryPartType.Join;
 
     DatabaseJoinsClauseQueryPart(ICollection<JoinPredicate> joinPredicates)
     {
@@ -40,7 +37,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
             JoinType.Left => "LEFT JOIN",
             JoinType.Right => "RIGHT JOIN",
             JoinType.Outer => "OUTER JOIN",
-            _ => throw new Parsis.Predicate.Sdk.Exception.NotSupportedException(joinPredicate.JoinType.ToString(),ExceptionCode.DatabaseQueryJoiningGenerator)
+            _ => throw new Parsis.Predicate.Sdk.Exception.NotSupported(joinPredicate.JoinType.ToString(),ExceptionCode.DatabaseQueryJoiningGenerator)
         };
         //ToDo : Need PersonObjectInfo For Get id
         var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey);
@@ -49,9 +46,9 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
 
     public static DatabaseJoinsClauseQueryPart Create(params JoinPredicate[] joinPredicates) => new(joinPredicates);
 
-    public static DatabaseJoinsClauseQueryPart CreateMerged(params DatabaseJoinsClauseQueryPart[] sqlClauses) => new(sqlClauses.SelectMany(properties => properties.Parameter).ToList());
+    public static DatabaseJoinsClauseQueryPart Merged(params DatabaseJoinsClauseQueryPart[] sqlClauses) => new(sqlClauses.SelectMany(properties => properties.Parameter).ToList());
 
-    public static DatabaseJoinsClauseQueryPart CreateMerged(IEnumerable<DatabaseJoinsClauseQueryPart> sqlQueries)
+    public static DatabaseJoinsClauseQueryPart Merged(IEnumerable<DatabaseJoinsClauseQueryPart> sqlQueries)
     {
         var column = new DatabaseJoinsClauseQueryPart(sqlQueries.SelectMany(properties => properties.Parameter).DistinctBy(item => new
         {

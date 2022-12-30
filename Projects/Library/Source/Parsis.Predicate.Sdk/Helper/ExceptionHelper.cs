@@ -222,7 +222,7 @@ public static class ExceptionHelper
             "ArgumentOutOfRangeException" => $"_Argument_Not_In_Range",
             "NullReferenceException" => $"_Invalid_Null_Reference",
             "IndexOutOfRangeException" => $"_Index_Array_Out_Of_Range",
-            "NotSupportedException" => "_Not_Supported",
+            "NotSupported" => "_Not_Supported",
             "FormatException" => "_Argument_Format_Invalid",
             "RankException" => $"Array_With_Wrong_Number",
             "TimeoutException" => $"_TimeOut",

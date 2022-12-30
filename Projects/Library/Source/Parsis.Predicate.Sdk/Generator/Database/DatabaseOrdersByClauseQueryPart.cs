@@ -12,8 +12,6 @@ public class DatabaseOrdersByClauseQueryPart : DatabaseQueryPart<ICollection<Col
         set => _text = value;
     }
 
-    protected override QueryPartType QueryPartType => QueryPartType.OrderBy;
-
     public DatabaseOrdersByClauseQueryPart(ColumnSortPredicate columnSortPredicate)
     {
         Parameter.Add(columnSortPredicate);
@@ -31,7 +29,7 @@ public class DatabaseOrdersByClauseQueryPart : DatabaseQueryPart<ICollection<Col
     public static DatabaseOrdersByClauseQueryPart Create(ColumnSortPredicate columnSortPredicate) => new(columnSortPredicate);
 
 
-    public static DatabaseOrdersByClauseQueryPart CreateMerged(IEnumerable<DatabaseOrdersByClauseQueryPart> orderByClauses) => new DatabaseOrdersByClauseQueryPart(orderByClauses.SelectMany(item => item.Parameter).ToArray());
+    public static DatabaseOrdersByClauseQueryPart Merged(IEnumerable<DatabaseOrdersByClauseQueryPart> orderByClauses) => new DatabaseOrdersByClauseQueryPart(orderByClauses.SelectMany(item => item.Parameter).ToArray());
 
 
     private void SetText() => _text = $"ORDER BY {string.Join(", ", Parameter.Select(columnSortPredicate => $"{SetColumnName(columnSortPredicate.ColumnPropertyInfo)} {SetDirection(columnSortPredicate.DirectionType)}"))}";
@@ -42,7 +40,7 @@ public class DatabaseOrdersByClauseQueryPart : DatabaseQueryPart<ICollection<Col
     {
         DirectionType.Asc => "asc",
         DirectionType.Desc => "desc",
-        _ => throw new Parsis.Predicate.Sdk.Exception.NotSupportedException("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
+        _ => throw new Parsis.Predicate.Sdk.Exception.NotSupported("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
     };
 }
 

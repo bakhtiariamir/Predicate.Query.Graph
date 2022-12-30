@@ -1,16 +1,15 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
+using Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Info.Database;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
-public class SqlServerFilteringGenerator : SqlServerVisitor<DatabaseWhereClauseQueryPart>
+public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQueryPart>
 {
-    private int _index = 0;
-
-    public SqlServerFilteringGenerator(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerFilteringVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 
@@ -90,11 +89,11 @@ public class SqlServerFilteringGenerator : SqlServerVisitor<DatabaseWhereClauseQ
 
     protected override DatabaseWhereClauseQueryPart VisitMember(MemberExpression expression)
     {
-        IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(expression.ToString(), expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
+        IColumnPropertyInfo[] fields = expression.GetProperty(ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFound(expression.ToString(), expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        var field = fields.FirstOrDefault() ?? throw new NotFoundException(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
+        var field = fields.FirstOrDefault() ?? throw new NotFound(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        return DatabaseWhereClauseQueryPart.Create(new WhereClause(field, clauseType: field.AggregationFunctionType != AggregationFunctionType.None ? ClauseType.Having : ClauseType.Where));
+        return DatabaseWhereClauseQueryPart.Create(new WhereClause(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }
 
     protected override DatabaseWhereClauseQueryPart VisitConstant(ConstantExpression expression)

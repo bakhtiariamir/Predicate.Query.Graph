@@ -1,9 +1,22 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.Generator.Database;
 
 namespace Parsis.Predicate.Sdk.Query;
 public class QueryObject<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
 {
     public TQueryType QueryType
+    {
+        get;
+        set;
+    }
+
+    public ObjectInitializing<TObject>? Insert
+    {
+        get;
+        set;
+    }
+
+    public ObjectCommand<TObject>? Command
     {
         get;
         set;

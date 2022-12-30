@@ -1,6 +1,4 @@
-﻿using Parsis.Predicate.Sdk.DataType;
-
-namespace Parsis.Predicate.Sdk.Generator.Database;
+﻿namespace Parsis.Predicate.Sdk.Generator.Database;
 public abstract class DatabaseQueryPart<TParameter> : IDatabaseQueryPart<TParameter> where TParameter : class
 {
     public abstract string? Text
@@ -13,11 +11,6 @@ public abstract class DatabaseQueryPart<TParameter> : IDatabaseQueryPart<TParame
     {
         get;
         set;
-    }
-
-    protected abstract QueryPartType QueryPartType
-    {
-        get;
     }
 
     public override string? ToString() => Text;

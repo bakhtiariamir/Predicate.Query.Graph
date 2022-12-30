@@ -5,7 +5,7 @@ using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
-public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection<TObject>, DatabaseQueryOperationType> where TObject : IQueryableObject
+public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection, DatabaseQueryOperationType> where TObject : IQueryableObject
 {
     protected override QueryObject<TObject, DatabaseQueryOperationType>? QueryObject
     {
@@ -13,7 +13,7 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
         set;
     }
 
-    public override async Task<DatabaseQueryPartCollection<TObject>> RunAsync(QueryObject<TObject, DatabaseQueryOperationType> queryObject, DatabaseQueryOperationType operationType)
+    public override async Task<DatabaseQueryPartCollection> RunAsync(QueryObject<TObject, DatabaseQueryOperationType> queryObject)
     {
         QueryObject = queryObject ?? throw new System.Exception("Asd");
 
@@ -22,7 +22,7 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
           var validateQuery = await ValidateAsync();
         if (validateQuery)
         {
-            return operationType switch
+            return queryObject.QueryType switch
             {
                 DatabaseQueryOperationType.Select => await SelectAsync(),
                 DatabaseQueryOperationType.Insert => await InsertAsync(),
@@ -36,13 +36,13 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
         throw new System.Exception("asd"); //ToDo
     }
 
-    protected abstract Task<DatabaseQueryPartCollection<TObject>> SelectAsync();
+    protected abstract Task<DatabaseQueryPartCollection> SelectAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection<TObject>> InsertAsync();
+    protected abstract Task<DatabaseQueryPartCollection> InsertAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection<TObject>> UpdateAsync();
+    protected abstract Task<DatabaseQueryPartCollection> UpdateAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection<TObject>> DeleteAsync();
+    protected abstract Task<DatabaseQueryPartCollection> DeleteAsync();
 }
 
 

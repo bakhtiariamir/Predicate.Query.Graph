@@ -49,7 +49,7 @@ public class Person : IQueryableObject
         set;
     }
 
-    [ColumnInfo("Age", ColumnDataType.Int, DatabaseFieldType.Aggregation, "Sum", false, false, AggregationFunctionType.Sum)]
+    [ColumnInfo("Age", ColumnDataType.Int, DatabaseFieldType.AggregateWindowFunction, "Sum", false, required: false,  aggregateFunctionType: AggregateFunctionType.Sum)]
     public int Sum
     {
         get;

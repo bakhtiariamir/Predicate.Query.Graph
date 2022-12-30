@@ -13,5 +13,6 @@ public enum ColumnDataType
     Decimal = 9,
     Double = 10,
     DateTime = 11,
-    Object = 12
+    Object = 12,
+    Structure = 13
 }

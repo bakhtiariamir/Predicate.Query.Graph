@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="Info\Database\SqlServer\**" />
-    <Compile Remove="Info\Service\Attribute\**" />
+    <Compile Remove="Info\Service\**" />
     <EmbeddedResource Remove="Info\Database\SqlServer\**" />
-    <EmbeddedResource Remove="Info\Service\Attribute\**" />
+    <EmbeddedResource Remove="Info\Service\**" />
     <None Remove="Info\Database\SqlServer\**" />
-    <None Remove="Info\Service\Attribute\**" />
+    <None Remove="Info\Service\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,18 +25,20 @@
     <Compile Remove="Contract\IDatabaseQuery.cs" />
     <Compile Remove="Contract\IDatabaseQueryOperation.cs" />
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
+    <Compile Remove="Generator\Database\DatabaseInsertQueryPart.cs" />
+    <Compile Remove="Generator\Database\SqlServer\SqlServerInsertingVisitor.cs" />
     <Compile Remove="Info\CacheObjectInfo.cs" />
     <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
     <Compile Remove="Query\QueryObjectGrouping.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Info\Service\" />
     <Folder Include="Manager\Service\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.4.0" />
+    <PackageReference Include="Dynamitey" Version="2.0.10.189" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0-rc.2.22472.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.Runtime.Caching" Version="7.0.0-rc.2.22472.3" />

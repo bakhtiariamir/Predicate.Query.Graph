@@ -8,7 +8,7 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
 
     private IQueryContext? _queryContext;
 
-    private IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection<TObject>>? _query;
+    private IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection>? _query;
 
     private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info)
     {
@@ -32,7 +32,7 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
         return Task.FromResult(this);
     }
 
-    public override Task<IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection<TObject>>> BuildAsync()
+    public override Task<IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection>> BuildAsync()
     {
         if (_queryContext == null)
             throw new System.Exception("asd"); //ToDo : Exception

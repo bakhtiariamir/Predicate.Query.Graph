@@ -11,7 +11,7 @@ public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryO
     }
 
     protected abstract Task<bool> ValidateAsync();
-    public abstract Task<TResult> RunAsync(QueryObject<TObject, TOperationType> queryObject, TOperationType operationType);
+    public abstract Task<TResult> RunAsync(QueryObject<TObject, TOperationType> queryObject);
 }
 
 

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Parsis.Predicate.Sdk.TreeExpression;
+namespace Parsis.Predicate.Sdk.ExpressionHandler;
 internal class ReplaceExpressionVisitor : ExpressionVisitor
 {
     private readonly Expression _oldValue;

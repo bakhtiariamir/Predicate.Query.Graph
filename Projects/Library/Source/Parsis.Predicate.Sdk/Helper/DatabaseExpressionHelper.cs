@@ -3,7 +3,10 @@ using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Info.Database;
 using Parsis.Predicate.Sdk.Query;
+using System.ComponentModel;
+using System.Dynamic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Parsis.Predicate.Sdk.Helper;
 public static class DatabaseExpressionHelper
@@ -20,16 +23,16 @@ public static class DatabaseExpressionHelper
             if (expr is MemberExpression memberExpression)
             {
                 if (memberExpression.Expression == null)
-                    throw new NotFoundException(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                    throw new NotFound(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
                 var memberInfo = memberExpression.Member;
                 if (!databaseCacheInfoCollection.TryGet(memberExpression.Expression.Type.Name, out IDatabaseObjectInfo? parentObjectInfo))
-                    throw new NotFoundException(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
+                    throw new NotFound(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
 
                 if (parentObjectInfo == null)
-                    throw new NotFoundException(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
+                    throw new NotFound(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
 
-                property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFoundException(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFound(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
                 if (memberExpression.Expression is MemberExpression)
                     property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);
             }
@@ -37,7 +40,7 @@ public static class DatabaseExpressionHelper
             {
                 if (expr.Type == databaseObjectInfo.ObjectType)
                 {
-                    property = new ColumnPropertyInfo(databaseObjectInfo.Schema, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, false, ColumnDataType.Object, DatabaseFieldType.Column);
+                    property = new ColumnPropertyInfo(databaseObjectInfo.Schema, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, false, false, ColumnDataType.Object, DatabaseFieldType.Column);
                 }
             }
             else if (expr is NewArrayExpression arrayExpression)
@@ -53,7 +56,7 @@ public static class DatabaseExpressionHelper
             }
             else
             {
-                throw new Exception.NotSupportedException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                throw new Exception.NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
             }
 
             return property;
@@ -75,7 +78,7 @@ public static class DatabaseExpressionHelper
             }
             else
             {
-                throw new Exception.NotSupportedException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                throw new Exception.NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
             }
 
             return properties;
@@ -96,7 +99,7 @@ public static class DatabaseExpressionHelper
         {
             if (!isJoinColumn)
             {
-                if (property.TryExpandProperty(cacheObjectCollection, out ICollection<IColumnPropertyInfo>? childProperties))
+                if (property.TryExpandProperty(cacheObjectCollection, out var childProperties))
                 {
                     foreach (var childProperty in childProperties)
                         yield return childProperty;
@@ -109,6 +112,8 @@ public static class DatabaseExpressionHelper
         }
     }
 
+    public static object? GetObject(this ConstantExpression expression) => expression.Value;
+
     public static bool TryExpandProperty(this IColumnPropertyInfo parent, IDatabaseCacheInfoCollection databaseCacheInfoCollection, out ICollection<IColumnPropertyInfo>? expandedProperties)
     {
         expandedProperties = null;
@@ -116,7 +121,7 @@ public static class DatabaseExpressionHelper
             return false;
 
         if (objectInfo == null)
-            throw new NotFoundException("DatabaseObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+            throw new NotFound("DatabaseObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
         expandedProperties = new List<IColumnPropertyInfo>();
         foreach (var child in objectInfo?.PropertyInfos.GetProperties(parent, !(objectInfo.DataSet == parent.Name || objectInfo.DataSet == parent.DataSet))!)
@@ -125,38 +130,39 @@ public static class DatabaseExpressionHelper
         return expandedProperties.Count > 0;
     }
 
-    public static LambdaExpression GenerateGetPropertyExpression(this IColumnPropertyInfo @join, IDatabaseObjectInfo propertyObjectInfo, string? indexer = null) => propertyObjectInfo.ObjectType.GenerateGetPropertyExpression($"{@join.DataSet}{@join.Name}{indexer}", @join.Name);
+    public static LambdaExpression GenerateGetPropertyExpression(this IColumnPropertyInfo @join, IDatabaseObjectInfo propertyObjectInfo, string? indexer = null) => propertyObjectInfo.ObjectType.GenerateGetPropertyExpression($"{join.DataSet}{join.Name}{indexer}", join.Name);
 
-    private static LambdaExpression GenerateGetPropertyExpression(this System.Type objectType, string parameterName, string memberName)
+    public static LambdaExpression GenerateJoinExpression(this IColumnPropertyInfo @join, Type propertyObjectType, JoinType joinType, string? indexer = null)
     {
-        ParameterExpression parameter = Expression.Parameter(objectType, parameterName);
-        MemberExpression member = Expression.Property(parameter, memberName);
+        var parameter = GenerateParameterExpression(propertyObjectType, $"{join.Parent.DataSet}{join.DataSet}{indexer}", join.Parent.Name, out var member);
+        var returnType = member.Type;
+        return member.GenerateJoinExpression(propertyObjectType, returnType, parameter);
+    }
+
+    public static Expression<Func<TObject, TResult>> CastExpression<TObject, TResult>(this Expression propertyExpression) => (Expression<Func<TObject, TResult>>)propertyExpression;
+
+    private static LambdaExpression GenerateGetPropertyExpression(this Type objectType, string parameterName, string memberName)
+    {
+        var parameter = Expression.Parameter(objectType, parameterName);
+        var member = Expression.Property(parameter, memberName);
         return GenerateGetPropertyExpression(objectType, parameter, member);
     }
 
-    private static LambdaExpression GenerateGetPropertyExpression(this System.Type objectType, ParameterExpression parameter, MemberExpression member)
+    private static LambdaExpression GenerateGetPropertyExpression(this Type objectType, ParameterExpression parameter, MemberExpression member)
     {
         var funcMember = typeof(Func<,>).MakeGenericType(objectType, typeof(object));
         var expression = Expression.Lambda(funcMember, member, parameter);
         return expression;
     }
 
-
-    public static LambdaExpression GenerateJoinExpression(this IColumnPropertyInfo @join, System.Type propertyObjectType, JoinType joinType, string? indexer = null)
-    {
-        var parameter = GenerateParameterExpression(propertyObjectType, $"{@join.Parent.DataSet}{@join.DataSet}{indexer}", @join.Parent.Name, out var member);
-        var returnType = member.Type;
-        return member.GenerateJoinExpression(propertyObjectType, returnType, parameter);
-    }
-
     private static ParameterExpression GenerateParameterExpression(Type objectType, string parameterName, string memberName, out MemberExpression member)
     {
-        ParameterExpression parameter = Expression.Parameter(objectType, parameterName);
+        var parameter = Expression.Parameter(objectType, parameterName);
         member = Expression.Property(parameter, memberName);
         return parameter;
     }
 
-    private static LambdaExpression GenerateJoinExpression(this Expression body, System.Type objectInfo, System.Type returnType, params ParameterExpression[] parameters)
+    private static LambdaExpression GenerateJoinExpression(this Expression body, Type objectInfo, Type returnType, params ParameterExpression[] parameters)
     {
         var funcMember = typeof(Func<,>).MakeGenericType(objectInfo, returnType);
         var expression = Expression.Lambda(funcMember, body, parameters);
