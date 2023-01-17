@@ -19,18 +19,16 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
 
         QueryObject = QueryObjectReducer<TObject, DatabaseQueryOperationType>.Init(queryObject).Reduce().Return();
 
-          var validateQuery = await ValidateAsync();
+        var validateQuery = await ValidateAsync();
         if (validateQuery)
         {
-            return queryObject.QueryType switch
-            {
+            return queryObject.QueryType switch {
                 DatabaseQueryOperationType.Select => await SelectAsync(),
                 DatabaseQueryOperationType.Insert => await InsertAsync(),
                 DatabaseQueryOperationType.Update => await UpdateAsync(),
                 DatabaseQueryOperationType.Delete => await DeleteAsync(),
                 _ => throw new System.Exception("Error")
             };
-
         }
 
         throw new System.Exception("asd"); //ToDo
@@ -44,5 +42,3 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
 
     protected abstract Task<DatabaseQueryPartCollection> DeleteAsync();
 }
-
-

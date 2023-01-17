@@ -19,18 +19,18 @@ public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where 
     }
 
     protected override async Task<DatabaseQueryPartCollection> SelectAsync() => await RunQueryAsync(DatabaseQueryOperationType.Select);
+
     protected override async Task<DatabaseQueryPartCollection> InsertAsync() => await RunQueryAsync(DatabaseQueryOperationType.Insert);
+
     protected override async Task<DatabaseQueryPartCollection> UpdateAsync() => await RunQueryAsync(DatabaseQueryOperationType.Update);
+
     protected override async Task<DatabaseQueryPartCollection> DeleteAsync() => await RunQueryAsync(DatabaseQueryOperationType.Delete);
 
     private async Task<DatabaseQueryPartCollection> RunQueryAsync(DatabaseQueryOperationType queryOperationType)
     {
         if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
 
-        var query = await (await (
-                    await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync())
-                .InitQueryAsync(queryOperationType))
-            .BuildAsync();
+        var query = await (await (await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync()).InitQueryAsync(queryOperationType)).BuildAsync();
         return await query.Build(QueryObject);
     }
 }

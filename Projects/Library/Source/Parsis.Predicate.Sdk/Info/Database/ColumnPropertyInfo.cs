@@ -86,10 +86,12 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         get;
         set;
     }
-    public ColumnPropertyInfo()
+
+    public ColumnPropertyInfo() : base()
     {
     }
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool? required = null, string? title = null, string? alias = null, string? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null) : base(name, dataType, required, title, alias, errorMessage)
+
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, string? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
     {
         Schema = schema;
         DataSet = dataSet;
@@ -108,17 +110,21 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public override string ToString() => Name;
 
-
     public void SetRelationalObject(IColumnPropertyInfo propertyInfo) => Parent = propertyInfo;
-    public string GetSelector() => $"[{Schema}].[{DataSet}]";
 
-    public string GetCombinedAlias() => $"{Schema}{DataSet}_{Name}";
-
-    public void SetSchemaDataSet(string schema, string dataSet)
+    public string GetSelector()
     {
-        this.Schema = schema;
-        this.DataSet = dataSet;
+        // if (parent.Name == Schema)
+        if (Parent is not null && Parent.Name != DataSet) return $"[{Parent.Name}]";
+
+        return $"[{Schema}].[{DataSet}]";
     }
+
+    public string GetJoinSelector() => $"[{Name}]";
+
+    public string GetJoinCreateSelector() => $"[{Schema}].[{DataSet}] AS {Name}";
+
+    public string GetCombinedAlias() => $"{Schema}{DataSet}_{ColumnName}";
 
     public override bool Equals(object? obj)
     {
@@ -141,6 +147,5 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         Name = name;
     }
 
-    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, IsPrimaryKey, IsIdentity, DataType, FieldType, IsIdentity, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, Alias, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
-
+    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, IsPrimaryKey, IsIdentity, DataType, FieldType, Type, IsIdentity, IsUnique, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, Alias, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
 }

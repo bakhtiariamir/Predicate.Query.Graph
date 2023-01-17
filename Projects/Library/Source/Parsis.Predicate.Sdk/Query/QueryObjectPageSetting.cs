@@ -7,9 +7,7 @@ public class QueryObjectPaging : IQueryObjectPart<QueryObjectPaging, PagePredica
 {
     private PagePredicate _pagePredicate;
 
-
     private QueryObjectPaging(Expression<Func<Page>> expression) => _pagePredicate = new PagePredicate(expression);
-
 
     public static QueryObjectPaging Init(int pageSize, int pageRows) => new(() => new Page(pageSize, pageRows));
 
@@ -29,7 +27,6 @@ public class PagePredicate
     {
         get;
     }
-
 }
 
 public class Page
@@ -49,5 +46,4 @@ public class Page
         PageNumber = pageNumber;
         PageRows = pageRows;
     }
-
 }

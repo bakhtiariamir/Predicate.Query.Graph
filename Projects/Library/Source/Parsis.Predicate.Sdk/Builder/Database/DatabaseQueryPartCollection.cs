@@ -2,6 +2,7 @@
 using Parsis.Predicate.Sdk.Generator.Database;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
+
 public class DatabaseQueryPartCollection
 {
     public IDatabaseObjectInfo? DatabaseObjectInfo

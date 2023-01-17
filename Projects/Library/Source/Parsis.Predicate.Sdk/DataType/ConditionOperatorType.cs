@@ -24,5 +24,6 @@ public enum ConditionOperatorType
     NotIsNull = 17,
     And = 18,
     Or = 19,
-    Set = 20
+    Set = 20,
+    Contains = 21
 }

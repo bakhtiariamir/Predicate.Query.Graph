@@ -2,41 +2,41 @@
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.ExpressionHandler;
-public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPropertyInfo> where TObjectInfo : IObjectInfo<TPropertyInfo> where TPropertyInfo : IPropertyInfo
+
+public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPropertyInfo> where TObjectInfo : IObjectInfo<TPropertyInfo>
+    where TPropertyInfo : IPropertyInfo
 {
     protected abstract TCacheObjectCollection CacheObjectCollection
     {
         get;
     }
+
     protected abstract TObjectInfo ObjectInfo
     {
         get;
     }
+
     protected abstract ParameterExpression ParameterExpression
     {
         get;
     }
 
-    protected IDictionary<string, object> Options
-    {
-        get;
-        set;
-    }
+    private IDictionary<string, object> _options;
 
     protected Visitor()
     {
-        Options = new Dictionary<string, object>();
+        _options = new Dictionary<string, object>();
     }
 
-    internal void AddOption(string key, object value) => Options.Add(key, value);
+    internal void AddOption(string key, object value) => _options.Add(key, value);
 
-    internal void RemoveOption(string key) => Options.Remove(key);
+    internal void RemoveOption(string key) => _options.Remove(key);
 
-    internal bool GetOption(string key, out object value) => Options.TryGetValue(key, out value);
+    internal bool GetOption(string key, out object value) => _options.TryGetValue(key, out value);
 
     internal TResult Generate(Expression expression) => Visit(expression);
 
-    protected virtual TResult Visit(Expression expression, string? parameterName = null)
+    protected virtual TResult Visit(Expression expression, Expression? previousExpression = null)
     {
         switch (expression.NodeType)
         {
@@ -68,7 +68,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
                 return VisitLessThanOrEqual((BinaryExpression)expression);
 
             case ExpressionType.Constant:
-                return VisitConstant((ConstantExpression)expression);
+                return VisitConstant((ConstantExpression)expression, previousExpression);
 
             case ExpressionType.Convert:
                 return VisitConvert((UnaryExpression)expression);
@@ -77,15 +77,14 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
                 return VisitNew((NewExpression)expression);
 
             case ExpressionType.Call:
-                return ((MethodCallExpression)expression).Method.Name switch
-                {
+                return ((MethodCallExpression)expression).Method.Name switch {
                     "LeftContains" => VisitStartsWith((MethodCallExpression)expression),
                     "RightContains" => VisitEndsWith((MethodCallExpression)expression),
-                    "Contains" => VisitContain((MethodCallExpression)expression),
-                    "Like" => VisitContain((MethodCallExpression)expression),
+                    "Contains" => VisitContains((MethodCallExpression)expression),
+                    "Like" => VisitContains((MethodCallExpression)expression),
                     "In" => VisitInclude((MethodCallExpression)expression, true),
                     "NotIn" => VisitInclude((MethodCallExpression)expression, false),
-
+                    "Equals" => VisitEqual((MethodCallExpression)expression),
                     _ => VisitCall((MethodCallExpression)expression)
                 };
             case ExpressionType.Lambda:
@@ -134,6 +133,11 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         throw new NotImplementedException();
     }
 
+    protected virtual TResult VisitEqual(MethodCallExpression expression)
+    {
+        throw new NotImplementedException();
+    }
+
     protected virtual TResult VisitNotEqual(BinaryExpression expression)
     {
         throw new NotImplementedException();
@@ -159,7 +163,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         throw new NotImplementedException();
     }
 
-    protected virtual TResult VisitConstant(ConstantExpression expression)
+    protected virtual TResult VisitConstant(ConstantExpression expression, Expression? previousExpression = null)
     {
         throw new NotImplementedException();
     }
@@ -179,7 +183,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         throw new NotImplementedException();
     }
 
-    protected virtual TResult VisitContain(MethodCallExpression expression)
+    protected virtual TResult VisitContains(MethodCallExpression expression)
     {
         throw new NotImplementedException();
     }
@@ -187,7 +191,6 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
     protected virtual TResult VisitStartsWith(MethodCallExpression expression)
     {
         throw new NotImplementedException();
-
     }
 
     protected virtual TResult VisitEndsWith(MethodCallExpression expression)

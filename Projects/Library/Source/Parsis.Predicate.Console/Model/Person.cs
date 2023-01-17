@@ -14,8 +14,8 @@ public class Person : IQueryableObject
         set;
     }
 
-    [ColumnInfo("Name", ColumnDataType.String, DatabaseFieldType.Column, required: true)]
-    public string Name
+    [ColumnInfo("Name", ColumnDataType.String, DatabaseFieldType.Column, required: true, defaultValue: "Ali")]
+    public string? Name
     {
         get;
         set;
@@ -57,7 +57,7 @@ public class Person : IQueryableObject
     }
 
 
-    public Person(int id, string name, string family, int age, GenderType genderType, Status status, int sum)
+    public Person(int id, string? name, string family, int age, GenderType genderType, Status status, int sum)
     {
         Id = id;
         Name = name;

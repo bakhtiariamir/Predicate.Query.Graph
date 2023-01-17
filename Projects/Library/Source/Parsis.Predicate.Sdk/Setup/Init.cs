@@ -5,14 +5,16 @@ using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Info;
 
 namespace Parsis.Predicate.Sdk.Setup;
-public class Setting
-{
-    private Setting()
-    {
 
+public class Setup
+{
+    private Setup()
+    {
     }
-    public static Setting Init() => new();
-    public Setting DefineDataType()
+
+    public static Setup Init() => new();
+
+    public Setup DefineDataType()
     {
         WindowFunctionType.AggregateCount.AddRelatedType(HavingType.Count);
         WindowFunctionType.AggregateAverage.AddRelatedType(HavingType.Average);
@@ -23,18 +25,5 @@ public class Setting
         return this;
     }
 
-    public Setting SetupIoc(ContainerBuilder builder)
-    {
-        builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();
-
-        return this;
-    }
-
-}
-
-
-public enum LoadingType
-{
-    Lazy = 1,
-    Eager = 2
+    public static void SetupIoc(ContainerBuilder builder) => builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();
 }

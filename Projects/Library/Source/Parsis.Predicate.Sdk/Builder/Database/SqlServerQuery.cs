@@ -8,6 +8,7 @@ using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
+
 public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQueryableObject
 {
     private IDatabaseObjectInfo _objectInfo;
@@ -45,7 +46,16 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
     protected override Task GenerateColumnAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
     {
         var fieldsExpression = query.Columns?.ToList();
-        var parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+        ParameterExpression? parameterExpression = null;
+        if (fieldsExpression[0]?.Expression != null)
+        {
+            parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+        }
+        else if (fieldsExpression[0]?.Expressions != null)
+        {
+            parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+        }
+
         var selectingGenerator = new SqlServerSelectingVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, parameterExpression);
         var columns = new List<DatabaseColumnsClauseQueryPart>();
         fieldsExpression.ToList().ForEach(field =>
@@ -77,7 +87,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         if (expression != null)
         {
             if (expression.NodeType != ExpressionType.Lambda)
-                throw new Exception.NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var lambdaExpression = (LambdaExpression)expression;
             var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -100,7 +110,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         if (expression != null)
         {
             if (expression.NodeType != ExpressionType.Lambda)
-                throw new Exception.NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var lambdaExpression = (LambdaExpression)expression;
             var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -122,8 +132,6 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             sortExpression.GroupBy(item => item.DirectionType).ToList().ForEach(sortPredicate =>
             {
                 Expression? expression = null;
-                var direction = sortPredicate.Key;
-
                 foreach (var field in sortPredicate)
                 {
                     if (field.Expression != null)
@@ -135,7 +143,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                         throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
                     var orderByProperty = sortingGenerator.Generate(expression);
-                    QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : DatabaseOrdersByClauseQueryPart.Merged(new[] { QueryPartCollection.OrderByClause, orderByProperty });
+                    QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : DatabaseOrdersByClauseQueryPart.Merged(new[] {QueryPartCollection.OrderByClause, orderByProperty});
                 }
             });
         }
@@ -154,50 +162,50 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         {
             foreach (var parameter in parameters)
             {
-                if (parameter.Parent is not null && !parameter.IsPrimaryKey)
+                if (parameter.Parent is not null && parameter.Parent.Name != _objectInfo.DataSet)
+                {
                     if (joins.All(item => !item.Item1.Equals(parameter.Parent)))
                     {
                         joins.Add(new Tuple<IColumnPropertyInfo, int>(parameter.Parent, level));
-                        getJoins?.Invoke(new[] { parameter.Parent }, ++level);
+                        getJoins?.Invoke(new[] {parameter.Parent}, ++level);
                     }
+                }
             }
         };
 
-        getJoins(JoinColumns.DistinctBy(item => new { item.Schema, item.DataSet, item.ColumnName, item.Name }).ToList(), 0);
+        getJoins(JoinColumns.Where(item => item.Parent is not null && item.Parent.Name != _objectInfo.DataSet).DistinctBy(item => new {item.Schema, item.DataSet, item.ColumnName, item.Name}).ToList(), 0);
         var queryObjectJoining = QueryObjectJoining.Init();
-        joins.OrderByDescending(item => item.Item2).Select(item => item).
-            GroupBy(item => new { item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name }).ToList().ForEach(item =>
+        joins.OrderByDescending(item => item.Item2).Select(item => item).GroupBy(item => new {item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name}).ToList().ForEach(item =>
+        {
+            var index = 0;
+            foreach (var joinPredicate in item.Select(item => item))
             {
-                var index = 0;
-                foreach (var joinPredicate in item.Select(item => item))
-                {
-                    var join = joinPredicate.Item1;
-                    var order = joinPredicate.Item2;
-                    if (!Context.DatabaseCacheInfoCollection.TryGet(join.DataSet, out IDatabaseObjectInfo? propertyObjectInfo))
-                        throw new NotFound(@join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
+                var join = joinPredicate.Item1;
+                var order = joinPredicate.Item2;
+                if (!Context.DatabaseCacheInfoCollection.TryGet(join.Parent.Type.Name, out IDatabaseObjectInfo? propertyObjectInfo))
+                    throw new NotFound(@join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                    if (propertyObjectInfo == null)
-                        throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                if (propertyObjectInfo == null)
+                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                    if (!Context.DatabaseCacheInfoCollection.TryGet(join.Name, out IDatabaseObjectInfo? relatedObjectInfo))
-                        throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                if (!Context.DatabaseCacheInfoCollection.TryGet(join.Type.Name, out IDatabaseObjectInfo? relatedObjectInfo))
+                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                    if (relatedObjectInfo == null)
-                        throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                if (relatedObjectInfo == null)
+                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                    var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey)?.Clone() ?? throw new NotFound(@join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator); ;
+                var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey)?.Clone() ?? throw new NotFound(@join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                    joinColumnPropertyInfo.Parent = @join;
+                joinColumnPropertyInfo.Parent = @join;
 
-                    var indexer = index > 0 ? $"_{index}" : "";
-                    var joinType = (@join.Required ?? false) ? JoinType.Inner : JoinType.Left;
-                    var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType, joinType, indexer);
-                    queryObjectJoining.Add(expression, joinType, order);
+                var indexer = index > 0 ? $"_{index}" : "";
+                var joinType = @join.Required ? JoinType.Inner : JoinType.Left;
+                var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType, joinType, indexer);
+                queryObjectJoining.Add(expression, joinType, order);
 
-                    index++;
-                }
-
-            });
+                index++;
+            }
+        });
 
         var joinPredicates = queryObjectJoining.Validate().Return().OrderByDescending(item => item.Order);
         var databaseJoinClauses = new List<DatabaseJoinsClauseQueryPart>();
@@ -267,7 +275,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             foreach (var objectPredicate in command.ObjectPredicate)
             {
                 if (objectPredicate.NodeType != ExpressionType.Lambda)
-                    throw new Exception.NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectPredicate is LambdaExpression expression)
                 {
@@ -284,7 +292,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             foreach (var objectsPredicate in command.ObjectsPredicate)
             {
                 if (objectsPredicate.NodeType != ExpressionType.Lambda)
-                    throw new Exception.NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectsPredicate is LambdaExpression expression)
                 {

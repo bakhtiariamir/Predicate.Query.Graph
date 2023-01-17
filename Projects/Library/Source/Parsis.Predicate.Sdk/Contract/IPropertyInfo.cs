@@ -1,7 +1,8 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Contract;
-public interface IPropertyInfo<out TProperty> : IPropertyInfo  where TProperty : IPropertyInfo
+
+public interface IPropertyInfo<out TProperty> : IPropertyInfo where TProperty : IPropertyInfo
 {
     string Name
     {
@@ -23,7 +24,17 @@ public interface IPropertyInfo<out TProperty> : IPropertyInfo  where TProperty :
         get;
     }
 
-    bool? Required
+    bool Required
+    {
+        get;
+    }
+
+    bool IsUnique
+    {
+        get;
+    }
+
+    object? DefaultValue
     {
         get;
     }
@@ -38,5 +49,8 @@ public interface IPropertyInfo<out TProperty> : IPropertyInfo  where TProperty :
 
 public interface IPropertyInfo
 {
-
+    Type Type
+    {
+        get;
+    }
 }

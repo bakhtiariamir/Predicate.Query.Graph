@@ -2,7 +2,9 @@
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectFilteringReducer<TObject, TQueryType> : QueryObjectPartReducer<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
+
+public class QueryObjectFilteringReducer<TObject, TQueryType> : QueryObjectPartReducer<TObject, TQueryType> where TObject : IQueryableObject
+    where TQueryType : Enum
 {
     public override QueryObject<TObject, TQueryType> Reduce(QueryObject<TObject, TQueryType> query, ReduceType type)
     {

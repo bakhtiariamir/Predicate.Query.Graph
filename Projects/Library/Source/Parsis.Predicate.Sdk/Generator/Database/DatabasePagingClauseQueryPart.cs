@@ -1,6 +1,7 @@
 ﻿using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public class DatabasePagingClauseQueryPart : DatabaseQueryPart<Page>
 {
     private string? _text;

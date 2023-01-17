@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Parsis.Predicate.Sdk.Contract;
+using System;
 using System.Collections.Concurrent;
-using Parsis.Predicate.Sdk.Contract;
 
 namespace Parsis.Predicate.Sdk.Info;
 
@@ -12,13 +12,13 @@ public class DatabaseCacheInfoCollection : CacheInfoCollection<IDatabaseObjectIn
 
     public DatabaseCacheInfoCollection() => _cache = new ConcurrentDictionary<string, IDatabaseObjectInfo>();
 
-    public override IDatabaseObjectInfo InitCache(string objectType, IDatabaseObjectInfo value) => _cache.GetOrAdd(GetKey(objectType), value);
+    public override void InitCache(string key, IDatabaseObjectInfo value) => _cache.GetOrAdd(GetKey(key), value);
 
-    public override bool TryRemove(string objectType, out IDatabaseObjectInfo? value) => _cache.TryRemove(GetKey(objectType), out value);
+    public override bool TryRemove(string key, out IDatabaseObjectInfo? value) => _cache.TryRemove(GetKey(key), out value);
 
-    public override bool RemoveCache(string objectType) => _cache.TryRemove(GetKey(objectType), out _);
+    public override bool RemoveCache(string key) => _cache.TryRemove(GetKey(key), out _);
 
-    public override bool TryGet(string objectType, out IDatabaseObjectInfo? value) => _cache.TryGetValue(GetKey(objectType), out value);
+    public override bool TryGet(string key, out IDatabaseObjectInfo? value) => _cache.TryGetValue(GetKey(key), out value);
 
-    public override string GetKey(string objectType) => $"{CacheKey}.{objectType}";
+    public override string GetKey(string key) => $"{CacheKey}.{key}";
 }

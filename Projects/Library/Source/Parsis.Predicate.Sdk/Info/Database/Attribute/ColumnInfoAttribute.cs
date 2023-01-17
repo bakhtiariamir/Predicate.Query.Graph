@@ -1,14 +1,15 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info.Database.Attribute;
+
 [AttributeUsage(AttributeTargets.Property)]
 public class ColumnInfoAttribute : BasePropertyAttribute
 {
-
     public string ColumnName
     {
         get;
     }
+
     public bool IsPrimaryKey
     {
         get;
@@ -69,8 +70,7 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         get;
     }
 
-
-    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isPrimaryKey = false, bool isIdentity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, string? errorMessage = null) : base(name ?? columnName, errorMessage, required)
+    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isUnique = false, bool isPrimaryKey = false, bool isIdentity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, string? errorMessage = null, object? defaultValue = null) : base(name ?? columnName, isUnique, errorMessage, required, defaultValue)
     {
         ColumnName = columnName;
         IsPrimaryKey = isPrimaryKey;
@@ -86,5 +86,4 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         FunctionName = functionName;
         Title = title ?? Name;
     }
-
 }

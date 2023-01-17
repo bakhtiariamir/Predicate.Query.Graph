@@ -1,13 +1,12 @@
-using System;
 using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
+using System;
 
 namespace Parsis.Predicate.Sdk.Info.Database;
 
 public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObjectInfo
 {
-    
-    public string DataSet 
+    public string DataSet
     {
         get;
         init;
@@ -24,7 +23,7 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
         get;
     }
 
-    public override System.Type ObjectType
+    public override Type ObjectType
     {
         get;
     }
@@ -33,9 +32,10 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
     {
         get;
     }
+
     public override ObjectInfoType Type => ObjectInfoType.Database;
 
-    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, System.Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
+    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
     {
         DataSet = dataSet;
         DataSetType = dataSetType;

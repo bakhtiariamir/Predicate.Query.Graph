@@ -3,9 +3,11 @@ using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPredicate>>
 {
     private string? _text;
+
     public override string? Text
     {
         get => _text;
@@ -19,11 +21,9 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
 
     DatabaseJoinsClauseQueryPart(JoinPredicate joinPredicate)
     {
-        Parameter = new[] { joinPredicate };
+        Parameter = new[] {joinPredicate};
         SetText();
-
     }
-
 
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.Alias ?? item.GetCombinedAlias()}.{item.ColumnName}";
 
@@ -31,17 +31,16 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
 
     private string SetJoinText(JoinPredicate joinPredicate)
     {
-        var joinString = joinPredicate.JoinType switch
-        {
+        var joinString = joinPredicate.JoinType switch {
             JoinType.Inner => "INNER JOIN",
             JoinType.Left => "LEFT JOIN",
             JoinType.Right => "RIGHT JOIN",
             JoinType.Outer => "OUTER JOIN",
-            _ => throw new Parsis.Predicate.Sdk.Exception.NotSupported(joinPredicate.JoinType.ToString(),ExceptionCode.DatabaseQueryJoiningGenerator)
+            _ => throw new NotSupported(joinPredicate.JoinType.ToString(), ExceptionCode.DatabaseQueryJoiningGenerator)
         };
         //ToDo : Need PersonObjectInfo For Get id
         var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey);
-        return $"{joinString} {joinPredicate.JoinObjectInfo} ON {joinPredicate.JoinColumn.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}] = {joinProperty.GetSelector()}.[{joinProperty.ColumnName}]";
+        return $"{joinString} {joinPredicate.JoinObjectInfo} AS {joinPredicate.JoinColumn} ON [{joinPredicate.JoinColumn}].[{joinProperty.ColumnName}] = {joinProperty.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}]";
     }
 
     public static DatabaseJoinsClauseQueryPart Create(params JoinPredicate[] joinPredicates) => new(joinPredicates);
@@ -50,8 +49,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
 
     public static DatabaseJoinsClauseQueryPart Merged(IEnumerable<DatabaseJoinsClauseQueryPart> sqlQueries)
     {
-        var column = new DatabaseJoinsClauseQueryPart(sqlQueries.SelectMany(properties => properties.Parameter).DistinctBy(item => new
-        {
+        var column = new DatabaseJoinsClauseQueryPart(sqlQueries.SelectMany(properties => properties.Parameter).DistinctBy(item => new {
             JoinColumn = item.JoinColumn,
             item.JoinType
         }).ToList());
@@ -59,9 +57,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
 
         return column;
     }
-
 }
-
 
 public class JoinPredicate
 {

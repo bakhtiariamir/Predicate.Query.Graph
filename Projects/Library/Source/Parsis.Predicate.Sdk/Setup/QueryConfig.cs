@@ -1,6 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Parsis.Predicate.Sdk.Setup;
 
-namespace Parsis.Predicate.Sdk.Setup;
 public class QueryConfig
 {
     public class SqlQueryConfig
@@ -10,21 +9,17 @@ public class QueryConfig
             get;
             set;
         } = 10;
-
-
     }
 
     public class ApiQueryConfig
     {
-
     }
 }
 
-
 public enum SqlInsertDataProvider
 {
-    Value= 1,
-    ListOfValue= 2,
+    Value = 1,
+    ListOfValue = 2,
     DataTable = 3,
     Select = 4,
 }

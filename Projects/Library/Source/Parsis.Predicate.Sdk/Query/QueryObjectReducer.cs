@@ -3,7 +3,8 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query
 {
-    public class QueryObjectReducer<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
+    public class QueryObjectReducer<TObject, TQueryType> where TObject : IQueryableObject
+        where TQueryType : Enum
     {
         private QueryObjectSelectingReducer<TObject, TQueryType> _objectSelecting;
         private QueryObjectFilteringReducer<TObject, TQueryType> _objectFiltering;

@@ -1,7 +1,9 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 
 namespace Parsis.Predicate.Sdk.Query;
-public class QueryObjectBuilder<TObject, TQueryType> : IQueryObjectBuilder<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
+
+public class QueryObjectBuilder<TObject, TQueryType> : IQueryObjectBuilder<TObject, TQueryType> where TObject : IQueryableObject
+    where TQueryType : Enum
 {
     private QueryObject<TObject, TQueryType> _object;
 
@@ -55,9 +57,9 @@ public class QueryObjectBuilder<TObject, TQueryType> : IQueryObjectBuilder<TObje
     }
 
     public QueryObject<TObject, TQueryType> Generate() => Validate()._object;
-
 }
 
-public interface IQueryObjectBuilder<TObject, TQueryType> where TObject : IQueryableObject where TQueryType : Enum
+public interface IQueryObjectBuilder<TObject, TQueryType> where TObject : IQueryableObject
+    where TQueryType : Enum
 {
 }

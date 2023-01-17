@@ -1,4 +1,5 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
+
 public enum FunctionType
 {
     ScalarValue = 1,

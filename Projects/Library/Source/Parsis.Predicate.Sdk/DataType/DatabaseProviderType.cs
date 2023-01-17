@@ -8,5 +8,5 @@ public enum DatabaseProviderType
     MySql = 2,
     Oracle = 3,
     Access = 4,
-    MongoDB = 5
+    Mongo = 5
 }

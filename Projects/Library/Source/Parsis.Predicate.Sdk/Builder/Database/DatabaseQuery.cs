@@ -1,32 +1,29 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
-using Parsis.Predicate.Sdk.Generator.Database;
 using Parsis.Predicate.Sdk.Query;
-using System.Runtime.InteropServices;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
+
 public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
         get;
-        set;
     }
 
     protected DatabaseQueryContext Context
     {
         get;
-        set;
     }
 
     protected DatabaseQueryPartCollection QueryPartCollection
     {
         get;
-        set;
-    } = new();
+    }
 
     protected DatabaseQuery(IQueryContext context, DatabaseQueryOperationType queryType) : base(queryType)
     {
+        QueryPartCollection = new();
         Context = (DatabaseQueryContext)context;
         JoinColumns = new List<IColumnPropertyInfo>();
     }
@@ -75,4 +72,3 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
 
     protected abstract Task GenerateFunctionByClause();
 }
-

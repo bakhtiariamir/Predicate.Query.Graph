@@ -2,7 +2,9 @@
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager;
-public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryOperation<TObject, TOperationType, TResult> where TObject : IQueryableObject where TOperationType : Enum
+
+public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryOperation<TObject, TOperationType, TResult> where TObject : IQueryableObject
+    where TOperationType : Enum
 {
     protected abstract QueryObject<TObject, TOperationType>? QueryObject
     {
@@ -11,7 +13,6 @@ public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryO
     }
 
     protected abstract Task<bool> ValidateAsync();
+
     public abstract Task<TResult> RunAsync(QueryObject<TObject, TOperationType> queryObject);
 }
-
-

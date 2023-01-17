@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+﻿namespace Parsis.Predicate.Sdk.DataType;
 
-namespace Parsis.Predicate.Sdk.DataType;
-public static class RelatedTypeCollection<TMain, TRelated> where TMain : Enum where TRelated : Enum
+public static class RelatedTypeCollection<TMain, TRelated> where TMain : Enum
+    where TRelated : Enum
 {
     public static IList<RelatedType<TMain, TRelated>> RelatedTypes
     {

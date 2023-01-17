@@ -1,10 +1,10 @@
 ﻿using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info.Database;
+
 public static class DatabaseFunctionCollection
 {
 }
-
 
 public class DatabaseFunction
 {
@@ -29,5 +29,4 @@ public class DatabaseFunction
         FunctionType = functionType;
         Schema = schema;
     }
-
 }

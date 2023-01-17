@@ -10,12 +10,18 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         get;
         set;
     }
-    public string Title
+
+    public bool IsUnique
     {
         get;
         set;
     }
 
+    public string Title
+    {
+        get;
+        set;
+    }
 
     public ColumnDataType DataType
     {
@@ -23,7 +29,7 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         set;
     }
 
-    public bool? Required
+    public bool Required
     {
         get;
         set;
@@ -41,24 +47,33 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         set;
     }
 
+    public object? DefaultValue
+    {
+        get;
+        set;
+    }
+
     protected PropertyInfo()
     {
-
     }
 
-    protected PropertyInfo(object value)
-    {
-    }
-
-    protected PropertyInfo(string name, ColumnDataType dataType, bool? required = null, string? title = null, string? @alias = null, string? errorMessage = null)
+    protected PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, string? errorMessage = null, object? defaultValue = null)
     {
         Name = name;
+        IsUnique = isUnique;
         Title = title ?? Name;
         DataType = dataType;
         Required = required;
         Alias = alias;
         ErrorMessage = errorMessage;
+        DefaultValue = defaultValue;
+        Type = type;
     }
 
     public abstract TProperty Clone();
+
+    public Type Type
+    {
+        get;
+    }
 }

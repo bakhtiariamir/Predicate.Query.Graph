@@ -2,7 +2,7 @@
 
 namespace Parsis.Predicate.Sdk.Info.Database.Attribute;
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class)]
 public class DataSetInfoAttribute : System.Attribute
 {
     public string DataSetName
@@ -20,7 +20,7 @@ public class DataSetInfoAttribute : System.Attribute
         get;
     }
 
-    public DataSetInfoAttribute(string dataSetName, DataSetType type, string schemaName = "dbo")
+    public DataSetInfoAttribute(string dataSetName, DataSetType type = DataSetType.Table, string schemaName = "dbo")
     {
         DataSetName = dataSetName;
         Type = type;

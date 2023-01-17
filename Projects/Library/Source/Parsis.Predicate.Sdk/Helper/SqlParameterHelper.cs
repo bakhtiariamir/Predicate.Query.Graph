@@ -4,10 +4,10 @@ using System.Data;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Helper;
+
 public static class SqlParameterHelper
 {
-    public static SqlDbType GetSqlDbType(this ColumnDataType columnDataType) => columnDataType switch
-    {
+    public static SqlDbType GetSqlDbType(this ColumnDataType columnDataType) => columnDataType switch {
         ColumnDataType.Char => SqlDbType.Char,
         ColumnDataType.String => SqlDbType.NVarChar,
         ColumnDataType.Boolean => SqlDbType.Bit,
@@ -23,8 +23,23 @@ public static class SqlParameterHelper
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
 
-    public static string GetTextBasedOnSqlDbType(this ColumnDataType columnDataType, object? value) => columnDataType switch
-    {
+    public static ColumnDataType GetColumnDataType(this Type type) => type switch {
+        not null when type == typeof(int) => ColumnDataType.Int,
+        not null when type == typeof(long) => ColumnDataType.Long,
+        not null when type == typeof(string) => ColumnDataType.String,
+        not null when type == typeof(char) => ColumnDataType.Char,
+        not null when type == typeof(decimal) => ColumnDataType.Decimal,
+        not null when type == typeof(float) => ColumnDataType.Float,
+        not null when type == typeof(double) => ColumnDataType.Double,
+        not null when type == typeof(bool) => ColumnDataType.Boolean,
+        not null when type == typeof(byte) => ColumnDataType.Byte,
+        not null when type == typeof(uint) => ColumnDataType.UInt,
+        not null when type == typeof(DateTime) => ColumnDataType.DateTime,
+        //not null when type == typeof(int) => ColumnDataType.Object // ToDo : check if object get PrimaryKey
+        _ => throw new NotImplementedException(),
+    };
+
+    public static string GetTextBasedOnSqlDbType(this ColumnDataType columnDataType, object? value) => columnDataType switch {
         ColumnDataType.Char => value != null ? $"N'{value}'" : "NULL",
         ColumnDataType.String => value != null ? $"N'{value}'" : "NULL",
         ColumnDataType.Boolean => value != null ? $"{value}" : "NULL",
@@ -40,8 +55,7 @@ public static class SqlParameterHelper
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
 
-    public static string GetParameterStringBasedOnSqlDbType(this ColumnDataType columnDataType, string parameterName, object? value) => columnDataType switch
-    {
+    public static string GetParameterStringBasedOnSqlDbType(this ColumnDataType columnDataType, string parameterName, object? value) => columnDataType switch {
         ColumnDataType.Char => value != null ? $"N'{parameterName}'" : "NULL",
         ColumnDataType.String => value != null ? $"N'{parameterName}'" : "NULL",
         ColumnDataType.Boolean => value != null ? $"{parameterName}" : "NULL",
@@ -60,8 +74,6 @@ public static class SqlParameterHelper
 
     public static string GetParameterPhraseBasedOnSqlDbType(this IColumnPropertyInfo? columnPropertyInfo, string parameterName, object? value) => $"[{columnPropertyInfo.ColumnName}] = {columnPropertyInfo.DataType.GetParameterStringBasedOnSqlDbType(parameterName, value)}";
 
-
-
     public static IEnumerable<SqlParameter> ArrayParameters<TDataType>(string baseParameterName, IEnumerable<TDataType> values, ColumnDataType columnDataType, int? index = 0)
     {
         var dbType = columnDataType.GetSqlDbType();
@@ -69,8 +81,7 @@ public static class SqlParameterHelper
         foreach (var value in values)
         {
             var parameterName = $"@{baseParameterName}_{index++}";
-            var parameter = new SqlParameter(parameterName, dbType) 
-            {
+            var parameter = new SqlParameter(parameterName, dbType) {
                 Value = value
             };
 
@@ -81,7 +92,7 @@ public static class SqlParameterHelper
     public static string ArrayParameterNames(this IColumnPropertyInfo column, string baseParameterName, int valueCount, int? index = 0)
     {
         var parameterNames = new List<string>();
-        for(var i = index; i< valueCount; i++)
+        for (var i = index; i < valueCount; i++)
         {
             var parameterName = $"@{baseParameterName}_{i}";
             parameterNames.Add(parameterName);
@@ -89,5 +100,4 @@ public static class SqlParameterHelper
 
         return $"{column.ColumnName} IN ({string.Join(", ", parameterNames)})";
     }
-
 }

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
+
 public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 {
     public SqlServerCommandVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
@@ -23,7 +24,6 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 
         var valueQueryPart = Visit(expression.Expression);
 
-
         var columnValue = valueQueryPart.Parameter.ColumnPropertyCollections?.FirstOrDefault() ?? throw new NotFound("asd"); //todo
 
         if (columnValue.Records == null)
@@ -37,7 +37,7 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
             var value = member switch {
                 FieldInfo field => field.GetValue(objectValue),
                 PropertyInfo info => info.GetValue(objectValue, null),
-                _ =>throw new NotSupported("asd")
+                _ => throw new NotSupported("asd")
             } ?? throw new NotFound("asd");
 
             if (value.GetType().IsArray)
@@ -45,11 +45,11 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 
             foreach (var column in columnProperties)
             {
-                var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name);
+                var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name) ?? column.ColumnPropertyInfo?.DefaultValue;
 
-                if ((column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null)
+                if ((column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null)
                     throw new NotSupported("e0"); //todo
-                
+
                 column.SetValue(dynamicValue);
             }
 
@@ -59,10 +59,10 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
         throw new System.Exception(); //todo
     }
 
-    protected override DatabaseCommandQueryPart VisitConstant(ConstantExpression expression)
+    protected override DatabaseCommandQueryPart VisitConstant(ConstantExpression expression, Expression? previousExpression = null)
     {
         var value = expression.GetObject() ?? throw new NotSupported("easd"); //todo
 
-        return DatabaseCommandQueryPart.Create(new ColumnPropertyCollection(new[]{ value }));
+        return DatabaseCommandQueryPart.Create(new ColumnPropertyCollection(new[] {value}));
     }
 }

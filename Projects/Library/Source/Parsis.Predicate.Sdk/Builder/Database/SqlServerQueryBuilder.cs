@@ -2,18 +2,16 @@
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
+
 public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> where TObject : IQueryableObject
 {
-    private readonly DatabaseQueryContextBuilder<TObject> _contextBuilder;
+    private readonly DatabaseQueryContextBuilder _contextBuilder;
 
     private IQueryContext? _queryContext;
 
     private IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection>? _query;
 
-    private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info)
-    {
-        _contextBuilder = new DatabaseQueryContextBuilder<TObject>(info);
-    }
+    private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info) => _contextBuilder = new DatabaseQueryContextBuilder(info);
 
     public static SqlServerQueryBuilder<TObject> Init(IDatabaseCacheInfoCollection info) => new(info);
 

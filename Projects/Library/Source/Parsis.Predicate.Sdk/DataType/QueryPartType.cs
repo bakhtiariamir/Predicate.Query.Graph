@@ -1,4 +1,5 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
+
 public enum QueryPartType
 {
     Insert = 1,
@@ -12,5 +13,4 @@ public enum QueryPartType
     Having = 9,
     OrderBy = 10,
     Paging = 11
-    
 }

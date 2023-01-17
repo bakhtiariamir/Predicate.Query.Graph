@@ -3,9 +3,11 @@ using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<IColumnPropertyInfo>>
 {
     private string? _text;
+
     public override string? Text
     {
         get => _text;
@@ -14,16 +16,14 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
 
     private DatabaseColumnsClauseQueryPart(ICollection<IColumnPropertyInfo> properties) => Parameter = properties;
 
-    private string SetColumnName(IColumnPropertyInfo item) =>  item.AggregateFunctionType switch
-        {
-            AggregateFunctionType.Count => $"COUNT(*){SetOverPartition(item)} AS COUNT_{item.GetCombinedAlias()}",
-            AggregateFunctionType.Average => $"AVG({SetColumnSelector(item)}) {SetOverPartition(item)} AS AVG_{item.GetCombinedAlias()}",
-            AggregateFunctionType.Max => $"MAX({SetColumnSelector(item)}) {SetOverPartition(item)} AS MAX_{item.GetCombinedAlias()}",
-            AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
-            AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
-            AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
-        };
-    
+    private string SetColumnName(IColumnPropertyInfo item) => item.AggregateFunctionType switch {
+        AggregateFunctionType.Count => $"COUNT(*){SetOverPartition(item)} AS COUNT_{item.GetCombinedAlias()}",
+        AggregateFunctionType.Average => $"AVG({SetColumnSelector(item)}) {SetOverPartition(item)} AS AVG_{item.GetCombinedAlias()}",
+        AggregateFunctionType.Max => $"MAX({SetColumnSelector(item)}) {SetOverPartition(item)} AS MAX_{item.GetCombinedAlias()}",
+        AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
+        AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
+        AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
+    };
 
     private string? SetOverPartition(IColumnPropertyInfo columnPropertyInfo)
     {
@@ -47,25 +47,18 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
 
     public static DatabaseColumnsClauseQueryPart Merged(IEnumerable<DatabaseColumnsClauseQueryPart> columnsClause)
     {
-        var columns = new List<IColumnPropertyInfo>();
-        var list = columnsClause.SelectMany(properties => properties.Parameter).DistinctBy(item => new
-        {
+        var list = columnsClause.SelectMany(properties => properties.Parameter).DistinctBy(item => new {
             item.Schema,
             item.DataSet,
             item.Name,
             item.ColumnName
         }).ToList();
 
-        foreach (var property in list)
-        {
-            if (list.All(item => item.DataSet != property.Name))
-                columns.Add(property);
-        }
+        var columns = list.Where(property => list.All(item => item.DataSet != property.Name)).ToList();
 
         var column = new DatabaseColumnsClauseQueryPart(columns);
         column.SetText();
 
         return column;
     }
-
 }

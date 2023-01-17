@@ -4,6 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<VersionPrefix>1.0.1.5</VersionPrefix>
+	<VersionSuffix>beta</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>

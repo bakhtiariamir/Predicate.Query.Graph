@@ -32,8 +32,8 @@ public class User : IQueryableObject
         set;
     }
 
-    [ColumnInfo("Username", ColumnDataType.String, DatabaseFieldType.Column, required: true)]
-    public string Username
+    [ColumnInfo("Username", ColumnDataType.String, DatabaseFieldType.Column, required: true, defaultValue:"AliAlie")]
+    public string? Username
     {
         get;
         set;

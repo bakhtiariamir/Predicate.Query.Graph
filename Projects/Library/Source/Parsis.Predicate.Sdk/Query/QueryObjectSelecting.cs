@@ -2,11 +2,15 @@
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
+
 public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecting<TObject>, ICollection<QueryColumn<TObject>>> where TObject : IQueryableObject
 {
     private ICollection<QueryColumn<TObject>> _columns;
 
-    private QueryObjectSelecting() => _columns = new List<QueryColumn<TObject>>();
+    private QueryObjectSelecting() => _columns = new List<QueryColumn<TObject>> {
+        new(item => item)
+    };
+
     public static QueryObjectSelecting<TObject> Init() => new();
 
     public QueryObjectSelecting<TObject> Add(Expression<Func<TObject, object>> expression)
@@ -54,7 +58,6 @@ public class QueryColumn<TObject>
         Expressions = expressions;
     }
 }
-
 
 public class QueryObjectPartIssue
 {

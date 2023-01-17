@@ -1,13 +1,14 @@
-﻿using System.Linq.Expressions;
-using Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
+using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
 
 public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFiltering<TObject>, FilterPredicate<TObject>> where TObject : IQueryableObject
 {
     private FilterPredicate<TObject> _filterPredicate;
+
     public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
 
     public static QueryObjectFiltering<TObject> Init(Expression<Func<TObject, bool>> expression) => new(expression);
@@ -20,8 +21,7 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
 
     private QueryObjectFiltering<TObject> CreatePredicate(Expression<Func<TObject, bool>> expression, ConnectorOperatorType connectorOperatorType)
     {
-        _filterPredicate.Expression = connectorOperatorType switch
-        {
+        _filterPredicate.Expression = connectorOperatorType switch {
             ConnectorOperatorType.And => _filterPredicate.Expression.AndAlsoExpression<TObject>(expression),
             ConnectorOperatorType.Or => _filterPredicate.Expression.OrElseExpression<TObject>(expression),
             _ => _filterPredicate.Expression

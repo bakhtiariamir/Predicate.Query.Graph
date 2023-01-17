@@ -2,6 +2,7 @@
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info;
+
 public abstract class ObjectInfo<TPropertyInfo> : IObjectInfo<TPropertyInfo> where TPropertyInfo : IPropertyInfo
 {
     public abstract IEnumerable<TPropertyInfo> PropertyInfos
@@ -14,7 +15,7 @@ public abstract class ObjectInfo<TPropertyInfo> : IObjectInfo<TPropertyInfo> whe
         get;
     }
 
-    public abstract System.Type ObjectType
+    public abstract Type ObjectType
     {
         get;
     }

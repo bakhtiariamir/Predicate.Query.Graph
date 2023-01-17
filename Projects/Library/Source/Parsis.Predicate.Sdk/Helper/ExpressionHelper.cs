@@ -2,11 +2,13 @@
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Helper;
+
 public static class ExpressionHelper
 {
     public static bool IsNull(this Expression expression) => expression.NodeType == ExpressionType.Constant && (((ConstantExpression)expression).Value == null);
 
     public static bool IsNotNull(this Expression expression) => expression.NodeType == ExpressionType.Constant && (((ConstantExpression)expression).Value != null);
+
     public static Expression<Func<TObject, bool>> AndAlsoExpression<TObject>(this Expression<Func<TObject, bool>> firstExpression, Expression<Func<TObject, bool>> secondExpression)
     {
         var parameter = Expression.Parameter(typeof(TObject));

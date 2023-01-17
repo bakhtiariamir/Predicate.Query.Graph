@@ -1,4 +1,5 @@
 ﻿namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public abstract class DatabaseQueryPart<TParameter> : IDatabaseQueryPart<TParameter> where TParameter : class
 {
     public abstract string? Text
@@ -30,5 +31,4 @@ public interface IDatabaseQueryPart
     {
         get;
     }
-
 }

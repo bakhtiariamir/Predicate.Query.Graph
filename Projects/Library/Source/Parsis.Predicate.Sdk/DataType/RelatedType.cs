@@ -1,5 +1,7 @@
 ﻿namespace Parsis.Predicate.Sdk.DataType;
-public class RelatedType<TMain, TRelated> where TMain : Enum where TRelated : Enum
+
+public class RelatedType<TMain, TRelated> where TMain : Enum
+    where TRelated : Enum
 {
     public TMain Main
     {

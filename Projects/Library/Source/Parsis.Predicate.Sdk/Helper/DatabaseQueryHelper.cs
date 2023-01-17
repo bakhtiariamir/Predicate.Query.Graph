@@ -6,12 +6,13 @@ using System.Data.SqlClient;
 using System.Text;
 
 namespace Parsis.Predicate.Sdk.Helper;
+
 public static class DatabaseQueryHelper
 {
-    public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts, out IEnumerable<SqlParameter>? parameters)
+    public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts, out ICollection<SqlParameter>? parameters)
     {
         if (queryParts.Columns == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
-        parameters = queryParts.SelectParameters();
+        parameters = queryParts.SelectParameters().ToArray();
 
         var select = new StringBuilder();
         select.Append($"SELECT {queryParts.Columns.Text} ");
@@ -19,13 +20,13 @@ public static class DatabaseQueryHelper
         select.Append($"{queryParts.JoinClause?.Text} ");
         select.Append(queryParts.WhereClause != null ? $"WHERE {queryParts.WhereClause.Text} " : "");
         select.Append(queryParts.GroupByClause != null ? $"GROUP BY {queryParts.GroupByClause.Text} " : "");
-        select.Append(queryParts.GroupByClause is { Having: { } } ? $"HAVING {queryParts.GroupByClause?.Having} " : "");
+        select.Append(queryParts.GroupByClause is {Having: { }} ? $"HAVING {queryParts.GroupByClause?.Having} " : "");
         select.Append(queryParts.OrderByClause != null ? $"{queryParts.OrderByClause.Text}" : "");
 
         return select.ToString();
     }
 
-    public static string GetCommandQuery(this DatabaseQueryPartCollection queryParts, out IEnumerable<SqlParameter> parameters)
+    public static string GetCommandQuery(this DatabaseQueryPartCollection queryParts, out ICollection<SqlParameter> parameters)
     {
         if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.Command.SqlParameters;
@@ -33,8 +34,7 @@ public static class DatabaseQueryHelper
         if (parameters != null && !parameters.Any())
             throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
-        return queryParts.Command.OperationType switch
-        {
+        return queryParts.Command.OperationType switch {
             DatabaseQueryOperationType.Insert => queryParts.Command.GetInsertQuery(),
             DatabaseQueryOperationType.Delete => queryParts.Command.GetDeleteQuery(),
             DatabaseQueryOperationType.Update => queryParts.Command.GetUpdateQuery(),
@@ -42,7 +42,6 @@ public static class DatabaseQueryHelper
             DatabaseQueryOperationType.Select or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
         };
     }
-
 
     private static string GetInsertQuery(this DatabaseCommandQueryPart command)
     {
@@ -69,6 +68,7 @@ public static class DatabaseQueryHelper
 
                 break;
         }
+
         return insert.ToString();
     }
 

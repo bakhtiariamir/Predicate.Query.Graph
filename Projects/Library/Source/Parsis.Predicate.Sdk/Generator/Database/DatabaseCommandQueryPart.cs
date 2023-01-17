@@ -3,15 +3,14 @@ using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
-using System.Data;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 {
     private string? _text;
     private Dictionary<string, object> _commandParts;
-
 
     public override string? Text
     {
@@ -35,15 +34,14 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
     {
         get;
         private set;
-    } = DataType.CommandValueType.Record;
+    } = CommandValueType.Record;
 
     public ICollection<SqlParameter> SqlParameters
     {
         get;
-        set;
     }
 
-    public void SetOptions(DatabaseQueryOperationType operationType, CommandValueType commandValueType)
+    private void SetOptions(DatabaseQueryOperationType operationType, CommandValueType commandValueType)
     {
         OperationType = operationType;
         CommandValueType = commandValueType;
@@ -57,13 +55,15 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
     private DatabaseCommandQueryPart(IEnumerable<WhereClause> wherePredicates) : this() => Parameter = new CommandPredicate(wherePredicates);
 
-    private DatabaseCommandQueryPart(ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(new[] { columnPropertyCollection });
+    private DatabaseCommandQueryPart(ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(new[] {columnPropertyCollection});
 
     private DatabaseCommandQueryPart(ICollection<ColumnPropertyCollection> columnPropertyCollections) : this() => Parameter = new CommandPredicate(columnPropertyCollections);
 
-    private DatabaseCommandQueryPart(IEnumerable<WhereClause> wherePredicates, ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(wherePredicates, new[] { columnPropertyCollection });
+    private DatabaseCommandQueryPart(IEnumerable<WhereClause> wherePredicates, ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(wherePredicates, new[] {columnPropertyCollection});
 
-    private DatabaseCommandQueryPart(ColumnProperty columnProperty) : this(new ColumnPropertyCollection(new[] { columnProperty })) { }
+    private DatabaseCommandQueryPart(ColumnProperty columnProperty) : this(new ColumnPropertyCollection(new[] {columnProperty}))
+    {
+    }
 
     public static DatabaseCommandQueryPart Create(ColumnPropertyCollection columnPropertyCollection) => new(columnPropertyCollection);
 
@@ -92,7 +92,6 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 break;
         }
 
-
         if (databaseCommandPart == null)
             throw new NotSupported("asd"); //todo
 
@@ -103,14 +102,23 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
         return databaseCommandPart;
     }
+
     private void SetCommandObject()
     {
         switch (OperationType)
         {
-            case DatabaseQueryOperationType.Insert: SetInsertQuery(); break;
-            case DatabaseQueryOperationType.Update: SetUpdateQuery(); break;
-            case DatabaseQueryOperationType.Delete: SetDeleteQuery(); break;
-            case DatabaseQueryOperationType.Merge: SetMergeQuery(); break;
+            case DatabaseQueryOperationType.Insert:
+                SetInsertQuery();
+                break;
+            case DatabaseQueryOperationType.Update:
+                SetUpdateQuery();
+                break;
+            case DatabaseQueryOperationType.Delete:
+                SetDeleteQuery();
+                break;
+            case DatabaseQueryOperationType.Merge:
+                SetMergeQuery();
+                break;
             case DatabaseQueryOperationType.Select:
             default: throw new NotSupported(""); // todo
         }
@@ -131,7 +139,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 var columnList = new List<string>();
                 var recordsValue = new List<string>();
 
-                var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw  new System.Exception(); //todo
+                var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
                 var records = Parameter.ColumnPropertyCollections?.SelectMany(item => item.Records ?? Enumerable.Empty<object>()).ToArray();
 
@@ -146,15 +154,14 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
                     columnList.Add(columnProperty.ColumnPropertyInfo?.ColumnName);
                     var dbType = columnProperty.ColumnPropertyInfo.DataType.GetSqlDbType();
-                    if (records.Count() > 1)
+                    if (records?.Length > 1)
                     {
                         var index = 0;
                         foreach (var record in records)
                         {
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-                            var sqlParameter = new SqlParameter(parameterName, dbType)
-                            {
+                            var sqlParameter = new SqlParameter(parameterName, dbType) {
                                 Value = columnValue
                             };
                             SqlParameters.Add(sqlParameter);
@@ -165,8 +172,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                     else
                     {
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-                        var sqlParameter = new SqlParameter(parameterName, dbType)
-                        {
+                        var sqlParameter = new SqlParameter(parameterName, dbType) {
                             Value = columnProperty.Value
                         };
                         SqlParameters.Add(sqlParameter);
@@ -223,8 +229,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
 
-                            var sqlParameter = new SqlParameter(parameterName, dbType)
-                            {
+                            var sqlParameter = new SqlParameter(parameterName, dbType) {
                                 Value = columnValue
                             };
                             SqlParameters.Add(sqlParameter);
@@ -237,6 +242,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
                             recordValue.Add(columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue));
                         }
+
                         recordsValue.Add(new Tuple<int, string?>(index, string.Join(", ", recordValue)));
                         index += 1;
                     }
@@ -257,8 +263,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                         var dbType = columnProperty.ColumnPropertyInfo?.DataType.GetSqlDbType();
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
 
-                        var sqlParameter = new SqlParameter(parameterName, dbType)
-                        {
+                        var sqlParameter = new SqlParameter(parameterName, dbType) {
                             Value = columnProperty.Value
                         };
                         SqlParameters.Add(sqlParameter);
@@ -275,6 +280,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                     var values = string.Join(", ", valueList);
                     _commandParts["Values"] = values;
                 }
+
                 break;
         }
     }
@@ -317,8 +323,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                     where = primaryKeyColumn.GetParameterPhraseBasedOnSqlDbType(parameterName, primaryKey.Value);
                     var dbType = primaryKeyColumn?.DataType.GetSqlDbType();
 
-                    var sqlParameter = new SqlParameter(parameterName, dbType)
-                    {
+                    var sqlParameter = new SqlParameter(parameterName, dbType) {
                         Value = primaryKey.Value
                     };
                     SqlParameters.Add(sqlParameter);
@@ -336,43 +341,33 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         {
             case CommandValueType.Record:
 
-
-
                 break;
         }
-
     }
 
     private static string BaseSetParameterName(IColumnPropertyInfo item) => $"P_{item.GetCombinedAlias()}";
 
-
     private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"{BaseSetParameterName(item)}_{index ?? 0}";
-
-
 }
 
 public class CommandPredicate
 {
-    public IEnumerable<WhereClause>? WherePredicates
-    {
-        get;
-    }
+    private IEnumerable<WhereClause>? _wherePredicates;
 
     public ICollection<ColumnPropertyCollection>? ColumnPropertyCollections
     {
         get;
     }
 
-    public CommandPredicate(IEnumerable<WhereClause> wherePredicates) => WherePredicates = wherePredicates;
+    public CommandPredicate(IEnumerable<WhereClause> wherePredicates) => _wherePredicates = wherePredicates;
 
     public CommandPredicate(ICollection<ColumnPropertyCollection> columnPropertyCollections) => ColumnPropertyCollections = columnPropertyCollections;
 
     public CommandPredicate(IEnumerable<WhereClause> wherePredicates, ICollection<ColumnPropertyCollection> columnPropertyCollections)
     {
         ColumnPropertyCollections = columnPropertyCollections;
-        WherePredicates = wherePredicates;
+        _wherePredicates = wherePredicates;
     }
-
 }
 
 public class ColumnPropertyCollection
@@ -380,7 +375,6 @@ public class ColumnPropertyCollection
     public ICollection<ColumnProperty>? ColumnProperties
     {
         get;
-        private set;
     }
 
     public IEnumerable<object>? Records
@@ -393,13 +387,9 @@ public class ColumnPropertyCollection
 
     public ColumnPropertyCollection(IEnumerable<object>? records) => Records = records;
 
-
     public void SetData(IEnumerable<object>? records) => Records = records;
 
-    public void AddColumn(ColumnProperty columnProperty) => ColumnProperties.Add(columnProperty);
-
-    //public void SetFromDataTable(DataTable? dataTable) =>
-
+    public void AddColumn(ColumnProperty columnProperty) => ColumnProperties?.Add(columnProperty);
 }
 
 public class ColumnProperty
@@ -418,7 +408,6 @@ public class ColumnProperty
     public ColumnProperty(IColumnPropertyInfo columnPropertyInfo) => ColumnPropertyInfo = columnPropertyInfo;
 
     public ColumnProperty(object value) => Value = value;
-
 
     public void SetValue(object? value) => Value = value;
 }

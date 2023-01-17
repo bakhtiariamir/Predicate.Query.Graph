@@ -25,14 +25,12 @@ public class UserDatabaseQuery : UserQuery<DatabaseQueryOperationType, DatabaseQ
             Init(DatabaseQueryOperationType.Select).
             SetSelecting(QueryObjectSelecting<User>.
                 Init().
-                Add(item => item).Add(item => new object[] { item.Id, item.IsActive, item.Person }).
-                Add(item => item.Person.Status.Name)
+
+                Add(item => item.Person).
+                Add(item => item.Person.Status)
             ).
             SetFiltering(QueryObjectFiltering<User>.
-                Init(item => item.Person.Sum > 10).
-                And(item => item.Person.Name.RightContains("ali")).
-            Or(item => item.Person.Age > 123).
-            And(item => item.Person.Age < 112)).
+                Init(item => item.Username != null)).
             SetSorting(QueryObjectSorting<User>.Init().Add(item => item.IsActive, DirectionType.Desc)).
             SetPaging(QueryObjectPaging.Init(10, 1)).
             Validate().Generate();

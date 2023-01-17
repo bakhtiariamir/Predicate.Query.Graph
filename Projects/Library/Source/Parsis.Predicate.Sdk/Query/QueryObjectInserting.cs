@@ -4,9 +4,11 @@ using System.Data;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
+
 public class QueryObjectInserting<TObject> : IQueryObjectPart<QueryObjectInserting<TObject>, ObjectInitializing<TObject>> where TObject : IQueryableObject
 {
     private ObjectInitializing<TObject> _inserting;
+
     public CommandValueType CommandValueType
     {
         get;
@@ -15,7 +17,6 @@ public class QueryObjectInserting<TObject> : IQueryObjectPart<QueryObjectInserti
 
     private QueryObjectInserting(CommandValueType commandValueType)
     {
-
         CommandValueType = commandValueType;
         _inserting = new ObjectInitializing<TObject>();
     }
@@ -27,7 +28,6 @@ public class QueryObjectInserting<TObject> : IQueryObjectPart<QueryObjectInserti
         //_inserting.Columns.Add(new InitializeObject<TObject>(expression));
         return this;
     }
-
 
     public QueryObjectInserting<TObject> Set(Expression<Func<TObject, object>> expression)
     {
@@ -50,7 +50,6 @@ public class QueryObjectInserting<TObject> : IQueryObjectPart<QueryObjectInserti
     public QueryObjectInserting<TObject> Validate() => this;
 
     public ObjectInitializing<TObject> Return() => _inserting;
-
 }
 
 public class ObjectInitializing<TObject> where TObject : IQueryableObject
@@ -76,7 +75,6 @@ public class ObjectInitializing<TObject> where TObject : IQueryableObject
     {
         Columns = new List<InitializeObject<TObject>>();
     }
-
 }
 
 public class InitializeObject<TObject> where TObject : IQueryableObject
@@ -97,4 +95,3 @@ public class InitializeObject<TObject> where TObject : IQueryableObject
         Value = value;
     }
 }
-

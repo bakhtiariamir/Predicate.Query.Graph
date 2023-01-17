@@ -1,13 +1,13 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
+
 public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicate>
 {
     private string? _text;
+
     public override string? Text
     {
         get => _text;
@@ -37,8 +37,7 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
 
     {
         if (clause.ColumnPropertyInfo == null) throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
-        return clause.Operator switch
-        {
+        return clause.Operator switch {
             ConditionOperatorType.NotEqual => $"{GetHavingColumn(clause.ColumnPropertyInfo)} <> {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
             ConditionOperatorType.GreaterThan => $"{GetHavingColumn(clause.ColumnPropertyInfo)} > {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
             ConditionOperatorType.GreaterThanEqual => $"{GetHavingColumn(clause.ColumnPropertyInfo)} >= {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
@@ -46,14 +45,13 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
             ConditionOperatorType.LessThanEqual => $"{GetHavingColumn(clause.ColumnPropertyInfo)} <= {SetParameterName(clause.ColumnPropertyInfo, clause.Index)}",
             //I think we should define parameter name in this item
             ConditionOperatorType.Set => $"",
-            ConditionOperatorType.Between or _ => throw new Exception.NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator)
+            ConditionOperatorType.Between or _ => throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator)
         };
     }
 
     private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"@P_{item.GetCombinedAlias()}_{index ?? 0}";
 
-    private string GetHavingColumn(IColumnPropertyInfo property) => property.AggregateFunctionType switch
-    {
+    private string GetHavingColumn(IColumnPropertyInfo property) => property.AggregateFunctionType switch {
         AggregateFunctionType.Count => $"COUNT(*)",
         AggregateFunctionType.Average => $"AVG({SetColumnSelector(property)})",
         AggregateFunctionType.Max => $"MAX({SetColumnSelector(property)})",
@@ -63,9 +61,7 @@ public class DatabaseGroupByClauseQueryPart : DatabaseQueryPart<GroupingPredicat
     };
 
     private string SetColumnSelector(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
-
 }
-
 
 public class GroupingPredicate
 {

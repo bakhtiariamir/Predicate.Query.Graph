@@ -4,6 +4,7 @@ using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
+
 public class SqlServerPagingVisitor : DatabaseVisitor<DatabasePagingClauseQueryPart>
 {
     public SqlServerPagingVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
@@ -17,7 +18,6 @@ public class SqlServerPagingVisitor : DatabaseVisitor<DatabasePagingClauseQueryP
 
     protected override DatabasePagingClauseQueryPart VisitNew(NewExpression expression) => DatabasePagingClauseQueryPart.Create(Activator.CreateInstance<Page>(expression));
 }
-
 
 static class Activator
 {

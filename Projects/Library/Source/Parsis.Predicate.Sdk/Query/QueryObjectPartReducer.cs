@@ -2,14 +2,13 @@
 using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
-public abstract class QueryObjectPartReducer<TObject, TQueryType>
-    where TObject : IQueryableObject
+
+public abstract class QueryObjectPartReducer<TObject, TQueryType> where TObject : IQueryableObject
     where TQueryType : Enum
 {
     protected virtual QueryObject<TObject, TQueryType> Visit(QueryObject<TObject, TQueryType> query, ReduceType type)
     {
-        return type switch
-        {
+        return type switch {
             ReduceType.Generate => Generate(query),
             ReduceType.Decrease => Decrease(query),
             ReduceType.Merge => Merge(query),
@@ -25,5 +24,3 @@ public abstract class QueryObjectPartReducer<TObject, TQueryType>
 
     protected abstract QueryObject<TObject, TQueryType> Merge(QueryObject<TObject, TQueryType> query);
 }
-
-

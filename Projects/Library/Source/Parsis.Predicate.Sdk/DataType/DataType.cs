@@ -14,5 +14,6 @@ public enum ColumnDataType
     Double = 10,
     DateTime = 11,
     Object = 12,
-    Structure = 13
+    Structure = 13,
+    Generic = 14
 }

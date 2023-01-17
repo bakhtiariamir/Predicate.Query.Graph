@@ -3,6 +3,7 @@ using Parsis.Predicate.Sdk.DataType;
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
+
 public class QueryObjectCommand<TObject> : IQueryObjectPart<QueryObjectCommand<TObject>, ObjectCommand<TObject>> where TObject : IQueryableObject
 {
     private ObjectCommand<TObject> _objectCommand;
@@ -19,10 +20,9 @@ public class QueryObjectCommand<TObject> : IQueryObjectPart<QueryObjectCommand<T
 
     public QueryObjectCommand<TObject> Add(Expression<Func<TObject, TObject>> expression)
     {
-         _objectCommand.AddObjectPredicate(expression);
+        _objectCommand.AddObjectPredicate(expression);
         return this;
     }
-
 
     public QueryObjectCommand<TObject> AddRange(Expression<Func<TObject, IEnumerable<TObject>>> expression)
     {
@@ -39,9 +39,7 @@ public class QueryObjectCommand<TObject> : IQueryObjectPart<QueryObjectCommand<T
     public QueryObjectCommand<TObject> Validate() => this;
 
     public ObjectCommand<TObject> Return() => _objectCommand;
-
 }
-
 
 public class ObjectCommand<TObject> where TObject : IQueryableObject
 {
@@ -57,13 +55,13 @@ public class ObjectCommand<TObject> where TObject : IQueryableObject
 
     public ICollection<Expression<Func<TObject, TObject>>>? ObjectPredicate
     {
-        get; 
+        get;
         private set;
     }
 
     public ICollection<Expression<Func<TObject, IEnumerable<TObject>>>>? ObjectsPredicate
     {
-        get; 
+        get;
         private set;
     }
 
@@ -79,21 +77,21 @@ public class ObjectCommand<TObject> where TObject : IQueryableObject
         CommandPartType = commandPartType;
     }
 
-
     public void SetObjectPredicate(ICollection<Expression<Func<TObject, TObject>>> predicate) => ObjectPredicate = predicate;
 
     public void AddObjectPredicate(Expression<Func<TObject, TObject>> predicate)
     {
-        if (ObjectPredicate == null) SetObjectPredicate(new[]{predicate}); else ObjectPredicate.Add(predicate);
+        if (ObjectPredicate == null) SetObjectPredicate(new[] {predicate});
+        else ObjectPredicate.Add(predicate);
     }
 
     public void AddObjectsPredicate(Expression<Func<TObject, IEnumerable<TObject>>> predicates)
     {
-        if (ObjectsPredicate == null) SetObjectsPredicate(new[] { predicates }); else ObjectsPredicate.Add(predicates);
+        if (ObjectsPredicate == null) SetObjectsPredicate(new[] {predicates});
+        else ObjectsPredicate.Add(predicates);
     }
 
     public void SetObjectsPredicate(ICollection<Expression<Func<TObject, IEnumerable<TObject>>>> predicates) => ObjectsPredicate = predicates;
 
     public void SetObjectFiltering(QueryObjectFiltering<TObject> filter) => Filter = filter;
-
 }

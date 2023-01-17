@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
+
 public class QueryObjectJoining : IQueryObjectPart<QueryObjectJoining, ICollection<JoinPredicate>>
 {
     private ICollection<JoinPredicate> _joinPredicates;

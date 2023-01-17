@@ -1,7 +1,6 @@
-﻿using Parsis.Predicate.Sdk.DataType;
+﻿namespace Parsis.Predicate.Sdk.Info;
 
-namespace Parsis.Predicate.Sdk.Info;
-public class BasePropertyAttribute : Attribute
+public abstract class BasePropertyAttribute : Attribute
 {
     public string Name
     {
@@ -12,15 +11,28 @@ public class BasePropertyAttribute : Attribute
     {
         get;
     }
+
     public string? ErrorMessage
     {
         get;
     }
 
-    public BasePropertyAttribute(string name, string? errorMessage = null, bool? required = null)
+    public object? DefaultValue
+    {
+        get;
+    }
+
+    public bool IsUnique
+    {
+        get;
+    }
+
+    protected BasePropertyAttribute(string name, bool isUnique, string? errorMessage = null, bool? required = null, object? defaultValue = null)
     {
         Name = name;
+        IsUnique = isUnique;
         ErrorMessage = errorMessage;
         Required = required;
+        DefaultValue = defaultValue;
     }
 }
