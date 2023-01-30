@@ -123,7 +123,7 @@ public static class DatabaseExpressionHelper
             throw new NotFound("DatabaseObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
         expandedProperties = new List<IColumnPropertyInfo>();
-        foreach (var child in objectInfo?.PropertyInfos.GetProperties(parent, !(objectInfo.DataSet == parent.Name || objectInfo.DataSet == parent.DataSet))!)
+        foreach (var child in objectInfo?.PropertyInfos.GetProperties(parent, objectInfo.DataSet != parent.Name)!)
             expandedProperties.Add(child);
 
         return expandedProperties.Count > 0;

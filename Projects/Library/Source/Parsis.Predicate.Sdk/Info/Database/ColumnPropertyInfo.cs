@@ -114,8 +114,8 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public string GetSelector()
     {
-        // if (parent.Name == Schema)
-        if (Parent is not null && Parent.Name != DataSet) return $"[{Parent.Name}]";
+        if (Parent is not null && Parent.Name != DataSet) 
+            return $"[{Parent.Name}]";
 
         return $"[{Schema}].[{DataSet}]";
     }
@@ -124,7 +124,12 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public string GetJoinCreateSelector() => $"[{Schema}].[{DataSet}] AS {Name}";
 
-    public string GetCombinedAlias() => $"{Schema}{DataSet}_{ColumnName}";
+    public string GetCombinedAlias()
+    {
+        if (Parent is not null && Parent.Name != DataSet) return $"{Parent.Name}_{ColumnName}";
+
+        return $"{DataSet}_{ColumnName}";
+    }
 
     public override bool Equals(object? obj)
     {

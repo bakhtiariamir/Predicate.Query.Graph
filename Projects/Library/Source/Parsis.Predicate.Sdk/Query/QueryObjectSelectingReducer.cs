@@ -26,10 +26,9 @@ public class QueryObjectSelectingReducer<TObject, TQueryType> : QueryObjectPartR
     {
         if (query.Columns == null || query.Columns.Count == 1) return query;
         var columns = new List<QueryColumn<TObject>>();
-        ParameterExpression expressionParameters = query.Columns.SelectMany(item => item.Expression.Parameters).FirstOrDefault() ?? Expression.Parameter(typeof(TObject));
-        //.Union(query.Columns.SelectMany(item => item.Expressions?.Parameters)?.DistinctBy(item => item.Type) ?? Enumerable.Empty<ParameterExpression>()).DistinctBy(item => item.Type);
+        var expressionParameters = query.Columns.SelectMany(item => item.Expression.Parameters).FirstOrDefault() ?? Expression.Parameter(typeof(TObject));
 
-        var bodies = new List<object>();
+        var bodies = new List<Expression>();
         foreach (var column in query.Columns)
         {
             if (column.Expression != null)
@@ -46,13 +45,14 @@ public class QueryObjectSelectingReducer<TObject, TQueryType> : QueryObjectPartR
             }
             else if (column.Expressions != null)
             {
-                //bodies.Add(column.Expression.Body);
+                //bodies.Add(column.Expressions.Body);
             }
         }
 
-        //  var ttt = Expression.Lambda<Func<TObject, IEnumerable<object>>>()  //(expressionParameters, bodies.ToArray());
+        var newArrayExpression = System.Linq.Expressions.Expression.NewArrayInit(typeof(object), bodies);
 
-        query.Columns = columns;
+        query.Columns = new[] { new QueryColumn<TObject>(Expression.Lambda<Func<TObject, IEnumerable<object>>>(newArrayExpression, expressionParameters)) };
+
         return query;
     }
 }

@@ -98,10 +98,11 @@ public static class DatabaseObjectInfoHelper
 
     public static IEnumerable<IColumnPropertyInfo> GetProperties(this IEnumerable<IColumnPropertyInfo> columnPropertyInfos, IColumnPropertyInfo parent, bool setParent = true)
     {
-        foreach (var column in columnPropertyInfos)
+        foreach (var propertyInfo in columnPropertyInfos)
         {
-            if (!column.NotMapped && setParent) column.SetRelationalObject(parent);
-            yield return column;
+            var property = propertyInfo.Clone();
+            if (!property.NotMapped && setParent) property.SetRelationalObject(parent);
+            yield return property;
         }
     }
 

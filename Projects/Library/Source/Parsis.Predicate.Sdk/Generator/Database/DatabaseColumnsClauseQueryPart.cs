@@ -23,6 +23,8 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
         AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
         AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
         AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
+        //اگر ستون جوین بود شناسه رو نزاره مثل Domain.parentId  چون تو خودش داره یا هر روش دیگه ای
+        //
     };
 
     private string? SetOverPartition(IColumnPropertyInfo columnPropertyInfo)
@@ -51,10 +53,11 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
             item.Schema,
             item.DataSet,
             item.Name,
-            item.ColumnName
+            item.ColumnName,
+            item.Parent
         }).ToList();
 
-        var columns = list.Where(property => list.All(item => item.DataSet != property.Name)).ToList();
+        var columns = list.Where(property => list.All(item => item.DataSet != property.Name || (item.Parent != null && item.IsPrimaryKey))).ToList();
 
         var column = new DatabaseColumnsClauseQueryPart(columns);
         column.SetText();

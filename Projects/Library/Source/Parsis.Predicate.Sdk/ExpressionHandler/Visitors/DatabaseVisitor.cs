@@ -159,8 +159,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                 {
                     if (item.NodeType == ExpressionType.Convert)
                         properties.Add(getMemberExpression.Invoke(((UnaryExpression)item).Operand, databaseObjectInfo, databaseCacheInfoCollection, true));
-
-                    if (item.NodeType == ExpressionType.MemberAccess)
+                    else
                         properties.Add(getMemberExpression.Invoke(item, databaseObjectInfo, databaseCacheInfoCollection, true));
                 }
             }
