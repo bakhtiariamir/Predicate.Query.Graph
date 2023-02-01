@@ -5,40 +5,44 @@ using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
-public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection, DatabaseQueryOperationType> where TObject : IQueryableObject
+public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection> where TObject : IQueryableObject
 {
-    protected override QueryObject<TObject, DatabaseQueryOperationType>? QueryObject
+    protected override QueryObject<TObject>? QueryObject
     {
         get;
         set;
     }
 
-    public override async Task<DatabaseQueryPartCollection> RunAsync(QueryObject<TObject, DatabaseQueryOperationType> queryObject)
+
+    public override async Task<DatabaseQueryPartCollection> RunAsync(QueryObject<TObject> queryObject)
     {
         QueryObject = queryObject ?? throw new System.Exception("Asd");
 
-        QueryObject = QueryObjectReducer<TObject, DatabaseQueryOperationType>.Init(queryObject).Reduce().Return();
+        QueryObject = QueryObjectReducer<TObject>.Init(queryObject).Reduce().Return();
 
         var validateQuery = await ValidateAsync();
         if (validateQuery)
         {
-            return queryObject.QueryType switch {
-                DatabaseQueryOperationType.Select => await SelectAsync(),
-                DatabaseQueryOperationType.Insert => await InsertAsync(),
-                DatabaseQueryOperationType.Update => await UpdateAsync(),
-                DatabaseQueryOperationType.Delete => await DeleteAsync(),
-                _ => throw new System.Exception("Error")
-            };
+            //return queryObject.QueryOperationType switch {
+            //    QueryOperationType.GetData => await SelectAsync(),
+            //    QueryOperationType.Add => await InsertAsync(),
+            //    QueryOperationType.Edit => await UpdateAsync(),
+            //    QueryOperationType.Remove => await DeleteAsync(),
+            //    _ => throw new System.Exception("Error")
+            //};
+            return await RunQueryAsync();
         }
 
         throw new System.Exception("asd"); //ToDo
     }
 
-    protected abstract Task<DatabaseQueryPartCollection> SelectAsync();
+    protected abstract Task<DatabaseQueryPartCollection> RunQueryAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection> InsertAsync();
+    //protected abstract Task<DatabaseQueryPartCollection> SelectAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection> UpdateAsync();
+    //protected abstract Task<DatabaseQueryPartCollection> InsertAsync();
 
-    protected abstract Task<DatabaseQueryPartCollection> DeleteAsync();
+    //protected abstract Task<DatabaseQueryPartCollection> UpdateAsync();
+
+    //protected abstract Task<DatabaseQueryPartCollection> DeleteAsync();
 }

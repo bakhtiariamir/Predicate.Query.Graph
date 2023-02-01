@@ -8,7 +8,7 @@ public interface ICacheInfoCollection<TObjectInfo>
 
     bool RemoveCache(string objectType);
 
-    bool TryGet(string objectType, out IDatabaseObjectInfo? value);
+    bool TryGet(string objectType, out TObjectInfo? value);
 
     string GetKey(string objectType);
 }

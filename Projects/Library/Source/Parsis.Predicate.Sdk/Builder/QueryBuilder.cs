@@ -2,8 +2,7 @@
 
 namespace Parsis.Predicate.Sdk.Builder;
 
-public abstract class QueryBuilder<TObject, TQueryType, TResult> : IQueryBuilder<TObject, TQueryType, TResult> where TObject : IQueryableObject
-    where TQueryType : Enum
+public abstract class QueryBuilder<TObject, TResult> : IQueryBuilder<TObject, TResult> where TObject : IQueryableObject
 {
-    public abstract Task<IQuery<TObject, TQueryType, TResult>> BuildAsync();
+    public abstract Task<IQuery<TObject, TResult>> BuildAsync();
 }

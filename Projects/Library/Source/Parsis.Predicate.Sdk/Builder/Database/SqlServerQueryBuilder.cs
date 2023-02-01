@@ -9,7 +9,7 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
 
     private IQueryContext? _queryContext;
 
-    private IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection>? _query;
+    private IQuery<TObject, DatabaseQueryPartCollection>? _query;
 
     private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info) => _contextBuilder = new DatabaseQueryContextBuilder(info);
 
@@ -21,16 +21,16 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
         return this;
     }
 
-    public Task<SqlServerQueryBuilder<TObject>> InitQueryAsync(DatabaseQueryOperationType queryType)
+    public Task<SqlServerQueryBuilder<TObject>> InitQueryAsync()
     {
         if (_queryContext == null)
             throw new System.Exception("asdas"); //ToDo
 
-        _query = new SqlServerQuery<TObject>(_queryContext, queryType);
+        _query = new SqlServerQuery<TObject>(_queryContext);
         return Task.FromResult(this);
     }
 
-    public override Task<IQuery<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection>> BuildAsync()
+    public override Task<IQuery<TObject, DatabaseQueryPartCollection>> BuildAsync()
     {
         if (_queryContext == null)
             throw new System.Exception("asd"); //ToDo : Exception

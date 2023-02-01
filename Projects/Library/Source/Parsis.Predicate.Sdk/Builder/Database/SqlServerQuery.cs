@@ -13,37 +13,37 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 {
     private IDatabaseObjectInfo _objectInfo;
 
-    public SqlServerQuery(IQueryContext context, DatabaseQueryOperationType queryType) : base(context, queryType)
+    public SqlServerQuery(IQueryContext context) : base(context)
     {
         _objectInfo = Context.DatabaseCacheInfoCollection?.GetLastObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryPartCollection.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override Task GenerateInsertAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateInsertAsync(QueryObject<TObject> query)
     {
         var command = query.Command ?? throw new NotSupported("a");
         var commandSqlVisitor = new SqlServerCommandVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Insert);
+        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Add);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateUpdateAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateUpdateAsync(QueryObject<TObject> query)
     {
         var command = query.Command ?? throw new NotSupported("a");
         var commandSqlVisitor = new SqlServerCommandVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Update);
+        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Edit);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateDeleteAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateDeleteAsync(QueryObject<TObject> query)
     {
         var command = query.Command ?? throw new NotSupported("a");
         var commandSqlVisitor = new SqlServerCommandVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Delete);
+        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Remove);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateColumnAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateColumnAsync(QueryObject<TObject> query)
     {
         var fieldsExpression = query.Columns?.ToList();
         ParameterExpression? parameterExpression = null;
@@ -81,7 +81,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateWhereAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateWhereAsync(QueryObject<TObject> query)
     {
         var expression = query.Filters?.Expression;
         if (expression != null)
@@ -104,7 +104,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    protected override Task GeneratePagingAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GeneratePagingAsync(QueryObject<TObject> query)
     {
         var expression = query.Paging?.Predicate;
         if (expression != null)
@@ -122,7 +122,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateOrderByAsync(QueryObject<TObject, DatabaseQueryOperationType> query)
+    protected override Task GenerateOrderByAsync(QueryObject<TObject> query)
     {
         var sortExpression = query.Sorts?.ToList();
         if (sortExpression != null)
@@ -246,7 +246,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    private void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, DatabaseQueryOperationType operationType)
+    private void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, QueryOperationType operationType)
     {
         var commandQueries = new List<DatabaseCommandQueryPart>();
         switch (command.CommandValueType)

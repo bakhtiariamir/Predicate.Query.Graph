@@ -18,19 +18,19 @@ public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where 
         return Task.FromResult(true); // todo
     }
 
-    protected override async Task<DatabaseQueryPartCollection> SelectAsync() => await RunQueryAsync(DatabaseQueryOperationType.Select);
+    //protected override async Task<DatabaseQueryPartCollection> SelectAsync() => await RunQueryAsync(QueryOperationType.GetData);
 
-    protected override async Task<DatabaseQueryPartCollection> InsertAsync() => await RunQueryAsync(DatabaseQueryOperationType.Insert);
+    //protected override async Task<DatabaseQueryPartCollection> InsertAsync() => await RunQueryAsync(QueryOperationType.Add);
 
-    protected override async Task<DatabaseQueryPartCollection> UpdateAsync() => await RunQueryAsync(DatabaseQueryOperationType.Update);
+    //protected override async Task<DatabaseQueryPartCollection> UpdateAsync() => await RunQueryAsync(QueryOperationType.Edit);
 
-    protected override async Task<DatabaseQueryPartCollection> DeleteAsync() => await RunQueryAsync(DatabaseQueryOperationType.Delete);
+    //protected override async Task<DatabaseQueryPartCollection> DeleteAsync() => await RunQueryAsync(QueryOperationType.Remove);
 
-    private async Task<DatabaseQueryPartCollection> RunQueryAsync(DatabaseQueryOperationType queryOperationType)
+    protected override async Task<DatabaseQueryPartCollection> RunQueryAsync()
     {
         if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
 
-        var query = await (await (await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync()).InitQueryAsync(queryOperationType)).BuildAsync();
+        var query = await (await (await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync()).InitQueryAsync()).BuildAsync();
         return await query.Build(QueryObject);
     }
 }

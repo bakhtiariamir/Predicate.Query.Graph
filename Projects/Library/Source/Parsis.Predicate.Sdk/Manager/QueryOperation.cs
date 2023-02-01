@@ -1,18 +1,30 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Manager;
 
-public abstract class QueryOperation<TObject, TResult, TOperationType> : IQueryOperation<TObject, TOperationType, TResult> where TObject : IQueryableObject
-    where TOperationType : Enum
+public abstract class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResult> where TObject : IQueryableObject
 {
-    protected abstract QueryObject<TObject, TOperationType>? QueryObject
+    protected QueryObject<TObject>? QueryObject
     {
         get;
         set;
     }
 
+    public QueryObjectBuilder<TObject>? QueryBuilder
+    {
+        get;
+        private set;
+    }
+
+    public void Init(QueryOperationType queryOperationType)
+    {
+        QueryObject = QueryObject<TObject>.Init(queryOperationType);
+        QueryBuilder = new QueryObjectBuilder<TObject>(QueryObject);
+    }
+
     protected abstract Task<bool> ValidateAsync();
 
-    public abstract Task<TResult> RunAsync(QueryObject<TObject, TOperationType> queryObject);
+    public abstract Task<TResult> RunAsync(QueryObject<TObject> queryObject);
 }

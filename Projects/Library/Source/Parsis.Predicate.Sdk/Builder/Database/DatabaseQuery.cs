@@ -4,7 +4,7 @@ using Parsis.Predicate.Sdk.Query;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
 
-public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOperationType, DatabaseQueryPartCollection> where TObject : IQueryableObject
+public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartCollection> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -21,18 +21,18 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
         get;
     }
 
-    protected DatabaseQuery(IQueryContext context, DatabaseQueryOperationType queryType) : base(queryType)
+    protected DatabaseQuery(IQueryContext context)
     {
         QueryPartCollection = new();
         Context = (DatabaseQueryContext)context;
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<DatabaseQueryPartCollection> Build(QueryObject<TObject, DatabaseQueryOperationType> query)
+    public override async Task<DatabaseQueryPartCollection> Build(QueryObject<TObject> query)
     {
-        switch (QueryType)
+        switch (query.QueryOperationType)
         {
-            case DatabaseQueryOperationType.Select:
+            case QueryOperationType.GetData:
                 await GenerateColumnAsync(query);
                 await GenerateWhereAsync(query);
                 await GenerateOrderByAsync(query);
@@ -40,13 +40,13 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
                 await GeneratePagingAsync(query);
                 await GenerateFunctionByClause();
                 break;
-            case DatabaseQueryOperationType.Insert:
+            case QueryOperationType.Add:
                 await GenerateInsertAsync(query);
                 break;
-            case DatabaseQueryOperationType.Update:
+            case QueryOperationType.Edit:
                 await GenerateUpdateAsync(query);
                 break;
-            case DatabaseQueryOperationType.Delete:
+            case QueryOperationType.Remove:
                 await GenerateDeleteAsync(query);
                 break;
         }
@@ -54,19 +54,19 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryOpera
         return QueryPartCollection;
     }
 
-    protected abstract Task GenerateInsertAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateInsertAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateUpdateAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateUpdateAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateDeleteAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateDeleteAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateColumnAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateColumnAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateWhereAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateWhereAsync(QueryObject<TObject> query);
 
-    protected abstract Task GeneratePagingAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GeneratePagingAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateOrderByAsync(QueryObject<TObject, DatabaseQueryOperationType> query);
+    protected abstract Task GenerateOrderByAsync(QueryObject<TObject> query);
 
     protected abstract Task GenerateJoinAsync();
 
