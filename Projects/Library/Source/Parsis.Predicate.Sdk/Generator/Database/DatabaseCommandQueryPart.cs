@@ -24,11 +24,11 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         set => _commandParts = value;
     }
 
-    public DatabaseQueryOperationType OperationType
+    public QueryOperationType OperationType
     {
         get;
         private set;
-    } = DatabaseQueryOperationType.Insert;
+    } = QueryOperationType.Add;
 
     public CommandValueType CommandValueType
     {
@@ -41,7 +41,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         get;
     }
 
-    private void SetOptions(DatabaseQueryOperationType operationType, CommandValueType commandValueType)
+    private void SetOptions(QueryOperationType operationType, CommandValueType commandValueType)
     {
         OperationType = operationType;
         CommandValueType = commandValueType;
@@ -69,7 +69,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
     public static DatabaseCommandQueryPart Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
 
-    public static DatabaseCommandQueryPart Merge(DatabaseQueryOperationType? operationType, params DatabaseCommandQueryPart[] commandParts)
+    public static DatabaseCommandQueryPart Merge(QueryOperationType? operationType, params DatabaseCommandQueryPart[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
             throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
@@ -107,19 +107,19 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
     {
         switch (OperationType)
         {
-            case DatabaseQueryOperationType.Insert:
+            case QueryOperationType.Add:
                 SetInsertQuery();
                 break;
-            case DatabaseQueryOperationType.Update:
+            case QueryOperationType.Edit:
                 SetUpdateQuery();
                 break;
-            case DatabaseQueryOperationType.Delete:
+            case QueryOperationType.Remove:
                 SetDeleteQuery();
                 break;
-            case DatabaseQueryOperationType.Merge:
+            case QueryOperationType.Merge:
                 SetMergeQuery();
                 break;
-            case DatabaseQueryOperationType.Select:
+            case QueryOperationType.GetData:
             default: throw new NotSupported(""); // todo
         }
     }

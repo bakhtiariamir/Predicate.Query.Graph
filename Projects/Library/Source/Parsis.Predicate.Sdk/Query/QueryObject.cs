@@ -1,17 +1,11 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query;
 
-public class QueryObject<TObject, TQueryType> where TObject : IQueryableObject
-    where TQueryType : Enum
+public class QueryObject<TObject> where TObject : IQueryableObject
 {
-    public TQueryType QueryType
-    {
-        get;
-        set;
-    }
-
-    public ObjectInitializing<TObject>? Insert
+    public QueryOperationType QueryOperationType
     {
         get;
         set;
@@ -53,5 +47,7 @@ public class QueryObject<TObject, TQueryType> where TObject : IQueryableObject
         set;
     }
 
-    public QueryObject(TQueryType queryType) => QueryType = queryType;
+    private QueryObject(QueryOperationType queryOperationType) => QueryOperationType = queryOperationType;
+
+    public static QueryObject<TObject> Init(QueryOperationType queryOperationType) => new(queryOperationType);
 }

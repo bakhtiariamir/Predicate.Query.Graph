@@ -1,7 +1,6 @@
 ﻿namespace Parsis.Predicate.Sdk.Contract;
 
-public interface IQueryBuilder<TObject, TQueryType, TResult> where TObject : IQueryableObject
-    where TQueryType : Enum
+public interface IQueryBuilder<TObject, TResult> where TObject : IQueryableObject
 {
-    Task<IQuery<TObject, TQueryType, TResult>> BuildAsync();
+    Task<IQuery<TObject, TResult>> BuildAsync();
 }

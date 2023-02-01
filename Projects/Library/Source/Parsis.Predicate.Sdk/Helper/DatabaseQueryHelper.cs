@@ -35,11 +35,11 @@ public static class DatabaseQueryHelper
             throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
         return queryParts.Command.OperationType switch {
-            DatabaseQueryOperationType.Insert => queryParts.Command.GetInsertQuery(),
-            DatabaseQueryOperationType.Delete => queryParts.Command.GetDeleteQuery(),
-            DatabaseQueryOperationType.Update => queryParts.Command.GetUpdateQuery(),
-            DatabaseQueryOperationType.Merge => queryParts.Command.GetMergeQuery(),
-            DatabaseQueryOperationType.Select or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
+            QueryOperationType.Add => queryParts.Command.GetInsertQuery(),
+            QueryOperationType.Remove => queryParts.Command.GetDeleteQuery(),
+            QueryOperationType.Edit => queryParts.Command.GetUpdateQuery(),
+            QueryOperationType.Merge => queryParts.Command.GetMergeQuery(),
+            QueryOperationType.GetData or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
         };
     }
 

@@ -3,23 +3,22 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Query
 {
-    public class QueryObjectReducer<TObject, TQueryType> where TObject : IQueryableObject
-        where TQueryType : Enum
+    public class QueryObjectReducer<TObject> where TObject : IQueryableObject
     {
-        private QueryObjectSelectingReducer<TObject, TQueryType> _objectSelecting;
-        private QueryObjectFilteringReducer<TObject, TQueryType> _objectFiltering;
-        private QueryObject<TObject, TQueryType> _query;
+        private QueryObjectSelectingReducer<TObject> _objectSelecting;
+        private QueryObjectFilteringReducer<TObject> _objectFiltering;
+        private QueryObject<TObject> _query;
 
-        private QueryObjectReducer(QueryObject<TObject, TQueryType> query)
+        private QueryObjectReducer(QueryObject<TObject> query)
         {
-            _objectSelecting = new QueryObjectSelectingReducer<TObject, TQueryType>();
-            _objectFiltering = new QueryObjectFilteringReducer<TObject, TQueryType>();
+            _objectSelecting = new QueryObjectSelectingReducer<TObject>();
+            _objectFiltering = new QueryObjectFilteringReducer<TObject>();
             _query = query;
         }
 
-        public static QueryObjectReducer<TObject, TQueryType> Init(QueryObject<TObject, TQueryType> query) => new(query);
+        public static QueryObjectReducer<TObject> Init(QueryObject<TObject> query) => new(query);
 
-        public QueryObjectReducer<TObject, TQueryType> Reduce()
+        public QueryObjectReducer<TObject> Reduce()
         {
             Enum.GetValues(typeof(ReduceType)).Cast<ReduceType>().ToList().ForEach(type =>
             {
@@ -29,6 +28,6 @@ namespace Parsis.Predicate.Sdk.Query
             return this;
         }
 
-        public QueryObject<TObject, TQueryType> Return() => _query;
+        public QueryObject<TObject> Return() => _query;
     }
 }

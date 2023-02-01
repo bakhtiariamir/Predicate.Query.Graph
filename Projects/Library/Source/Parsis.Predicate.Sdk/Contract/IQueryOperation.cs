@@ -2,8 +2,7 @@
 
 namespace Parsis.Predicate.Sdk.Contract;
 
-public interface IQueryOperation<TObject, TOperationType, TResult> where TObject : IQueryableObject
-    where TOperationType : Enum
+public interface IQueryOperation<TObject, TResult> where TObject : IQueryableObject
 {
-    Task<TResult> RunAsync(QueryObject<TObject, TOperationType> queryObject);
+    Task<TResult> RunAsync(QueryObject<TObject> queryObject);
 }

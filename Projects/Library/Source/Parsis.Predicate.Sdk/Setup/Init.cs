@@ -25,5 +25,5 @@ public class Setup
         return this;
     }
 
-    public static void SetupIoc(ContainerBuilder builder) => builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();
+    public static void RegisterSetting(ContainerBuilder builder) => builder.RegisterType<DatabaseCacheInfoCollection>().As<IDatabaseCacheInfoCollection>().SingleInstance();
 }
