@@ -11,6 +11,23 @@ using System.Reflection;
 
 namespace Parsis.Predicate.Sdk.Helper;
 
+public static class ObjectInfoHelper
+{
+    //public static IObjectInfo<TPropertyInfo>? GetLastObjectInfo<TObjectInfo, TObject, TPropertyInfo>(this ICacheInfoCollection<TObjectInfo> cacheInfoCollection) where TObject : IQueryableObject
+    //{
+    //    var type = typeof(TObject);
+    //    if (!cacheInfoCollection.TryGet(cacheInfoCollection.GetKey(type.Name), out var objectInfo))
+    //    {
+    //        objectInfo = type.GetObjectInfo();
+    //        cacheInfoCollection.InitCache(type.Name, objectInfo);
+    //    }
+
+    //    return objectInfo;
+    //}
+
+
+}
+
 public static class DatabaseObjectInfoHelper
 {
     public static IDatabaseObjectInfo? GetLastObjectInfo<TObject>(this IDatabaseCacheInfoCollection databaseCacheInfoCollection) where TObject : IQueryableObject
@@ -24,6 +41,9 @@ public static class DatabaseObjectInfoHelper
 
         return objectInfo;
     }
+
+
+
 
     public static IDatabaseObjectInfo GetObjectInfo(this Type type)
     {

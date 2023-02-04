@@ -3,7 +3,7 @@ using Parsis.Predicate.Sdk.Generator.Database;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
 
-public class DatabaseQueryPartCollection
+public class DatabaseQueryPartCollection : IQueryResult
 {
     public IDatabaseObjectInfo? DatabaseObjectInfo
     {
@@ -52,4 +52,8 @@ public class DatabaseQueryPartCollection
         get;
         set;
     }
+}
+
+public interface IQueryResult
+{
 }

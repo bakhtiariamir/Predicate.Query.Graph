@@ -7,13 +7,6 @@ namespace Parsis.Predicate.Sdk.Manager.Database;
 
 public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, DatabaseQueryPartCollection> where TObject : IQueryableObject
 {
-    protected override QueryObject<TObject>? QueryObject
-    {
-        get;
-        set;
-    }
-
-
     public override async Task<DatabaseQueryPartCollection> RunAsync(QueryObject<TObject> queryObject)
     {
         QueryObject = queryObject ?? throw new System.Exception("Asd");

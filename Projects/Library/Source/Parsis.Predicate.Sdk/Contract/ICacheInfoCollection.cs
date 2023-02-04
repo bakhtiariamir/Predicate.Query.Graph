@@ -1,14 +1,14 @@
 ﻿namespace Parsis.Predicate.Sdk.Contract;
 
-public interface ICacheInfoCollection<TObjectInfo>
+public interface ICacheInfoCollection
 {
-    void InitCache(string objectType, TObjectInfo value);
+    void InitCache(string objectType, object value);
 
-    bool TryRemove(string objectType, out TObjectInfo? value);
+    bool TryRemove(string objectType, out object? value);
 
     bool RemoveCache(string objectType);
 
-    bool TryGet(string objectType, out TObjectInfo? value);
+    bool TryGet(string objectType, out object? value);
 
     string GetKey(string objectType);
 }
