@@ -4,12 +4,12 @@ namespace Parsis.Predicate.Sdk.Builder.Database;
 
 public class DatabaseQueryContext : QueryContext, IDatabaseQueryContext
 {
-    public IDatabaseCacheInfoCollection DatabaseCacheInfoCollection
+    public ICacheInfoCollection DatabaseCacheInfoCollection
     {
         get;
     }
 
-    public DatabaseQueryContext(IDatabaseCacheInfoCollection databaseCacheCacheInfoCollection)
+    public DatabaseQueryContext(ICacheInfoCollection databaseCacheCacheInfoCollection)
     {
         DatabaseCacheInfoCollection = databaseCacheCacheInfoCollection;
     }

@@ -1,14 +1,13 @@
 ﻿using Parsis.Predicate.Sdk.Builder.Database;
 using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Manager.Database;
 
 public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : IQueryableObject
 {
-    private readonly IDatabaseCacheInfoCollection _databaseCacheInfoCollection;
+    private readonly ICacheInfoCollection _databaseCacheInfoCollection;
 
-    public SqlQueryOperation(IDatabaseCacheInfoCollection databaseCacheInfoCollection)
+    public SqlQueryOperation(ICacheInfoCollection databaseCacheInfoCollection)
     {
         _databaseCacheInfoCollection = databaseCacheInfoCollection;
     }

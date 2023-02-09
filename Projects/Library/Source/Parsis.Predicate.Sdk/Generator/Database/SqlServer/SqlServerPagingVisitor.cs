@@ -7,7 +7,7 @@ namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
 
 public class SqlServerPagingVisitor : DatabaseVisitor<DatabasePagingClauseQueryPart>
 {
-    public SqlServerPagingVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerPagingVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

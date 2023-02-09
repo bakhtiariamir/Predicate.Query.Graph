@@ -1,5 +1,4 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
 

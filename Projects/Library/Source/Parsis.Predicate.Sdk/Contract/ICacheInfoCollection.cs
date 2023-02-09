@@ -2,13 +2,17 @@
 
 public interface ICacheInfoCollection
 {
-    void InitCache(string objectType, object value);
+    IDictionary<string, object> Cache
+    {
+        get;
+        set;
+    }
 
-    bool TryRemove(string objectType, out object? value);
+    void InitCache(string key, object value);
 
-    bool RemoveCache(string objectType);
+    bool RemoveCache(string key);
 
-    bool TryGet(string objectType, out object? value);
+    bool TryGet(string key, out object? value);
 
-    string GetKey(string objectType);
+    bool TryGetFirst(string key, out object? value);
 }

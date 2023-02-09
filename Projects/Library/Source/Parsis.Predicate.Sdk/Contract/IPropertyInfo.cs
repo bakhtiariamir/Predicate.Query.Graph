@@ -4,6 +4,11 @@ namespace Parsis.Predicate.Sdk.Contract;
 
 public interface IPropertyInfo<out TProperty> : IPropertyInfo where TProperty : IPropertyInfo
 {
+    TProperty Clone();
+}
+
+public interface IPropertyInfo
+{
     string Name
     {
         get;
@@ -39,16 +44,11 @@ public interface IPropertyInfo<out TProperty> : IPropertyInfo where TProperty : 
         get;
     }
 
-    string? ErrorMessage
+    IDictionary<string, string>? ErrorMessage
     {
         get;
     }
 
-    TProperty Clone();
-}
-
-public interface IPropertyInfo
-{
     Type Type
     {
         get;

@@ -13,7 +13,7 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 {
     private int _constantIndex = 0;
 
-    public SqlServerFilteringVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerFilteringVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

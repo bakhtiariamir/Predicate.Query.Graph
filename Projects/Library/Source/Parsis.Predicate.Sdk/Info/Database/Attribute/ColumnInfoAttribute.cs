@@ -60,21 +60,10 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         get;
     }
 
-    public ColumnDataType DataType
-    {
-        get;
-    }
-
-    public string Title
-    {
-        get;
-    }
-
-    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isUnique = false, bool isPrimaryKey = false, bool isIdentity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, string? errorMessage = null, object? defaultValue = null) : base(name ?? columnName, isUnique, errorMessage, required, defaultValue)
+    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isUnique = false, bool isPrimaryKey = false, bool isIdentity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, object? defaultValue = null, params string[]? errorMessage) : base(name ?? columnName, isUnique, dataType, title, required, defaultValue, errorMessage)
     {
         ColumnName = columnName;
         IsPrimaryKey = isPrimaryKey;
-        DataType = dataType;
         Type = type;
         IsIdentity = isIdentity;
         ReadOnly = readOnly;
@@ -84,6 +73,5 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         RankingFunctionType = rankingFunctionType;
         AggregateFunctionType = aggregateFunctionType;
         FunctionName = functionName;
-        Title = title ?? Name;
     }
 }

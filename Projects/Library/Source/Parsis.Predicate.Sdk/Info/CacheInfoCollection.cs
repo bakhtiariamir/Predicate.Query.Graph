@@ -2,21 +2,36 @@
 
 namespace Parsis.Predicate.Sdk.Info
 {
-    public abstract class CacheInfoCollection : ICacheInfoCollection
+    public class CacheInfoCollection : ICacheInfoCollection
     {
-        protected abstract string CacheKey
+        public IDictionary<string, object> Cache
         {
             get;
+            set;
         }
 
-        public abstract void InitCache(string objectType, object value);
+        public CacheInfoCollection()
+        {
+            Cache = new Dictionary<string, object>();
+        }
 
-        public abstract bool TryRemove(string objectType, out object? value);
+        public virtual void InitCache(string key, object value) => Cache.Add(key, value);
 
-        public abstract bool RemoveCache(string objectType);
+        public virtual bool RemoveCache(string key) => Cache.Remove(key);
 
-        public abstract bool TryGet(string objectType, out object? value);
+        public virtual bool TryGet(string key, out object? value) => Cache.TryGetValue(key, out value);
 
-        public abstract string GetKey(string objectType);
+        public bool TryGetFirst(string key, out object? value)
+        {
+            value = default;
+            var firstKey = Cache.Keys.FirstOrDefault(item => item.Split(":")[1] == key);
+            if (string.IsNullOrWhiteSpace(firstKey)) return false;
+
+            return Cache.TryGetValue(firstKey, out value);
+        }
+        //void InitCache(string key, IDatabaseObjectInfo value);
+        //bool TryRemove(string key, out IDatabaseObjectInfo? value); 
+        //bool TryGet(string key, out IDatabaseObjectInfo? value);
+        //bool TryGet(string key, out IDatabaseObjectInfo? value);
     }
 }

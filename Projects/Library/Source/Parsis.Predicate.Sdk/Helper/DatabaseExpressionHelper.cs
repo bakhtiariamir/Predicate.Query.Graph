@@ -7,11 +7,11 @@ namespace Parsis.Predicate.Sdk.Helper;
 
 public static class DatabaseExpressionHelper
 {
-    //public static IEnumerable<IColumnPropertyInfo>? GetProperty(this Expression expression, IDatabaseObjectInfo objectInfo, IDatabaseCacheInfoCollection cacheObjectCollection, bool isJoinColumn = false)
+    //public static IEnumerable<IColumnPropertyInfo>? GetProperty(this Expression expression, IDatabaseObjectInfo objectInfo, ICacheInfoCollection cacheObjectCollection, bool isJoinColumn = false)
     //{
-    //    Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
+    //    Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
 
-    //    Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
+    //    Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
 
     //    getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
     //    {
@@ -110,13 +110,13 @@ public static class DatabaseExpressionHelper
 
     public static object? GetObject(this ConstantExpression expression) => expression.Value;
 
-    public static bool TryExpandProperty(this IColumnPropertyInfo parent, IDatabaseCacheInfoCollection databaseCacheInfoCollection, out ICollection<IColumnPropertyInfo>? expandedProperties)
+    public static bool TryExpandProperty(this IColumnPropertyInfo parent, ICacheInfoCollection databaseCacheInfoCollection, out ICollection<IColumnPropertyInfo>? expandedProperties)
     {
         expandedProperties = null;
-        if (!databaseCacheInfoCollection.TryGet(parent.Name, out var objectInfo))
+        if (!databaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(parent.Type, out var objectInfo))
         {
-            if (!databaseCacheInfoCollection.TryGet(parent.Type.Name, out objectInfo))
-                return false;
+            //if (!databaseCacheInfoCollection.TryGet(parent.Type.Name, out objectInfo))
+            return false;
         }
 
         if (objectInfo == null)

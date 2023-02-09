@@ -7,7 +7,7 @@ namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
 
 public class SqlServerSelectingVisitor : DatabaseVisitor<DatabaseColumnsClauseQueryPart>
 {
-    public SqlServerSelectingVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerSelectingVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

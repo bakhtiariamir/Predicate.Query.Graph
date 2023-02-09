@@ -23,26 +23,29 @@ public class DatabaseObjectInfo : ObjectInfo<IColumnPropertyInfo>, IDatabaseObje
         get;
     }
 
-    public override Type ObjectType
-    {
-        get;
-    }
-
-    public override IEnumerable<IColumnPropertyInfo> PropertyInfos
-    {
-        get;
-    }
-
     public override ObjectInfoType Type => ObjectInfoType.Database;
 
-    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo")
+    public DatabaseObjectInfo(string dataSet, DataSetType dataSetType, Type objectType, IEnumerable<IColumnPropertyInfo> propertyInfos, string schema = "dbo") : base(propertyInfos, ObjectInfoType.Database, objectType)
     {
         DataSet = dataSet;
         DataSetType = dataSetType;
-        ObjectType = objectType;
-        PropertyInfos = propertyInfos;
         Schema = schema;
     }
 
     public override string ToString() => $"[{Schema}].[{DataSet}]";
+
+    public static new IDatabaseObjectInfo CastObject(object value)
+    {
+        if (value is IDatabaseObjectInfo info)
+            return info;
+
+        try
+        {
+            return (IDatabaseObjectInfo)Convert.ChangeType(value, typeof(IDatabaseObjectInfo));
+        }
+        catch (InvalidCastException)
+        {
+            throw new InvalidCastException(); //todo
+        }
+    }
 }

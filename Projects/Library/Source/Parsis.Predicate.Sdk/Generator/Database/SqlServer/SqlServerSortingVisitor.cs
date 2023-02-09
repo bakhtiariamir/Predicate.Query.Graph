@@ -7,7 +7,7 @@ namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
 
 public class SqlServerSortingVisitor : DatabaseVisitor<DatabaseOrdersByClauseQueryPart>
 {
-    public SqlServerSortingVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerSortingVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 
@@ -29,9 +29,9 @@ public class SqlServerSortingVisitor : DatabaseVisitor<DatabaseOrdersByClauseQue
         return DatabaseOrdersByClauseQueryPart.Create(fields.Select(item => new ColumnSortPredicate(item)).ToArray());
     }
 
-    //private IEnumerable<IColumnPropertyInfo>? GetProperty(Expression expression, IDatabaseObjectInfo objectInfo, IDatabaseCacheInfoCollection cacheObjectCollection, bool isJoinColumn = false)
+    //private IEnumerable<IColumnPropertyInfo>? GetProperty(Expression expression, IDatabaseObjectInfo objectInfo, ICacheInfoCollection cacheObjectCollection, bool isJoinColumn = false)
     //{
-    //    Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IDatabaseObjectInfo?>? getConvertedObjectInfo = null;
+    //    Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, IDatabaseObjectInfo?>? getConvertedObjectInfo = null;
 
     //    getConvertedObjectInfo = (convertExpr, mainObjectInfo, fullDatabaseCacheInfoCollection) =>
     //    {
@@ -49,9 +49,9 @@ public class SqlServerSortingVisitor : DatabaseVisitor<DatabaseOrdersByClauseQue
     //        return objectInfo;
     //    };
 
-    //    Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
+    //    Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
 
-    //    Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
+    //    Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
 
     //    getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
     //    {

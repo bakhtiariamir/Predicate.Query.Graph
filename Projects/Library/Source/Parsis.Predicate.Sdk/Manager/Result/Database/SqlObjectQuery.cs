@@ -5,6 +5,7 @@ using Parsis.Predicate.Sdk.Helper;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Manager.Result.Database;
+
 public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
 {
     public string Phrase
@@ -23,7 +24,6 @@ public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
         if (newParam != null)
             parameter.Value = newParam.Value;
     });
-
 }
 
 public class SqlObjectQueryGenerator : IObjectQueryGenerator<SqlParameter, SqlObjectQuery, DatabaseQueryPartCollection>

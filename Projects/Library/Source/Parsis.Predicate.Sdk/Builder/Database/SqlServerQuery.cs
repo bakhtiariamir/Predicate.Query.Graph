@@ -15,7 +15,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 
     public SqlServerQuery(IQueryContext context) : base(context)
     {
-        _objectInfo = Context.DatabaseCacheInfoCollection?.GetLastObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
+        _objectInfo = Context.DatabaseCacheInfoCollection?.GetLastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryPartCollection.DatabaseObjectInfo = _objectInfo;
     }
 
@@ -182,13 +182,13 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             {
                 var join = joinPredicate.Item1;
                 var order = joinPredicate.Item2;
-                if (!Context.DatabaseCacheInfoCollection.TryGet(join.Parent.Type.Name, out IDatabaseObjectInfo? propertyObjectInfo))
+                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Parent.Type, out IDatabaseObjectInfo? propertyObjectInfo))
                     throw new NotFound(@join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (propertyObjectInfo == null)
                     throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                if (!Context.DatabaseCacheInfoCollection.TryGet(join.Type.Name, out IDatabaseObjectInfo? relatedObjectInfo))
+                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Type, out IDatabaseObjectInfo? relatedObjectInfo))
                     throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (relatedObjectInfo == null)

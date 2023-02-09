@@ -3,7 +3,23 @@ using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Info;
 
-public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where TProperty : IPropertyInfo
+public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> where TProperty : IPropertyInfo
+{
+    public PropertyInfo()
+    {
+    }
+
+    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
+    {
+    }
+
+    public virtual TProperty Clone()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class PropertyInfo : IPropertyInfo
 {
     public string Name
     {
@@ -41,7 +57,7 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         set;
     }
 
-    public string? ErrorMessage
+    public IDictionary<string, string>? ErrorMessage
     {
         get;
         set;
@@ -53,11 +69,16 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         set;
     }
 
-    protected PropertyInfo()
+    public Type Type
+    {
+        get;
+    }
+
+    public PropertyInfo()
     {
     }
 
-    protected PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, string? errorMessage = null, object? defaultValue = null)
+    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null)
     {
         Name = name;
         IsUnique = isUnique;
@@ -68,12 +89,5 @@ public abstract class PropertyInfo<TProperty> : IPropertyInfo<TProperty> where T
         ErrorMessage = errorMessage;
         DefaultValue = defaultValue;
         Type = type;
-    }
-
-    public abstract TProperty Clone();
-
-    public Type Type
-    {
-        get;
     }
 }

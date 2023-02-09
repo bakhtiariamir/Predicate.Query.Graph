@@ -1,30 +1,29 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using System;
-using System.Collections.Concurrent;
 
 namespace Parsis.Predicate.Sdk.Info;
 
-public class DatabaseCacheInfoCollection : CacheInfoCollection, IDatabaseCacheInfoCollection
+public class DatabaseCacheInfoCollection : CacheInfoCollection, ICacheInfoCollection
 {
-    private ConcurrentDictionary<string, IDatabaseObjectInfo> _cache;
+    //public override TObjectInfo CastObject<TObjectInfo, TPropertyInfo>(object value) 
+    //{
+    //    if (value is IDatabaseObjectInfo info)
+    //        return (TObjectInfo)info;
 
-    protected override string CacheKey => "cache.database";
+    //    throw new InvalidCastException();//todo
+    //}
+    //public override void InitCache(string objectType, IDatabaseObjectInfo value) => throw new NotImplementedException();
 
-    public override void InitCache(string objectType, object value) => throw new NotImplementedException();
+    //public override bool TryRemove(string objectType, out IDatabaseObjectInfo? value) => throw new NotImplementedException();
 
-    public override bool TryRemove(string objectType, out object? value) => throw new NotImplementedException();
+    //public override bool RemoveCache(string key) => _cache.TryRemove(GetKey(key), out _);
 
-    public DatabaseCacheInfoCollection() => _cache = new ConcurrentDictionary<string, IDatabaseObjectInfo>();
+    //public override bool TryGet(string objectType, out IDatabaseObjectInfo? value) => throw new NotImplementedException();
 
-    public void InitCache(string key, IDatabaseObjectInfo value) => _cache.GetOrAdd(GetKey(key), value);
+    //public override string GetKey(string key) => $"{CacheKey}.{key}";
 
-    public bool TryRemove(string key, out IDatabaseObjectInfo? value) => _cache.TryRemove(GetKey(key), out value);
+    //public void InitCache(string key, IDatabaseObjectInfo value) => _cache.GetOrAdd(GetKey(key), value);
 
-    public override bool RemoveCache(string key) => _cache.TryRemove(GetKey(key), out _);
+    //public bool TryRemove(string key, out IDatabaseObjectInfo? value) => _cache.TryRemove(GetKey(key), out value);
 
-    public override bool TryGet(string objectType, out object? value) => throw new NotImplementedException();
-
-    public bool TryGet(string key, out IDatabaseObjectInfo? value) => _cache.TryGetValue(GetKey(key), out value);
-
-    public override string GetKey(string key) => $"{CacheKey}.{key}";
+    //public bool TryGet(string key, out IDatabaseObjectInfo? value) => _cache.TryGetValue(GetKey(key), out value);
 }

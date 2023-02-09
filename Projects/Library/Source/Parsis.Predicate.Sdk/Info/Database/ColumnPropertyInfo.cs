@@ -91,7 +91,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     {
     }
 
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, string? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
     {
         Schema = schema;
         DataSet = dataSet;
@@ -114,7 +114,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public string GetSelector()
     {
-        if (Parent is not null && Parent.Name != DataSet) 
+        if (Parent is not null && Parent.Name != DataSet)
             return $"[{Parent.Name}]";
 
         return $"[{Schema}].[{DataSet}]";

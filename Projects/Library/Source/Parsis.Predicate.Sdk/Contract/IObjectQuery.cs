@@ -1,5 +1,4 @@
-﻿using Parsis.Predicate.Sdk.Builder.Database;
-using Parsis.Predicate.Sdk.DataType;
+﻿using Parsis.Predicate.Sdk.DataType;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Contract;
@@ -12,8 +11,7 @@ public interface ISqlQuery : IObjectQuery<SqlParameter>
     }
 }
 
-
-public interface IObjectQuery<TParameter> 
+public interface IObjectQuery<TParameter>
 {
     string? Action
     {

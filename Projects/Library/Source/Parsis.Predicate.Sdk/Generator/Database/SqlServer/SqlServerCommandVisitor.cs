@@ -10,7 +10,7 @@ namespace Parsis.Predicate.Sdk.Generator.Database.SqlServer;
 
 public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 {
-    public SqlServerCommandVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SqlServerCommandVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

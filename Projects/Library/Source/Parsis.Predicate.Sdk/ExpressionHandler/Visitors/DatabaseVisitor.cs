@@ -8,16 +8,16 @@ using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
 
-public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IColumnPropertyInfo> where TResult : IDatabaseQueryPart
+public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjectInfo, ICacheInfoCollection, IColumnPropertyInfo> where TResult : IDatabaseQueryPart
 {
-    protected DatabaseVisitor(IDatabaseCacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression)
+    protected DatabaseVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression)
     {
         CacheObjectCollection = cacheObjectCollection;
         ObjectInfo = objectInfo;
         ParameterExpression = parameterExpression;
     }
 
-    protected override IDatabaseCacheInfoCollection CacheObjectCollection
+    protected override ICacheInfoCollection CacheObjectCollection
     {
         get;
     }
@@ -70,9 +70,9 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
         }
     }
 
-    protected IEnumerable<IColumnPropertyInfo>? GetProperty(Expression expression, IDatabaseObjectInfo objectInfo, IDatabaseCacheInfoCollection cacheObjectCollection, bool isCondition = false)
+    protected IEnumerable<IColumnPropertyInfo>? GetProperty(Expression expression, IDatabaseObjectInfo objectInfo, ICacheInfoCollection cacheObjectCollection, bool isCondition = false)
     {
-        Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, IDatabaseObjectInfo?>? getConvertedObjectInfo = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, IDatabaseObjectInfo?>? getConvertedObjectInfo = null;
 
         getConvertedObjectInfo = (convertExpr, mainObjectInfo, fullDatabaseCacheInfoCollection) =>
         {
@@ -83,16 +83,16 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
             }
             else if (convertExpr is ParameterExpression parameterExpression)
             {
-                if (!fullDatabaseCacheInfoCollection.TryGet(parameterExpression.Type.Name, out objectInfo))
+                if (!fullDatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(parameterExpression.Type, out objectInfo))
                     throw new System.Exception(); //todo
             }
 
             return objectInfo;
         };
 
-        Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
 
-        Func<Expression, IDatabaseObjectInfo, IDatabaseCacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
 
         getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
         {
@@ -103,7 +103,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                     throw new NotFound(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
                 var memberInfo = memberExpression.Member;
-                if (!databaseCacheInfoCollection.TryGet(memberExpression.Expression.Type.Name, out var parentObjectInfo))
+                if (!databaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(memberExpression.Expression.Type, out var parentObjectInfo))
                 {
                     if (memberExpression.Expression.NodeType == ExpressionType.Convert)
                     {

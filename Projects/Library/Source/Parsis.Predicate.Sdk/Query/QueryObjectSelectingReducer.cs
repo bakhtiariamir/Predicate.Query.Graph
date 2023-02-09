@@ -48,9 +48,9 @@ public class QueryObjectSelectingReducer<TObject> : QueryObjectPartReducer<TObje
             }
         }
 
-        var newArrayExpression = System.Linq.Expressions.Expression.NewArrayInit(typeof(object), bodies);
+        var newArrayExpression = Expression.NewArrayInit(typeof(object), bodies);
 
-        query.Columns = new[] { new QueryColumn<TObject>(Expression.Lambda<Func<TObject, IEnumerable<object>>>(newArrayExpression, expressionParameters)) };
+        query.Columns = new[] {new QueryColumn<TObject>(Expression.Lambda<Func<TObject, IEnumerable<object>>>(newArrayExpression, expressionParameters))};
 
         return query;
     }

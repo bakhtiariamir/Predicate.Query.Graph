@@ -1,5 +1,4 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
-using Parsis.Predicate.Sdk.DataType;
 
 namespace Parsis.Predicate.Sdk.Builder.Database;
 
@@ -11,9 +10,9 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
 
     private IQuery<TObject, DatabaseQueryPartCollection>? _query;
 
-    private SqlServerQueryBuilder(IDatabaseCacheInfoCollection info) => _contextBuilder = new DatabaseQueryContextBuilder(info);
+    private SqlServerQueryBuilder(ICacheInfoCollection info) => _contextBuilder = new DatabaseQueryContextBuilder(info);
 
-    public static SqlServerQueryBuilder<TObject> Init(IDatabaseCacheInfoCollection info) => new(info);
+    public static SqlServerQueryBuilder<TObject> Init(ICacheInfoCollection info) => new(info);
 
     public async Task<SqlServerQueryBuilder<TObject>> InitContextAsync()
     {
