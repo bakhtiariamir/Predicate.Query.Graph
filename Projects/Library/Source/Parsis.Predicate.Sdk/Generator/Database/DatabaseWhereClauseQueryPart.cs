@@ -58,7 +58,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 columnProperties.Add(left);
             }
         }
-        else if (left.Operator is not ConditionOperatorType.NotIsNull or ConditionOperatorType.IsNull)
+        else if (left.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
             columnProperties.AddRange((GeHavingClause(left)));
 
         if (parameter.Right.ColumnPropertyInfo != null)
@@ -71,7 +71,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 columnProperties.Add(right);
             }
         }
-        else if (right.Operator is not ConditionOperatorType.NotIsNull or ConditionOperatorType.IsNull)
+        else if (right.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
             columnProperties.AddRange((GeHavingClause(right)));
 
         return columnProperties;
@@ -90,7 +90,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 SqlParameter sqlParameter;
                 if (whereClause.Left?.PartType == PartType.ColumnInfo)
                 {
-                    if (whereClause.Operator is not ConditionOperatorType.NotIsNull and not ConditionOperatorType.IsNull)
+                    if (whereClause.Operator is not ConditionOperatorType.IsNotNull and not ConditionOperatorType.IsNull)
                     {
                         sqlParameter = GetParameters(whereClause.Left)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
                         var valueParameter = GetParameters(whereClause.Right)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
@@ -151,7 +151,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                         if (wherePart.Right is null && wherePart.Operator != ConditionOperatorType.None)
                             throw new NotFound(whereClause.ToString(), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-                        if (wherePart.Operator is ConditionOperatorType.IsNull or ConditionOperatorType.NotIsNull)
+                        if (wherePart.Operator is ConditionOperatorType.IsNull or ConditionOperatorType.IsNotNull)
                         {
                             right = null;
                         }
@@ -231,7 +231,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             ConditionOperatorType.In => $"{left} IN ({right})",
             ConditionOperatorType.NotIn => $"{left} NOT IN ({right})",
             ConditionOperatorType.IsNull => $"{left} IS NULL",
-            ConditionOperatorType.NotIsNull => $"{left} IS NOT NULL",
+            ConditionOperatorType.IsNotNull => $"{left} IS NOT NULL",
             ConditionOperatorType.Or => right == null ? $"({right})" : $"({left} OR {right})",
             ConditionOperatorType.And => right == null ? $"({right})" : $"({left} AND {right})",
             ConditionOperatorType.None => $"({left})",

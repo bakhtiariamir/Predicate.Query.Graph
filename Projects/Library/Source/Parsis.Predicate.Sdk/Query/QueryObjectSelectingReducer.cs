@@ -24,8 +24,7 @@ public class QueryObjectSelectingReducer<TObject> : QueryObjectPartReducer<TObje
     protected override QueryObject<TObject> Merge(QueryObject<TObject> query)
     {
         if (query.Columns == null || query.Columns.Count == 1) return query;
-        var columns = new List<QueryColumn<TObject>>();
-        var expressionParameters = query.Columns.SelectMany(item => item.Expression.Parameters).FirstOrDefault() ?? Expression.Parameter(typeof(TObject));
+        var expressionParameters = query.Columns.SelectMany(item => item.Expression?.Parameters ?? Enumerable.Empty<ParameterExpression>()).FirstOrDefault() ?? Expression.Parameter(typeof(TObject));
 
         var bodies = new List<Expression>();
         foreach (var column in query.Columns)

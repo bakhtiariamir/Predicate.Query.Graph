@@ -43,40 +43,47 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateColumnAsync(QueryObject<TObject> query)
+    protected override Task GenerateColumnAsync(QueryObject<TObject> query, bool getCount = false)
     {
-        var fieldsExpression = query.Columns?.ToList();
-        ParameterExpression? parameterExpression = null;
-        if (fieldsExpression[0]?.Expression != null)
+        if (!getCount)
         {
-            parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+            var fieldsExpression = query.Columns?.ToList();
+            ParameterExpression? parameterExpression = null;
+            if (fieldsExpression[0]?.Expression != null)
+            {
+                parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+            }
+            else if (fieldsExpression[0]?.Expressions != null)
+            {
+                parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+            }
+
+            var selectingGenerator = new SqlServerSelectingVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, parameterExpression);
+            var columns = new List<DatabaseColumnsClauseQueryPart>();
+            fieldsExpression.ToList().ForEach(field =>
+            {
+                Expression? expression = null;
+                if (field.Expression != null)
+                    expression = field.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+                if (field.Expressions != null)
+                    expression = field.Expressions.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+                if (expression == null)
+                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+                var property = selectingGenerator.Generate(expression);
+                columns.Add(property);
+            });
+
+            var queryColumns = DatabaseColumnsClauseQueryPart.Merged(columns.Select(item => item));
+            QueryPartCollection.Columns = queryColumns;
+            JoinColumns.AddRange(queryColumns.Parameter);
         }
-        else if (fieldsExpression[0]?.Expressions != null)
+        else
         {
-            parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+            QueryPartCollection.Columns = DatabaseColumnsClauseQueryPart.CreateCount();
         }
-
-        var selectingGenerator = new SqlServerSelectingVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, parameterExpression);
-        var columns = new List<DatabaseColumnsClauseQueryPart>();
-        fieldsExpression.ToList().ForEach(field =>
-        {
-            Expression? expression = null;
-            if (field.Expression != null)
-                expression = field.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-            if (field.Expressions != null)
-                expression = field.Expressions.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-            if (expression == null)
-                throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-            var property = selectingGenerator.Generate(expression);
-            columns.Add(property);
-        });
-
-        var queryColumns = DatabaseColumnsClauseQueryPart.Merged(columns.Select(item => item));
-        QueryPartCollection.Columns = queryColumns;
-        JoinColumns.AddRange(queryColumns.Parameter);
 
         return Task.CompletedTask;
     }

@@ -31,10 +31,24 @@ public class QueryObjectBuilder<TObject> : IQueryObjectBuilder where TObject : I
         return this;
     }
 
+    public QueryObjectBuilder<TObject> SetFilterPredicate(FilterPredicate<TObject> filterPredicate)
+    {
+        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
+        _queryObjectObject.Filters = filterPredicate;
+        return this;
+    }
+
     public QueryObjectBuilder<TObject> SetSorting(QueryObjectSorting<TObject> objectSorting)
     {
         if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
         _queryObjectObject.Sorts = objectSorting.Validate().Return();
+        return this;
+    }
+
+    public QueryObjectBuilder<TObject> SetSortPredicate(ICollection<SortPredicate<TObject>> sortPredicates)
+    {
+        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
+        _queryObjectObject.Sorts = sortPredicates;
         return this;
     }
 

@@ -3,10 +3,10 @@
 public enum QueryOperationType
 {
     GetData = 1,
-    Add = 2,
-    Edit = 3,
-    Remove = 4,
-    Merge = 5,
-    Script = 6,
-    Count = 7
+    GetCount = 2,
+    Add = 3,
+    Edit = 4,
+    Remove = 5,
+    Merge = 6,
+    Script = 7
 }

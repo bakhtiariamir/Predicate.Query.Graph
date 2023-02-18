@@ -7,6 +7,7 @@ namespace Parsis.Predicate.Sdk.Generator.Database;
 public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<IColumnPropertyInfo>>
 {
     private string? _text;
+    private bool _isCount = false;
 
     public override string? Text
     {
@@ -46,6 +47,16 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
     private void SetText() => _text = string.Join(", ", Parameter.Select(SetColumnName));
 
     public static DatabaseColumnsClauseQueryPart Create(params IColumnPropertyInfo[] properties) => new(properties);
+
+    public static DatabaseColumnsClauseQueryPart CreateCount()
+    {
+        var queryPart = new DatabaseColumnsClauseQueryPart(new List<IColumnPropertyInfo>());
+        queryPart._isCount = true;
+        queryPart._text = " COUNT(*) AS COUNT ";
+        return queryPart;
+    }
+
+    public bool IsCountQuery() => _isCount;
 
     public static DatabaseColumnsClauseQueryPart Merged(IEnumerable<DatabaseColumnsClauseQueryPart> columnsClause)
     {

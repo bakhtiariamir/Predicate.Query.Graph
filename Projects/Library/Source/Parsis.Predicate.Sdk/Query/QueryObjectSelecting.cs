@@ -7,9 +7,7 @@ public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecti
 {
     private ICollection<QueryColumn<TObject>> _columns;
 
-    private QueryObjectSelecting() => _columns = new List<QueryColumn<TObject>> {
-        new(item => item)
-    };
+    private QueryObjectSelecting() => _columns = new List<QueryColumn<TObject>> { new(item => item)};
 
     public static QueryObjectSelecting<TObject> Init() => new();
 

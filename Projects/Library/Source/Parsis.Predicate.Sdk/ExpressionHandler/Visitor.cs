@@ -85,6 +85,8 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
                     "In" => VisitInclude((MethodCallExpression)expression, true),
                     "NotIn" => VisitInclude((MethodCallExpression)expression, false),
                     "Equals" => VisitEqual((MethodCallExpression)expression),
+                    "IsNull" => VisitCheckValue((MethodCallExpression)expression, false),
+                    "IsNotNull" => VisitCheckValue((MethodCallExpression)expression, true),
                     _ => VisitCall((MethodCallExpression)expression)
                 };
             case ExpressionType.Lambda:
@@ -109,6 +111,11 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
     }
 
     protected virtual TResult VisitInclude(MethodCallExpression expression, bool condition)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected virtual TResult VisitCheckValue(MethodCallExpression expression, bool condition)
     {
         throw new NotImplementedException();
     }

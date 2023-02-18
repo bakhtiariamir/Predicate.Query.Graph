@@ -9,7 +9,7 @@ public class QueryObjectPaging : IQueryObjectPart<QueryObjectPaging, PagePredica
 
     private QueryObjectPaging(Expression<Func<Page>> expression) => _pagePredicate = new PagePredicate(expression);
 
-    public static QueryObjectPaging Init(int pageSize, int pageRows) => new(() => new Page(pageSize, pageRows));
+    public static QueryObjectPaging Init(int skip, int take) => new(() => new Page(skip, take));
 
     public QueryObjectPaging Validate() => this;
 
@@ -31,19 +31,19 @@ public class PagePredicate
 
 public class Page
 {
-    public int PageNumber
+    public int Skip
     {
         get;
     }
 
-    public int PageRows
+    public int Take
     {
         get;
     }
 
-    public Page(int pageNumber, int pageRows)
+    public Page(int skip, int take)
     {
-        PageNumber = pageNumber;
-        PageRows = pageRows;
+        Skip = skip;
+        Take = take;
     }
 }

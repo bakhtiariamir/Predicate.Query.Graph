@@ -1,4 +1,5 @@
-﻿using Parsis.Predicate.Sdk.Contract;
+﻿using Dynamitey;
+using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
 using System.Linq.Expressions;
@@ -12,6 +13,23 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
     public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
 
     public static QueryObjectFiltering<TObject> Init(Expression<Func<TObject, bool>> expression) => new(expression);
+
+    public static QueryObjectFiltering<TObject> Init(IEnumerable<Expression<Func<TObject, bool>>> expressions)
+    {
+        var expressionArray = expressions.ToArray();
+        if (expressionArray.Length > 0)
+        {
+            var filterPredicate = Init(expressionArray[0]);
+            for (var i = 1; i < expressionArray.Length; i++)
+            {
+                filterPredicate.And(expressionArray[i]);
+            }
+
+            return filterPredicate;
+        }
+
+        return new(item => true);
+    }
 
     public QueryObjectFiltering<TObject> And(Expression<Func<TObject, bool>> expression) => CreatePredicate(expression, ConnectorOperatorType.And);
 

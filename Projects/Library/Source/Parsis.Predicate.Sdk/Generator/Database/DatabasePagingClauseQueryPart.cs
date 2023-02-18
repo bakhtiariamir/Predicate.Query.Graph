@@ -24,7 +24,7 @@ public class DatabasePagingClauseQueryPart : DatabaseQueryPart<Page>
         SetText();
     }
 
-    public void SetText() => _text = "OFFSET (@PageNumber-1) * @PageRows ROWS FETCH NEXT @PageRows ROWS ONLY";
+    public void SetText() => _text = "OFFSET (@Skip-1) * @Take ROWS FETCH NEXT @Take ROWS ONLY";
 
     public static DatabasePagingClauseQueryPart Create(Page pagination) => new(pagination);
 

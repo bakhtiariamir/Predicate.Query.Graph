@@ -23,17 +23,22 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
         return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
-    protected override DatabaseWhereClauseQueryPart VisitConvert(UnaryExpression expression)
-    {
-        return Visit(expression.Operand);
-    }
+    protected override DatabaseWhereClauseQueryPart VisitConvert(UnaryExpression expression) => Visit(expression.Operand);
 
     protected override DatabaseWhereClauseQueryPart VisitNot(UnaryExpression expression)
     {
-        var operand = Visit(expression.Operand);
+        var left = Visit(expression.Operand);
+        var right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(null, null, null));
+        if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
+            right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
 
-        return null;
-        // SqlClause.CreateMerged($"(NOT {operand})", operand);
+        var clauseType = ClauseType.None;
+        if (left.Parameter.ColumnPropertyInfo != null && (left.Parameter.ClauseType == ClauseType.Having || right.Parameter.ClauseType == ClauseType.Having))
+            clauseType = ClauseType.Having;
+        if (left.Parameter.ColumnPropertyInfo != null && left.Parameter.ClauseType is ClauseType.Where or ClauseType.None || right.Parameter.ClauseType is ClauseType.Where or ClauseType.None)
+            clauseType = ClauseType.Where;
+
+        return DatabaseWhereClauseQueryPart.Create(WhereClause.CreateWhereClause(left.Parameter, right.Parameter, ConditionOperatorType.Not, clauseType));
     }
 
     protected override DatabaseWhereClauseQueryPart VisitOrElse(BinaryExpression expression)
@@ -81,6 +86,18 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
     protected override DatabaseWhereClauseQueryPart VisitContains(MethodCallExpression expression)
     {
         var whereClause = VisitCall(expression, ConditionOperatorType.Contains);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitInclude(MethodCallExpression expression, bool condition)
+    {
+        var whereClause = VisitCall(expression, condition ? ConditionOperatorType.In : ConditionOperatorType.NotIn);
+        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+    }
+
+    protected override DatabaseWhereClauseQueryPart VisitCheckValue(MethodCallExpression expression, bool condition)
+    {
+        var whereClause = VisitCall(expression, condition ? ConditionOperatorType.IsNotNull : ConditionOperatorType.IsNull);
         return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
     }
 
@@ -150,31 +167,78 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
     {
         DatabaseWhereClauseQueryPart? left = null;
         DatabaseWhereClauseQueryPart? right = null;
-        if (operatorType == ConditionOperatorType.Contains)
+        MemberExpression? memberExpression = null;
+        ConstantExpression? constantExpression= null;
+
+        var memberIndex = 0;
+        if (expression.Arguments[0] is MemberExpression)
         {
-            if (expression.Arguments[0] is MemberExpression memberExpression)
-            {
-                if (memberExpression.Type.IsArray)
+            memberExpression = expression.Arguments[0] as MemberExpression;
+        }
+        else if (expression.Arguments[1] is MemberExpression)
+        {
+            memberExpression = expression.Arguments[1] as MemberExpression;
+            memberIndex = 1;
+        }
+
+        if (memberExpression == null)
+            throw new ArgumentNullException("asd");//ToDo
+
+        switch (operatorType)
+        {
+            //ToDo Replace Expression Visutor  وقتی از سمت متد بر اساس فیلتر بیاید قبلش بااید Parmaeter 
+            //با بقیه یکی شود
+            case ConditionOperatorType.Contains when memberExpression.Type is { IsArray: true }:
+            case ConditionOperatorType.In:
                 {
                     operatorType = ConditionOperatorType.In;
+                    left = Visit(expression.Arguments[memberIndex]);
+                    var value = Expression.Lambda(memberExpression).Compile().FastDynamicInvoke();
+                    right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(value, GetValueType(value), memberExpression.Member.Name));
+                    break;
+                }
+            case ConditionOperatorType.NotIn:
+                {
                     left = Visit(expression.Arguments[1]);
                     var value = Expression.Lambda(memberExpression).Compile().FastDynamicInvoke();
-                    right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(value, GetValueType(value), parameterName: memberExpression.Member.Name));
+                    right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(value, GetValueType(value), memberExpression.Member.Name));
+                    break;
                 }
-                else
+            case ConditionOperatorType.Equal:
+            case ConditionOperatorType.NotEqual:
+            case ConditionOperatorType.Like:
+            case ConditionOperatorType.Contains when !memberExpression.Type.IsArray && memberExpression.Type == typeof(string):
+            case ConditionOperatorType.RightLike:
+            case ConditionOperatorType.LeftLike:
                 {
+                    left = Visit(memberExpression);
+                    var value = Expression.Lambda(expression.Arguments[0]).Compile().FastDynamicInvoke();
+                    right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(value, GetValueType(value), memberExpression.Member.Name));
+                    break;
                 }
-            }
+            case ConditionOperatorType.Between:
+                break;
+            case ConditionOperatorType.IsNull:
+                break;
+            case ConditionOperatorType.IsNotNull:
+                break;
+            case ConditionOperatorType.NotLike:
+            case ConditionOperatorType.NotRightLike:
+            case ConditionOperatorType.NotLeftLike:
+                break;
+            case ConditionOperatorType.And:
+            case ConditionOperatorType.Or:
+            case ConditionOperatorType.Set:
+            case ConditionOperatorType.None:
+            case ConditionOperatorType.GreaterThan:
+            case ConditionOperatorType.GreaterThanEqual:
+            case ConditionOperatorType.LessThan:
+            case ConditionOperatorType.LessThanEqual:
+            case ConditionOperatorType.Not:
+            default:
+                throw new ArgumentOutOfRangeException(nameof(operatorType), operatorType, null);
         }
-        else if (operatorType == ConditionOperatorType.Equal)
-        {
-            if (expression.Object is MemberExpression memberExpression)
-            {
-                left = Visit(memberExpression);
-                var value = Expression.Lambda(expression.Arguments[0]).Compile().FastDynamicInvoke();
-                right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(value, GetValueType(value), parameterName: memberExpression.Member.Name));
-            }
-        }
+
 
         if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
             right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
@@ -190,15 +254,13 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     private DatabaseWhereClauseQueryPart VisitBinary(BinaryExpression expression, ConditionOperatorType operatorType = ConditionOperatorType.And)
     {
-        DatabaseWhereClauseQueryPart? left = null;
+        var left = Visit(expression.Left);
         DatabaseWhereClauseQueryPart? right = null;
-        left = Visit(expression.Left);
 
         if (operatorType == ConditionOperatorType.Equal)
         {
             if (IsNull(expression.Right))
             {
-                var property = new ColumnPropertyInfo();
                 right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(null, null, null));
                 operatorType = ConditionOperatorType.IsNull;
             }
@@ -214,9 +276,8 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
         {
             if (IsNull(expression.Right))
             {
-                var property = new ColumnPropertyInfo();
                 right = DatabaseWhereClauseQueryPart.Create(WhereClause.CreateParameterClause(null, null, null));
-                operatorType = ConditionOperatorType.NotIsNull;
+                operatorType = ConditionOperatorType.IsNotNull;
             }
             else
             {
@@ -231,7 +292,7 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
             right = Visit(expression.Right);
         }
 
-        if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
+        if (right != null && right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
             right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
 
         var clauseType = ClauseType.None;

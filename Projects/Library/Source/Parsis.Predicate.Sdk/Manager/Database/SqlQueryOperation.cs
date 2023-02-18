@@ -17,14 +17,6 @@ public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where 
         return Task.FromResult(true); // todo
     }
 
-    //protected override async Task<DatabaseQueryPartCollection> SelectAsync() => await RunQueryAsync(QueryOperationType.GetData);
-
-    //protected override async Task<DatabaseQueryPartCollection> InsertAsync() => await RunQueryAsync(QueryOperationType.Add);
-
-    //protected override async Task<DatabaseQueryPartCollection> UpdateAsync() => await RunQueryAsync(QueryOperationType.Edit);
-
-    //protected override async Task<DatabaseQueryPartCollection> DeleteAsync() => await RunQueryAsync(QueryOperationType.Remove);
-
     protected override async Task<DatabaseQueryPartCollection> RunQueryAsync()
     {
         if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
