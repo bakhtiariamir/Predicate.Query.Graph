@@ -92,9 +92,12 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 {
                     if (whereClause.Operator is not ConditionOperatorType.IsNotNull and not ConditionOperatorType.IsNull)
                     {
+                        if (whereClause.Right is {PartType: PartType.ParameterInfo} && (whereClause.Right.ValueType?.IsArray ?? false))
+                            yield break;
+
                         sqlParameter = GetParameters(whereClause.Left)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
                         var valueParameter = GetParameters(whereClause.Right)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
-                        sqlParameter.ParameterName = !string.IsNullOrWhiteSpace(valueParameter.ParameterName) ? valueParameter.ParameterName : $"@{SetParameterName(whereClause.Left?.ColumnPropertyInfo, whereClause.Index)}";
+                        sqlParameter.ParameterName = valueParameter.ParameterName;
                         sqlParameter.Value = valueParameter.Value;
                         yield return sqlParameter;
                     }
@@ -115,7 +118,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 break;
             case PartType.ParameterInfo:
                 sqlParameter = new SqlParameter {
-                    ParameterName = $"@{whereClause.ParameterName}",
+                    ParameterName = SetParameterName(whereClause),
                     Value = parameter.Value
                 };
                 yield return sqlParameter;
@@ -148,6 +151,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                         var left = SetWhereClauseText(wherePart.Left);
                         string? right = null;
                         var isString = false;
+                        var isArray = false;
                         if (wherePart.Right is null && wherePart.Operator != ConditionOperatorType.None)
                             throw new NotFound(whereClause.ToString(), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
 
@@ -158,19 +162,29 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                         else
                         {
                             right = SetWhereClauseText(wherePart.Right);
+                            isArray = wherePart.Right?.ValueType?.IsArray ?? false;
                             isString = wherePart.Left.ColumnPropertyInfo != null && new[] {ColumnDataType.Char, ColumnDataType.String}.Contains(wherePart.Left.ColumnPropertyInfo.DataType);
                         }
 
-                        return GenerateClausePhrase(left, wherePart.Operator, right, isString);
+                        return GenerateClausePhrase(left, wherePart.Operator, right, isString, isArray);
                     }
                     else
                         throw new NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
                 case PartType.ParameterInfo:
 
-                    if (!string.IsNullOrWhiteSpace(whereClause.ParameterName))
-                        return !string.IsNullOrWhiteSpace(whereClause.ParameterName) ? $"@{whereClause.ParameterName}" : $"@{SetParameterName(whereClause.ColumnPropertyInfo, whereClause.Index)}";
+                    if (whereClause.ValueType?.IsArray ?? false)
+                    {
+                        if (whereClause.Value is IEnumerable<int> enumerableInt)
+                            return string.Join(", ", enumerableInt);
+                    }
 
-                    return string.Empty;
+                    else if (string.IsNullOrWhiteSpace(whereClause.ParameterName))
+                    {
+                        return $"@{whereClause.ParameterName}";
+                    }
+
+                    return $"@{SetParameterName(whereClause)}";
+
                 default:
                     throw new NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
             }
@@ -211,7 +225,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         return null;
     }
 
-    private static string GenerateClausePhrase(string left, ConditionOperatorType operatorType, string? right, bool isString)
+    private static string GenerateClausePhrase(string left, ConditionOperatorType operatorType, string? right, bool isString, bool isArray = false)
     {
         var startQuote = isString ? "N'" : string.Empty;
         var endQuote = isString ? "'" : string.Empty;
@@ -229,6 +243,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             ConditionOperatorType.LessThan => $"{left} < {right}",
             ConditionOperatorType.LessThanEqual => $"{left} <= {right}",
             ConditionOperatorType.In => $"{left} IN ({right})",
+            ConditionOperatorType.Contains => isArray ? $"{left} IN ({right})" : isString ? $"{left} LIKE {startQuote}{right}{endQuote}" : throw new NotSupported(left, ExceptionCode.DatabaseQueryFilteringGenerator),
             ConditionOperatorType.NotIn => $"{left} NOT IN ({right})",
             ConditionOperatorType.IsNull => $"{left} IS NULL",
             ConditionOperatorType.IsNotNull => $"{left} IS NOT NULL",
@@ -244,7 +259,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
     //ToDo : add these methods in helper for use by all QueryPart
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
-    private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"P_{item.GetCombinedAlias()}_{index ?? 0}";
+    private static string SetParameterName(WhereClause item) => item.ParameterName + (item.Index > 0 ? $"_{item.Index}" : "");
 
     public void ReduceParameter(WhereClause? parameter = null)
     {
@@ -290,6 +305,7 @@ public class WhereClause
     public IColumnPropertyInfo? ColumnPropertyInfo
     {
         get;
+        private set;
     }
 
     public object? Value
@@ -363,6 +379,8 @@ public class WhereClause
     public void SetValue(object? value) => Value = value;
 
     public void SetIndex(int index) => Index = index;
+
+    public void SetParameterColumnInfo(IColumnPropertyInfo columnPropertyInfo) => ColumnPropertyInfo = columnPropertyInfo;
 }
 
 public enum ClauseType

@@ -1,4 +1,6 @@
-﻿namespace Parsis.Predicate.Sdk.Helper;
+﻿using System.Net.Http.Headers;
+
+namespace Parsis.Predicate.Sdk.Helper;
 
 public static class ExpressionExtensionMethodHelper
 {
@@ -15,5 +17,5 @@ public static class ExpressionExtensionMethodHelper
     public static bool IsNull(this object? input) => input == null;
 
     public static bool IsNotNull(this object? input) => input != null;
-
+    public static bool Between<T>(T item1, T item2, T input) => true;
 }

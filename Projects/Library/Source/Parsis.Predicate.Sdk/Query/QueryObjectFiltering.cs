@@ -3,6 +3,7 @@ using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace Parsis.Predicate.Sdk.Query;
 
@@ -58,8 +59,10 @@ public class FilterPredicate<TObject> where TObject : IQueryableObject
         set;
     }
 
-    public FilterPredicate(Expression<Func<TObject, bool>> expression)
+    internal FilterPredicate(Expression<Func<TObject, bool>> expression)
     {
         Expression = expression;
     }
+
+    public static FilterPredicate<TObject> CreateFilter(Expression<Func<TObject, bool>> expression) => new (expression);
 }

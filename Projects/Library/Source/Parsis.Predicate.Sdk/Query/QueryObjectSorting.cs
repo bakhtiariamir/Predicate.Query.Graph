@@ -35,9 +35,11 @@ public class SortPredicate<TObject> where TObject : IQueryableObject
         get;
     }
 
-    public SortPredicate(Expression<Func<TObject, object>> expression, DirectionType directionType)
+    internal SortPredicate(Expression<Func<TObject, object>> expression, DirectionType directionType)
     {
         Expression = expression;
         DirectionType = directionType;
     }
+
+    public static SortPredicate<TObject> CreateSorPredicate(Expression<Func<TObject, object>> expression, DirectionType directionType) => new (expression, directionType);
 }

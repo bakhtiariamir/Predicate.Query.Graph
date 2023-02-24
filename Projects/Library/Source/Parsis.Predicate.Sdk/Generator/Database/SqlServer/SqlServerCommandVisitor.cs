@@ -59,7 +59,7 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
         throw new System.Exception(); //todo
     }
 
-    protected override DatabaseCommandQueryPart VisitConstant(ConstantExpression expression, Expression? previousExpression = null)
+    protected override DatabaseCommandQueryPart VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
         var value = expression.GetObject() ?? throw new NotSupported("easd"); //todo
 

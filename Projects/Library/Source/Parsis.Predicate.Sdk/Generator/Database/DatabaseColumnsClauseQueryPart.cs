@@ -67,8 +67,21 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
             item.ColumnName,
             item.Parent
         }).ToList();
+        var relatedObjects = list.Where(item => item.Type.GetInterface(nameof(IQueryableObject)) != null && item.Parent == null).ToArray();
+        var removeRelatedObjects = new List<IColumnPropertyInfo>();
+        if (relatedObjects.Any())
+        {
+            foreach (var relatedObject in relatedObjects)
+            {
+                if (list.Any(item => item.Parent?.Name == relatedObject.Name))
+                {
+                    removeRelatedObjects.Add(relatedObject);
+                    continue;
+                }
+            }
+        }
 
-        var columns = list.Where(property => list.All(item => item.DataSet != property.Name || (item.Parent != null && item.IsPrimaryKey))).ToList();
+        var columns = list.Where(property => !(removeRelatedObjects.Contains(property) && property.Parent == null)).ToList();
 
         var column = new DatabaseColumnsClauseQueryPart(columns);
         column.SetText();

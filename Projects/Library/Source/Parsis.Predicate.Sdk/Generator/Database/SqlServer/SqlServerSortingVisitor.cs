@@ -11,21 +11,35 @@ public class SqlServerSortingVisitor : DatabaseVisitor<DatabaseOrdersByClauseQue
     {
     }
 
+    protected override DatabaseOrdersByClauseQueryPart VisitConvert(UnaryExpression expression, string? memberName = null)
+    {
+        if (string.IsNullOrWhiteSpace(memberName))
+            return Visit(expression.Operand, memberName);
+
+        var memberInfo = expression.Operand.Type.GetInterfaces().SelectMany(item => item.GetMember("Id")).FirstOrDefault() ?? throw new System.Exception(); //todo
+        return Visit(Expression.MakeMemberAccess(expression.Operand, memberInfo));
+    }
+
     protected override DatabaseOrdersByClauseQueryPart VisitMember(MemberExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (expression.Expression != null && expression.Expression.NodeType != ExpressionType.Parameter)
+        {
+            return Visit(expression.Expression, expression.Member.Name);
+        }
+
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         return DatabaseOrdersByClauseQueryPart.Create(fields.Select(item => new ColumnSortPredicate(item)).ToArray());
     }
 
     protected override DatabaseOrdersByClauseQueryPart VisitParameter(ParameterExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         return DatabaseOrdersByClauseQueryPart.Create(fields.Select(item => new ColumnSortPredicate(item)).ToArray());
     }
 
     protected override DatabaseOrdersByClauseQueryPart VisitNewArray(NewArrayExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         return DatabaseOrdersByClauseQueryPart.Create(fields.Select(item => new ColumnSortPredicate(item)).ToArray());
     }
 }

@@ -32,7 +32,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
         get;
     }
 
-    protected override TResult VisitConvert(UnaryExpression expression) => Visit(expression.Operand);
+    protected override TResult VisitConvert(UnaryExpression expression, string? memberName = null) => Visit(expression.Operand, memberName);
 
     protected bool IsNull(Expression expression)
     {
@@ -42,34 +42,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
         return false;
     }
 
-    protected Type? GetValueType(object? value)
-    {
-        if (value is null) return null;
-
-        switch (value)
-        {
-            case int:
-                return typeof(int);
-            case long:
-                return typeof(long);
-            case float:
-                return typeof(float);
-            case double:
-                return typeof(double);
-            case decimal:
-                return typeof(decimal);
-            case byte:
-                return typeof(byte);
-            case bool:
-                return typeof(bool);
-            case char:
-            case string:
-                return typeof(string);
-            default:
-                return null;
-        }
-    }
-
+    protected Type? GetValueType(object? value) => value?.GetType();
     protected IEnumerable<IColumnPropertyInfo>? GetProperty(Expression expression, IDatabaseObjectInfo objectInfo, ICacheInfoCollection cacheObjectCollection, bool isCondition = false)
     {
         Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, IDatabaseObjectInfo?>? getConvertedObjectInfo = null;
@@ -92,7 +65,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
 
         Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
 
-        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>> getMemberExpressions = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>>? getMemberExpressions = null;
 
         getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
         {

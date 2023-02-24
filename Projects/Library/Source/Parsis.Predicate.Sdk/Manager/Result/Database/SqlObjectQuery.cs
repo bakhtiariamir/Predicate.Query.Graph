@@ -20,7 +20,7 @@ public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
 
     public override void UpdateParameter(params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
     {
-        var newParam = parameters.FirstOrDefault(item => string.Equals(parameter.ParameterName, $"@{item.Name}", StringComparison.CurrentCultureIgnoreCase));
+        var newParam = parameters.FirstOrDefault(item => string.Equals(parameter.ParameterName, item.Name, StringComparison.CurrentCultureIgnoreCase));
         if (newParam != null)
             parameter.Value = newParam.Value;
     });

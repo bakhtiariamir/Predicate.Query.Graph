@@ -36,7 +36,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
 
     internal TResult Generate(Expression expression) => Visit(expression);
 
-    protected virtual TResult Visit(Expression expression, Expression? previousExpression = null)
+    protected virtual TResult Visit(Expression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
         switch (expression.NodeType)
         {
@@ -68,10 +68,10 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
                 return VisitLessThanOrEqual((BinaryExpression)expression);
 
             case ExpressionType.Constant:
-                return VisitConstant((ConstantExpression)expression, previousExpression);
+                return VisitConstant((ConstantExpression)expression, memberName, memberExpression);
 
             case ExpressionType.Convert:
-                return VisitConvert((UnaryExpression)expression);
+                return VisitConvert((UnaryExpression)expression, memberName);
 
             case ExpressionType.New:
                 return VisitNew((NewExpression)expression);
@@ -170,12 +170,12 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         throw new NotImplementedException();
     }
 
-    protected virtual TResult VisitConstant(ConstantExpression expression, Expression? previousExpression = null)
+    protected virtual TResult VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
         throw new NotImplementedException();
     }
 
-    protected virtual TResult VisitConvert(UnaryExpression expression)
+    protected virtual TResult VisitConvert(UnaryExpression expression, string? memberName = null)
     {
         throw new NotImplementedException();
     }
