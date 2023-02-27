@@ -2,13 +2,13 @@
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
+using Parsis.Predicate.Sdk.Info;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
 
 public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 {
-    private int _index = 0;
     private string? _text;
 
     public override string? Text
@@ -261,26 +261,53 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
     private static string SetParameterName(WhereClause item) => item.ParameterName + (item.Index > 0 ? $"_{item.Index}" : "");
 
-    public void ReduceParameter(WhereClause? parameter = null)
+    public void ReduceParameter(WhereClause? parameter = null, Dictionary<string, int>? parameterIndex = null)
     {
+        parameterIndex ??= new Dictionary<string, int>();
         parameter ??= Parameter;
-        if (parameter.Left is {PartType: PartType.ParameterInfo})
+
+        switch (parameter.Left)
         {
-            parameter.Left.SetIndex(_index++);
-        }
-        else if (parameter.Left is {PartType: PartType.WhereClause})
-        {
-            ReduceParameter(parameter.Left);
+            case { PartType: PartType.ParameterInfo } when parameter?.Left.ParameterName is null:
+                throw new ArgumentNullException($"Parameter can not be null for {parameter?.ColumnPropertyInfo?.ColumnName}.");
+            case { PartType: PartType.ParameterInfo }:
+                {
+                    SetParameterIndex(parameter.Left, parameterIndex);
+                    parameter?.Left.SetIndex(parameterIndex[parameter?.Left.ParameterName!]);
+                    break;
+                }
+            case { PartType: PartType.WhereClause }:
+                ReduceParameter(parameter.Left);
+                break;
         }
 
-        if (parameter.Right is {PartType: PartType.ParameterInfo})
+        if (parameter?.Right is { ParameterName: { } })
         {
-            parameter.Right.SetIndex(_index++);
+            switch (parameter?.Right)
+            {
+                case { PartType: PartType.ParameterInfo } when parameter?.Right.ParameterName is null:
+                    throw new ArgumentNullException($"Parameter can not be null for {parameter?.ColumnPropertyInfo?.ColumnName}.");
+                case { PartType: PartType.ParameterInfo }:
+                    {
+                        SetParameterIndex(parameter.Right, parameterIndex);
+                        parameter?.Right.SetIndex(parameterIndex[parameter?.Right.ParameterName!]);
+                        break;
+                    }
+                case { PartType: PartType.WhereClause }:
+                    ReduceParameter(parameter.Right);
+                    break;
+            }
         }
-        else if (parameter.Right is {PartType: PartType.WhereClause})
+    }
+
+    private static void SetParameterIndex(WhereClause parameter, Dictionary<string, int> parameterIndex)
+    {
+        if (parameterIndex.ContainsKey(parameter?.ParameterName!))
         {
-            ReduceParameter(parameter.Right);
+            parameterIndex[parameter?.ParameterName!] = ++parameterIndex[parameter?.ParameterName!];
         }
+        else
+            parameterIndex.Add(parameter?.ParameterName!, 0);
     }
 }
 

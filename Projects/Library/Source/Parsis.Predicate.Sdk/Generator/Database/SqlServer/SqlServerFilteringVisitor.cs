@@ -18,8 +18,9 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     protected override DatabaseWhereClauseQueryPart VisitAndAlso(BinaryExpression expression)
     {
-        var whereClause = VisitBinary(expression, ConditionOperatorType.And);
-        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+        var left = Visit(expression.Left);
+        var right = Visit(expression.Right);
+        return VisitDatabaseWhereClause(ConditionOperatorType.And, right, left);
     }
 
     protected override DatabaseWhereClauseQueryPart VisitConvert(UnaryExpression expression, string? memberName = null)
@@ -49,8 +50,9 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     protected override DatabaseWhereClauseQueryPart VisitOrElse(BinaryExpression expression)
     {
-        var whereClause = VisitBinary(expression, ConditionOperatorType.Or);
-        return DatabaseWhereClauseQueryPart.Create(whereClause.Parameter);
+        var left = Visit(expression.Left);
+        var right = Visit(expression.Right);
+        return VisitDatabaseWhereClause(ConditionOperatorType.Or, right, left);
     }
 
     protected override DatabaseWhereClauseQueryPart VisitGreaterThan(BinaryExpression expression)
@@ -307,7 +309,7 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     private static DatabaseWhereClauseQueryPart VisitDatabaseWhereClause(ConditionOperatorType operatorType, DatabaseWhereClauseQueryPart right, DatabaseWhereClauseQueryPart left)
     {
-        if (right.Parameter.ColumnPropertyInfo == null && right.Parameter.ParameterName.ToLower() == left.Parameter.ColumnPropertyInfo.ColumnName.ToLower())
+        if (right.Parameter.ParameterName != null && right.Parameter.ColumnPropertyInfo == null && right.Parameter.PartType == PartType.ParameterInfo && right.Parameter.ParameterName.ToLower() == left.Parameter.ColumnPropertyInfo.ColumnName.ToLower())
             right.Parameter.SetParameterColumnInfo(left.Parameter.ColumnPropertyInfo);
 
         if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
