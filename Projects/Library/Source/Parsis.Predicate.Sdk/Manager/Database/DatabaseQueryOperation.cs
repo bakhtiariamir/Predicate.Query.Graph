@@ -14,18 +14,9 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
 
         var validateQuery = await ValidateAsync();
         if (validateQuery)
-        {
-            //return queryObject.QueryOperationType switch {
-            //    QueryOperationType.GetData => await SelectAsync(),
-            //    QueryOperationType.Add => await InsertAsync(),
-            //    QueryOperationType.Edit => await UpdateAsync(),
-            //    QueryOperationType.Remove => await DeleteAsync(),
-            //    _ => throw new System.Exception("Error")
-            //};
             return await RunQueryAsync();
-        }
 
-        throw new System.Exception("asd"); //ToDo
+        throw new System.Exception("database query is not valid"); //ToDo
     }
 
     protected abstract Task<DatabaseQueryPartCollection> RunQueryAsync();

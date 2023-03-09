@@ -30,11 +30,13 @@
     <Compile Remove="Generator\Database\DatabaseInsertQueryPart.cs" />
     <Compile Remove="Generator\Database\SqlServer\SqlServerInsertingVisitor.cs" />
     <Compile Remove="Info\CacheObjectInfo.cs" />
+    <Compile Remove="Info\DatabaseCacheInfoCollection.cs" />
     <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
     <Compile Remove="Query\QueryObjectGrouping.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Builder\Cache\" />
     <Folder Include="Manager\Service\" />
   </ItemGroup>
 

@@ -3,6 +3,9 @@ using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Query;
 
+
+//cache query 
+// => https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/how-to-use-expression-trees-to-build-dynamic-queries
 public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecting<TObject>, ICollection<QueryColumn<TObject>>> where TObject : IQueryableObject
 {
     private ICollection<QueryColumn<TObject>> _columns;

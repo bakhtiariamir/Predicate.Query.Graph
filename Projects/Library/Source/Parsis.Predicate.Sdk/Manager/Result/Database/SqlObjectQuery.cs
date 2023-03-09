@@ -28,8 +28,6 @@ public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
 
 public class SqlObjectQueryGenerator : IObjectQueryGenerator<SqlParameter, SqlObjectQuery, DatabaseQueryPartCollection>
 {
-    //public ISqlQuery? GenerateResult(QueryOperationType operationType, DatabaseQueryPartCollection query) => throw new NotImplementedException();
-
     public SqlObjectQuery? GenerateResult(QueryOperationType operationType, DatabaseQueryPartCollection query)
     {
         var phrase = string.Empty;
