@@ -40,7 +40,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
         };
         //ToDo : Need PersonObjectInfo For Get id
         var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey);
-        return $"{joinString} {joinPredicate.JoinObjectInfo} AS [{joinPredicate.JoinColumn}] ON [{joinPredicate.JoinColumn}].[{joinProperty.ColumnName}] = {joinProperty.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}]";
+        return $"{joinString} {joinPredicate.JoinObjectInfo} AS [{joinPredicate.JoinColumn}] ON [{joinPredicate.JoinColumn}].[{joinProperty.ColumnName}] = {joinPredicate.JoinColumn.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}]";
     }
 
     public static DatabaseJoinsClauseQueryPart Create(params JoinPredicate[] joinPredicates) => new(joinPredicates);

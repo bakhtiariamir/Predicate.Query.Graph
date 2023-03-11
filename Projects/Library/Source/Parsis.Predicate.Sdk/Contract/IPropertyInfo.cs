@@ -53,4 +53,9 @@ public interface IPropertyInfo
     {
         get;
     }
+
+    bool IsObject
+    {
+        get;
+    }
 }

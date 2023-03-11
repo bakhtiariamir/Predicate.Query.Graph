@@ -100,6 +100,14 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                 {
                     property = new ColumnPropertyInfo(databaseObjectInfo.Schema, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, databaseObjectInfo.DataSet, false, false, ColumnDataType.Object, DatabaseFieldType.Column, databaseObjectInfo.ObjectType);
                 }
+                else
+                {
+                    var exprProperty = databaseObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == parameterExpression.Name);
+                    if (exprProperty != null)
+                    {
+                        property = exprProperty;
+                    }
+                }
             }
             else if (expr is NewArrayExpression arrayExpression)
             {

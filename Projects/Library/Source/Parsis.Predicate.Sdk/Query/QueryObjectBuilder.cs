@@ -6,7 +6,7 @@ public class QueryObjectBuilder<TObject> : IQueryObjectBuilder where TObject : I
 {
     private QueryObject<TObject> _queryObjectObject;
 
-    public QueryObjectBuilder(QueryObject<TObject> queryObject) => _queryObjectObject = queryObject;
+    private QueryObjectBuilder(QueryObject<TObject> queryObject) => _queryObjectObject = queryObject;
 
     public static QueryObjectBuilder<TObject> Init(QueryObject<TObject> queryObject) => new(queryObject);
 
@@ -21,6 +21,13 @@ public class QueryObjectBuilder<TObject> : IQueryObjectBuilder where TObject : I
     {
         if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
         _queryObjectObject.Columns = objectSelecting.Validate().Return();
+        return this;
+    }
+
+    public QueryObjectBuilder<TObject> SetSelecting(ICollection<QueryColumn<TObject>> columns)
+    {
+        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
+        _queryObjectObject.Columns = columns;
         return this;
     }
 

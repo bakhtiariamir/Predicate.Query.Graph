@@ -2,7 +2,7 @@
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
-using Parsis.Predicate.Sdk.Info;
+using Parsis.Predicate.Sdk.Query;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
@@ -21,7 +21,14 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
     public static DatabaseWhereClauseQueryPart Create(WhereClause property) => new(property);
 
-    public void SetText() => _text = SetWhereClauseText(Parameter);
+    public void SetText(ReturnType returnType = ReturnType.None, WhereClause? returnClause = null) =>
+        _text = returnType switch 
+        {
+            ReturnType.Record => ReturnResultRecordWhereClause(returnClause ?? throw new ArgumentNullException($"object prameter key can not be null.")),
+            _ or ReturnType.None => SetWhereClauseText(Parameter)
+        };
+
+    private static string ReturnResultRecordWhereClause(WhereClause returnClause) => $"{returnClause.ColumnPropertyInfo?.GetSelector()}.[{returnClause.ColumnPropertyInfo?.ColumnName}] = @ResultId";
 
     public static ICollection<IColumnPropertyInfo> GetColumnProperties(WhereClause parameter)
     {
@@ -192,6 +199,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
         return null;
     }
+
 
     private static WhereClause? ReduceWhereClause(WhereClause? parameter)
     {

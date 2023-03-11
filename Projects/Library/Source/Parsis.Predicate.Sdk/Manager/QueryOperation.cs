@@ -21,7 +21,7 @@ public abstract class QueryOperation<TObject, TResult> : IQueryOperation<TObject
     public void Init(QueryOperationType queryOperationType)
     {
         QueryObject = QueryObject<TObject>.Init(queryOperationType);
-        QueryBuilder = new QueryObjectBuilder<TObject>(QueryObject);
+        QueryBuilder = QueryObjectBuilder<TObject>.Init(QueryObject);
     }
 
     protected abstract Task<bool> ValidateAsync();

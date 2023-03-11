@@ -12,27 +12,44 @@ namespace Parsis.Predicate.Sdk.Builder.Database;
 public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQueryableObject
 {
     private IDatabaseObjectInfo _objectInfo;
-
     public SqlServerQuery(IQueryContext context) : base(context)
     {
         _objectInfo = Context.DatabaseCacheInfoCollection?.GetLastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryPartCollection.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override Task GenerateInsertAsync(QueryObject<TObject> query)
+    protected override async Task GenerateInsertAsync(QueryObject<TObject> query)
     {
         var command = query.Command ?? throw new NotSupported("a");
         var commandSqlVisitor = new SqlServerCommandVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Add);
-        return Task.CompletedTask;
+
+        if (QueryPartCollection.Command != null && command.ReturnType == ReturnType.Record && QueryPartCollection.Command.CommandParts.ContainsKey("result"))
+        {
+            if (query.Columns == null)
+                throw new ArgumentNullException($"Columns for insert query in return record mode for {typeof(TObject).Name} can not be null.");
+
+            var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
+            var sqlQuery = await Build(selectQuery);
+            QueryPartCollection.ResultQuery = sqlQuery;
+        }
     }
 
-    protected override Task GenerateUpdateAsync(QueryObject<TObject> query)
+    protected override async Task GenerateUpdateAsync(QueryObject<TObject> query)
     {
         var command = query.Command ?? throw new NotSupported("a");
         var commandSqlVisitor = new SqlServerCommandVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Edit);
-        return Task.CompletedTask;
+        if (QueryPartCollection.Command != null && command.ReturnType == ReturnType.Record && QueryPartCollection.Command.CommandParts.ContainsKey("result"))
+        {
+            if (query.Columns == null)
+                throw new ArgumentNullException($"Columns for update query in return record mode for {typeof(TObject).Name} can not be null.");
+
+
+            var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
+            var sqlQuery = await Build(selectQuery);
+            QueryPartCollection.ResultQuery = sqlQuery;
+        }
     }
 
     protected override Task GenerateDeleteAsync(QueryObject<TObject> query)
@@ -90,8 +107,24 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 
     protected override Task GenerateWhereAsync(QueryObject<TObject> query)
     {
+        if (query.Filters?.ReturnType != ReturnType.None)
+        {
+            var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey) ?? throw new ArgumentNullException("Primary key can not be null.");
+            var clause = new WhereClause(key, null, ConditionOperatorType.Equal);
+            switch (query.Filters?.ReturnType)
+            {
+                case ReturnType.Record:
+                    var whereClause = DatabaseWhereClauseQueryPart.Create(clause);
+                    whereClause.SetText(ReturnType.Record, clause);
+                    QueryPartCollection.WhereClause = whereClause;
+                    break;
+            }
+        }
+
         var expression = query.Filters?.Expression;
-        if (expression != null)
+        if (expression == null)
+            return Task.CompletedTask;
+
         {
             if (expression.NodeType != ExpressionType.Lambda)
                 throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -114,17 +147,17 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
     protected override Task GeneratePagingAsync(QueryObject<TObject> query)
     {
         var expression = query.Paging?.Predicate;
-        if (expression != null)
-        {
-            if (expression.NodeType != ExpressionType.Lambda)
-                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+        if (expression == null)
+            return Task.CompletedTask;
 
-            var lambdaExpression = (LambdaExpression)expression;
-            var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+        if (expression.NodeType != ExpressionType.Lambda)
+            throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
-            var pagingVisitor = new SqlServerPagingVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
-            QueryPartCollection.Paging = pagingVisitor.Generate(body);
-        }
+        var lambdaExpression = (LambdaExpression)expression;
+        var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+        var pagingVisitor = new SqlServerPagingVisitor(Context.DatabaseCacheInfoCollection, _objectInfo, null);
+        QueryPartCollection.Paging = pagingVisitor.Generate(body);
 
         return Task.CompletedTask;
     }
@@ -169,33 +202,34 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         {
             foreach (var parameter in parameters)
             {
-                if (parameter.Parent is not null && parameter.Parent.Name != _objectInfo.DataSet)
-                {
-                    if (joins.All(item => !item.Item1.Equals(parameter.Parent)))
-                    {
-                        joins.Add(new Tuple<IColumnPropertyInfo, int>(parameter.Parent, level));
-                        getJoins?.Invoke(new[] {parameter.Parent}, ++level);
-                    }
-                }
+                if (parameter.Parent is null || parameter.Parent.Name == _objectInfo.DataSet)
+                    continue;
+
+                if (joins.Any(item => item.Item1.Equals(parameter.Parent)))
+                    continue;
+
+                joins.Add(new Tuple<IColumnPropertyInfo, int>(parameter.Parent, level));
+                getJoins?.Invoke(new[] {parameter.Parent}, ++level);
             }
         };
 
         getJoins(JoinColumns.Where(item => item.Parent is not null && item.Parent.Name != _objectInfo.DataSet).DistinctBy(item => new {item.Schema, item.DataSet, item.ColumnName, item.Name}).ToList(), 0);
         var queryObjectJoining = QueryObjectJoining.Init();
-        joins.OrderByDescending(item => item.Item2).Select(item => item).GroupBy(item => new {item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name}).ToList().ForEach(item =>
+
+        joins.OrderBy(item => item.Item2).Select(item => item).GroupBy(item => new {item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name}).ToList().ForEach(item =>
         {
             var index = 0;
             foreach (var joinPredicate in item.Select(item => item))
             {
                 var join = joinPredicate.Item1;
                 var order = joinPredicate.Item2;
-                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Parent.Type, out IDatabaseObjectInfo? propertyObjectInfo))
+                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Parent.Type, out var propertyObjectInfo))
                     throw new NotFound(@join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (propertyObjectInfo == null)
                     throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Type, out IDatabaseObjectInfo? relatedObjectInfo))
+                if (!Context.DatabaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Type, out var relatedObjectInfo))
                     throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (relatedObjectInfo == null)
@@ -214,7 +248,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             }
         });
 
-        var joinPredicates = queryObjectJoining.Validate().Return().OrderByDescending(item => item.Order);
+        var joinPredicates = queryObjectJoining.Validate().Return().OrderBy(item => item.Order);
         var databaseJoinClauses = new List<DatabaseJoinsClauseQueryPart>();
         foreach (var join in joinPredicates)
         {
@@ -268,12 +302,12 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             default:
                 throw new NotSupported(ExceptionCode.ApiQueryBuilder); //Too
         }
-
-        var commandObject = DatabaseCommandQueryPart.Merge(operationType, commandQueries.ToArray());
+        commandSqlVisitor.AddOption("returnRecord", command.ReturnType);
+        var commandObject = DatabaseCommandQueryPart.Merge(operationType, command.ReturnType, commandQueries.ToArray());
         QueryPartCollection.Command = commandObject;
     }
 
-    private static void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, List<DatabaseCommandQueryPart> commandQueries)
+    private static void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, ICollection<DatabaseCommandQueryPart> commandQueries)
     {
         if (command.ObjectPredicate == null && command.ObjectsPredicate == null) throw new NotFound("as"); //todo
 

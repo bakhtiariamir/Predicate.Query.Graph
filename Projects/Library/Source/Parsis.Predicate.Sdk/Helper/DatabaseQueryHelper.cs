@@ -35,15 +35,15 @@ public static class DatabaseQueryHelper
             throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
         return queryParts.Command.OperationType switch {
-            QueryOperationType.Add => queryParts.Command.GetInsertQuery(),
+            QueryOperationType.Add => queryParts.Command.GetInsertQuery(queryParts),
             QueryOperationType.Remove => queryParts.Command.GetDeleteQuery(),
-            QueryOperationType.Edit => queryParts.Command.GetUpdateQuery(),
+            QueryOperationType.Edit => queryParts.Command.GetUpdateQuery(queryParts),
             QueryOperationType.Merge => queryParts.Command.GetMergeQuery(),
             QueryOperationType.GetData or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
         };
     }
 
-    private static string GetInsertQuery(this DatabaseCommandQueryPart command)
+    private static string GetInsertQuery(this DatabaseCommandQueryPart command, DatabaseQueryPartCollection queryParts)
     {
         var commandParts = command.CommandParts;
         var insert = new StringBuilder();
@@ -62,7 +62,20 @@ public static class DatabaseQueryHelper
                 if (value == null)
                     throw new NotSupported(ExceptionCode.DatabaseObjectInfo); //todo
 
-                insert.Append($"VALUES {value}");
+                insert.Append($"VALUES {value};");
+                if (command.CommandParts.ContainsKey("result") && queryParts.ResultQuery != null)
+                {
+                    var resultQueryParts = queryParts.ResultQuery;
+                    var select = GetSelectQuery(resultQueryParts, out var selectParameter);
+                    //var select = new StringBuilder();
+                    //select.Append($"SELECT {resultQueryParts.Columns.Text} ");
+                    //select.Append($"FROM {resultQueryParts.DatabaseObjectInfo} ");
+                    //select.Append(resultQueryParts.WhereClause != null ? $"WHERE {resultQueryParts.WhereClause.Text} ;" : ";");
+                    insert.AppendLine();
+                    insert.Append($"{commandParts["result"]};");
+                    insert.AppendLine();
+                    insert.AppendLine(select);
+                }
                 break;
             case CommandValueType.Bulk:
 
@@ -72,7 +85,7 @@ public static class DatabaseQueryHelper
         return insert.ToString();
     }
 
-    private static string GetUpdateQuery(this DatabaseCommandQueryPart command)
+    private static string GetUpdateQuery(this DatabaseCommandQueryPart command, DatabaseQueryPartCollection queryParts)
     {
         var commandParts = command.CommandParts;
         var update = new StringBuilder();
@@ -111,7 +124,21 @@ public static class DatabaseQueryHelper
                         update.Append($"SET {values} ");
 
                         if (commandParts.TryGetValue("Where", out var where))
-                            update.Append($"WHERE {where}");
+                            update.Append($"WHERE {where};");
+
+                        if (command.CommandParts.ContainsKey("result") && queryParts.ResultQuery != null)
+                        {
+                            var resultQueryParts = queryParts.ResultQuery;
+                            var select = GetSelectQuery(resultQueryParts, out var selectParameter);
+                            //var select = new StringBuilder();
+                            //select.Append($"SELECT {resultQueryParts.Columns.Text} ");
+                            //select.Append($"FROM {resultQueryParts.DatabaseObjectInfo} ");
+                            //select.Append(resultQueryParts.WhereClause != null ? $"WHERE {resultQueryParts.WhereClause.Text} " : "");
+                            update.AppendLine();
+                            update.Append(commandParts["result"]);
+                            update.AppendLine();
+                            update.AppendLine(select);
+                        }
                     }
                     else
                         throw new NotSupported(""); // todo

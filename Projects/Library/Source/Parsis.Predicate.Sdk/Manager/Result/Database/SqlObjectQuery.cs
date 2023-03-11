@@ -37,8 +37,12 @@ public class SqlObjectQueryGenerator : IObjectQueryGenerator<SqlParameter, SqlOb
             case QueryOperationType.GetData:
                 phrase = query.GetSelectQuery(out parameters);
                 break;
-            //case QueryOperationType.Add:
-            //    phrase = query.GetCommandQuery()
+            case QueryOperationType.Add:
+            case QueryOperationType.Edit:
+            case QueryOperationType.Remove:
+            case QueryOperationType.Merge:
+                phrase = query.GetCommandQuery(out parameters);
+                break;
         }
 
         return new SqlObjectQuery(operationType, parameters, phrase);

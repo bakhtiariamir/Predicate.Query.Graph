@@ -3,6 +3,7 @@ using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
 using Parsis.Predicate.Sdk.Helper;
+using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -41,7 +42,7 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
             } ?? throw new NotFound("asd");
 
             if (value.GetType().IsArray)
-                return DatabaseCommandQueryPart.Merge(null, columnCommandQueryPart, DatabaseCommandQueryPart.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
+                return DatabaseCommandQueryPart.Merge(null, ReturnType.Record, columnCommandQueryPart, DatabaseCommandQueryPart.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
 
             foreach (var column in columnProperties)
             {
@@ -49,8 +50,24 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 
                 if ((column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null)
                     throw new NotSupported("e0"); //todo
+                if (dynamicValue == null)
+                {
+                    column.SetValue(null);
+                    break;
+                }
 
-                column.SetValue(dynamicValue);
+                if (column.ColumnPropertyInfo?.Type.GetInterface(nameof(IQueryableObject)) != null)
+                {
+                    var cacheObject = CacheObjectCollection.GetLastDatabaseObjectInfo(column.ColumnPropertyInfo?.Type!) ?? throw new System.Exception(); //todo
+                    var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey) ?? throw new System.Exception(); //todo
+
+                    var objectColumnValue = Dynamic.InvokeGet(dynamicValue, key.Name);
+                    column.SetValue(objectColumnValue);
+                }
+                else
+                {
+                    column.SetValue(dynamicValue);
+                }
             }
 
             return DatabaseCommandQueryPart.Create(columnProperties);

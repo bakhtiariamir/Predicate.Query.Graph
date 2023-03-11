@@ -52,6 +52,12 @@ public class DatabaseQueryPartCollection : IQueryResult
         get;
         set;
     }
+
+    public DatabaseQueryPartCollection? ResultQuery
+    {
+        get;
+        set;
+    }
 }
 
 public interface IQueryResult

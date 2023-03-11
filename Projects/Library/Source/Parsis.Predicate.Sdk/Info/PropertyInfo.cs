@@ -9,7 +9,7 @@ public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> wh
     {
     }
 
-    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
+    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue, isObject)
     {
     }
 
@@ -74,11 +74,18 @@ public class PropertyInfo : IPropertyInfo
         get;
     }
 
+    public bool IsObject
+    {
+        get;
+        set;
+    }
+
     public PropertyInfo()
     {
     }
 
-    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null)
+    public PropertyInfo(string name, bool isUnique, ColumnDataType dataType, Type type, bool required = false, string? title = null, string? @alias = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false)
+
     {
         Name = name;
         IsUnique = isUnique;
@@ -89,5 +96,6 @@ public class PropertyInfo : IPropertyInfo
         ErrorMessage = errorMessage;
         DefaultValue = defaultValue;
         Type = type;
+        IsObject = isObject;
     }
 }

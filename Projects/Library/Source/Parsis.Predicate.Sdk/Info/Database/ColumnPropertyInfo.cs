@@ -91,7 +91,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     {
     }
 
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue, isObject)
     {
         Schema = schema;
         DataSet = dataSet;
@@ -114,7 +114,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public string GetSelector()
     {
-        if (Parent is not null && Parent.Name != DataSet)
+        if (Parent is not null)
             return $"[{Parent.Name}]";
 
         return $"[{Schema}].[{DataSet}]";
@@ -124,11 +124,24 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
     public string GetJoinCreateSelector() => $"[{Schema}].[{DataSet}] AS {Name}";
 
-    public string GetCombinedAlias()
+    public string GetCombinedAlias(bool getParent = false)
     {
-        if (Parent is not null && Parent.Name != DataSet) return $"{Parent.Name}_{ColumnName}";
+        if (Parent is not null)
+        {
+            if (Parent.Parent != null)
+            {
+                if (getParent)
+                    return $"{Parent.GetCombinedAlias(true)}_{Name}";
 
-        return $"{DataSet}_{ColumnName}";
+                return $"{Parent.GetCombinedAlias(true)}_{ColumnName}";
+            }
+            
+            return $"{Parent.Name}_{Name}";
+        }
+
+        if (!getParent) return $"{DataSet}_{Name}";
+
+        return Name;
     }
 
     public override bool Equals(object? obj)

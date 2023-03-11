@@ -3,6 +3,7 @@ using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
+using Parsis.Predicate.Sdk.Query;
 using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
@@ -69,7 +70,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
     public static DatabaseCommandQueryPart Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
 
-    public static DatabaseCommandQueryPart Merge(QueryOperationType? operationType, params DatabaseCommandQueryPart[] commandParts)
+    public static DatabaseCommandQueryPart Merge(QueryOperationType? operationType, ReturnType returnType = ReturnType.None , params DatabaseCommandQueryPart[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
             throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
@@ -98,33 +99,33 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         if (operationType.HasValue)
             databaseCommandPart.SetOptions(operationType.Value, commandType);
 
-        databaseCommandPart.SetCommandObject();
+        databaseCommandPart.SetCommandObject(returnType);
 
         return databaseCommandPart;
     }
 
-    private void SetCommandObject()
+    private void SetCommandObject(ReturnType returnType)
     {
         switch (OperationType)
         {
             case QueryOperationType.Add:
-                SetInsertQuery();
+                SetInsertQuery(returnType);
                 break;
             case QueryOperationType.Edit:
-                SetUpdateQuery();
+                SetUpdateQuery(returnType);
                 break;
             case QueryOperationType.Remove:
                 SetDeleteQuery();
                 break;
             case QueryOperationType.Merge:
-                SetMergeQuery();
+                SetMergeQuery(returnType);
                 break;
             case QueryOperationType.GetData:
             default: throw new NotSupported(""); // todo
         }
     }
 
-    private void SetInsertQuery()
+    private void SetInsertQuery(ReturnType returnType)
     {
         switch (CommandValueType)
         {
@@ -146,8 +147,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 var recordValue = new List<Tuple<int, string?>>();
                 foreach (var columnProperty in columnProperties)
                 {
-                    if ((columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false && (columnProperty.ColumnPropertyInfo?.IsIdentity ?? true))) continue;
-                    if ((columnProperty.ColumnPropertyInfo?.ReadOnly ?? true)) continue;
+                    if (columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false) continue;
                     if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
                     if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
                     if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
@@ -160,23 +160,25 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                         foreach (var record in records)
                         {
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
+
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
                             var sqlParameter = new SqlParameter(parameterName, dbType) {
-                                Value = columnValue
+                                Value = columnValue ?? DBNull.Value
                             };
                             SqlParameters.Add(sqlParameter);
-                            recordValue.Add(new Tuple<int, string?>(index, columnProperty.ColumnPropertyInfo?.DataType.GetParameterStringBasedOnSqlDbType(parameterName, (object)columnValue)));
+                            recordValue.Add(new Tuple<int, string?>(index, parameterName));
                             index += 1;
                         }
                     }
                     else
                     {
+                        //1 if value is iqueryable object
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
                         var sqlParameter = new SqlParameter(parameterName, dbType) {
-                            Value = columnProperty.Value
+                            Value = columnProperty.Value ?? DBNull.Value
                         };
                         SqlParameters.Add(sqlParameter);
-                        recordValue.Add(new Tuple<int, string?>(0, columnProperty.ColumnPropertyInfo?.DataType.GetParameterStringBasedOnSqlDbType(parameterName, columnProperty.Value)));
+                        recordValue.Add(new Tuple<int, string?>(0, parameterName));
                     }
                 }
 
@@ -189,11 +191,15 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 _commandParts.Add("Selector", selector);
                 _commandParts.Add("Columns", columns);
                 _commandParts.Add("Values", values);
+                if (returnType == ReturnType.Record)
+                    _commandParts.Add("result", "DECLARE @ResultId INT = (SELECT @@IDENTITY) ");
+                else if (returnType == ReturnType.KeyValue)
+                    _commandParts.Add("result", "SELECT @@IDENTITY AS Id");
                 break;
         }
     }
 
-    private void SetUpdateQuery()
+    private void SetUpdateQuery(ReturnType returnType)
     {
         switch (CommandValueType)
         {
@@ -271,6 +277,8 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                         if (columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false)
                         {
                             _commandParts["Where"] = columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value);
+                            if (returnType == ReturnType.Record)
+                                _commandParts.Add("result", $"DECLARE @ResultId INT = @{parameterName}");
                             continue;
                         }
 
@@ -335,7 +343,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         }
     }
 
-    private void SetMergeQuery()
+    private void SetMergeQuery(ReturnType returnType)
     {
         switch (CommandValueType)
         {
@@ -345,9 +353,9 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         }
     }
 
-    private static string BaseSetParameterName(IColumnPropertyInfo item) => $"P_{item.GetCombinedAlias()}";
+    private static string BaseSetParameterName(IColumnPropertyInfo item) => $"{item.Name}";
 
-    private static string SetParameterName(IColumnPropertyInfo item, int? index) => $"{BaseSetParameterName(item)}_{index ?? 0}";
+    private static string SetParameterName(IColumnPropertyInfo item, int? index) => (index == null || index == 0) ? $"{BaseSetParameterName(item)}" : $"{BaseSetParameterName(item)}_{index ?? 0}";
 }
 
 public class CommandPredicate

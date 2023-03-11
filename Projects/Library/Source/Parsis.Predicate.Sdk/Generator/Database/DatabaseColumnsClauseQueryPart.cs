@@ -23,10 +23,31 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
         AggregateFunctionType.Max => $"MAX({SetColumnSelector(item)}) {SetOverPartition(item)} AS MAX_{item.GetCombinedAlias()}",
         AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
         AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
+        //AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {SetColumnAlias(item, (item.Parent != null))}_{item.ColumnName}",
         AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
         //اگر ستون جوین بود شناسه رو نزاره مثل Domain.parentId  چون تو خودش داره یا هر روش دیگه ای
         //
     };
+
+    private string SetColumnAlias(IColumnPropertyInfo item, bool hasParent)
+    {
+        var columnAlias = string.Empty;
+        if (hasParent)
+        {
+            if (item.Parent == null)
+                return columnAlias;
+
+            var parentAliasSelector = SetColumnAlias(item.Parent, hasParent);
+            var parentAlias = !string.IsNullOrWhiteSpace(parentAliasSelector) ? $"{parentAliasSelector}_" : "";
+            columnAlias = $"{parentAlias}{item.Name}";
+        }
+        else
+        {
+            columnAlias = item.Name;
+        }
+
+        return columnAlias;
+    }
 
     private string? SetOverPartition(IColumnPropertyInfo columnPropertyInfo)
     {

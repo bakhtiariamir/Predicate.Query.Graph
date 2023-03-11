@@ -194,6 +194,8 @@ public static class DatabaseObjectInfoHelper
 
     private static void GetColumnPropertyInfo(System.Reflection.PropertyInfo property, string dataSet, List<IColumnPropertyInfo> properties, string schema)
     {
+        var isObject = property.PropertyType.GetInterface(nameof(IQueryableObject)) != null;
+
         var info = property.GetPropertyAttribute<ColumnInfoAttribute>();
         if (info != null)
         {
@@ -201,7 +203,9 @@ public static class DatabaseObjectInfoHelper
             if (info.RankingFunctionType != RankingFunctionType.None && info.AggregateFunctionType != AggregateFunctionType.None) throw new NotSupported(dataSet, info.Name, ExceptionCode.DataSetInfoAttribute, "Property can not become aggregateWindowFunction and rankingWindowFunction");
 
             if (!info.NotMapped)
-                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.IsPrimaryKey, info.IsIdentity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, required, info.Title, null, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue));
+            {
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.IsPrimaryKey, info.IsIdentity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, required, info.Title, null, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject));
+            }
         }
         else
         {
@@ -211,7 +215,7 @@ public static class DatabaseObjectInfoHelper
             var isPrimaryKey = property.GetPropertyAttribute<KeyAttribute>() != null || property.Name == "Id";
             var readOnly = property.GetPropertyAttribute<ReadOnlyAttribute>()?.IsReadOnly ?? property.CanWrite;
             if (!notMapped)
-                properties.Add(new ColumnPropertyInfo(schema, dataSet, property.Name, property.Name, isPrimaryKey, isPrimaryKey, columnDataType, DatabaseFieldType.Column, property.PropertyType, false, readOnly, notMapped, required: required));
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, property.Name, property.Name, isPrimaryKey, isPrimaryKey, columnDataType, DatabaseFieldType.Column, property.PropertyType, false, readOnly, notMapped, required: required, isObject: isObject));
         }
     }
 

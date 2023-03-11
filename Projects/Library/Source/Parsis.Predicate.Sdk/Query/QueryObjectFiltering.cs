@@ -1,9 +1,7 @@
-﻿using Dynamitey;
-using Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Helper;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 
 namespace Parsis.Predicate.Sdk.Query;
 
@@ -11,7 +9,11 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
 {
     private FilterPredicate<TObject> _filterPredicate;
 
-    public QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
+    private QueryObjectFiltering(ReturnType returnType) => _filterPredicate = new FilterPredicate<TObject>(returnType);
+
+    private QueryObjectFiltering(Expression<Func<TObject, bool>> expression) => _filterPredicate = new FilterPredicate<TObject>(expression);
+
+    public static QueryObjectFiltering<TObject> Init(ReturnType returnType) => new(returnType);
 
     public static QueryObjectFiltering<TObject> Init(Expression<Func<TObject, bool>> expression) => new(expression);
 
@@ -29,7 +31,7 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
             return filterPredicate;
         }
 
-        return new(item => true);
+        return new QueryObjectFiltering<TObject>(item => true);
     }
 
     public QueryObjectFiltering<TObject> And(Expression<Func<TObject, bool>> expression) => CreatePredicate(expression, ConnectorOperatorType.And);
@@ -37,12 +39,12 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
     public QueryObjectFiltering<TObject> Or(Expression<Func<TObject, bool>> expression) => CreatePredicate(expression, ConnectorOperatorType.Or);
 
     public FilterPredicate<TObject> Return() => _filterPredicate;
-
+    
     private QueryObjectFiltering<TObject> CreatePredicate(Expression<Func<TObject, bool>> expression, ConnectorOperatorType connectorOperatorType)
     {
         _filterPredicate.Expression = connectorOperatorType switch {
-            ConnectorOperatorType.And => _filterPredicate.Expression.AndAlsoExpression<TObject>(expression),
-            ConnectorOperatorType.Or => _filterPredicate.Expression.OrElseExpression<TObject>(expression),
+            ConnectorOperatorType.And => _filterPredicate.Expression.AndAlsoExpression(expression),
+            ConnectorOperatorType.Or => _filterPredicate.Expression.OrElseExpression(expression),
             _ => _filterPredicate.Expression
         };
         return this;
@@ -53,7 +55,13 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
 
 public class FilterPredicate<TObject> where TObject : IQueryableObject
 {
-    public Expression<Func<TObject, bool>> Expression
+    public Expression<Func<TObject, bool>>? Expression
+    {
+        get;
+        set;
+    }
+
+    public ReturnType ReturnType
     {
         get;
         set;
@@ -62,6 +70,17 @@ public class FilterPredicate<TObject> where TObject : IQueryableObject
     internal FilterPredicate(Expression<Func<TObject, bool>> expression)
     {
         Expression = expression;
+    }
+
+    internal FilterPredicate(ReturnType returnType)
+    {
+        ReturnType = returnType;
+    }
+
+    internal FilterPredicate(Expression<Func<TObject, bool>> expression, ReturnType returnType)
+    {
+        Expression = expression;
+        ReturnType = returnType;
     }
 
     public static FilterPredicate<TObject> CreateFilter(Expression<Func<TObject, bool>> expression) => new (expression);

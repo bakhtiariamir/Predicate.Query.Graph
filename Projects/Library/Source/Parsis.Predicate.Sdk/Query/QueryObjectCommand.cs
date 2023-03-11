@@ -1,4 +1,5 @@
-﻿using Parsis.Predicate.Sdk.Contract;
+﻿using Dynamitey;
+using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using System.Linq.Expressions;
 
@@ -8,15 +9,15 @@ public class QueryObjectCommand<TObject> : IQueryObjectPart<QueryObjectCommand<T
 {
     private ObjectCommand<TObject> _objectCommand;
 
-    private QueryObjectCommand(CommandValueType commandValueType, QueryPartType commandPartType) => _objectCommand = new ObjectCommand<TObject>(commandPartType, commandValueType);
+    private QueryObjectCommand(CommandValueType commandValueType, QueryPartType commandPartType, ReturnType returnType = ReturnType.None) => _objectCommand = new ObjectCommand<TObject>(commandPartType, commandValueType, returnType);
 
-    public static QueryObjectCommand<TObject> InitInsert(CommandValueType commandValueType) => new(commandValueType, QueryPartType.Insert);
+    public static QueryObjectCommand<TObject> InitInsert(CommandValueType commandValueType,  ReturnType returnType = ReturnType.None) => new(commandValueType, QueryPartType.Insert, returnType);
 
-    public static QueryObjectCommand<TObject> InitUpdate(CommandValueType commandValueType) => new(commandValueType, QueryPartType.Update);
+    public static QueryObjectCommand<TObject> InitUpdate(CommandValueType commandValueType, ReturnType returnType = ReturnType.None) => new(commandValueType, QueryPartType.Update, returnType);
 
     public static QueryObjectCommand<TObject> InitDelete(CommandValueType commandValueType) => new(commandValueType, QueryPartType.Delete);
 
-    public static QueryObjectCommand<TObject> InitMerge(CommandValueType commandValueType) => new(commandValueType, QueryPartType.Merge);
+    public static QueryObjectCommand<TObject> InitMerge(CommandValueType commandValueType, ReturnType returnType = ReturnType.None) => new(commandValueType, QueryPartType.Merge, returnType);
 
     public QueryObjectCommand<TObject> Add(Expression<Func<TObject, TObject>> expression)
     {
@@ -52,6 +53,11 @@ public class ObjectCommand<TObject> where TObject : IQueryableObject
     {
         get;
     }
+    public ReturnType ReturnType
+    {
+        get;
+        set;
+    }
 
     public ICollection<Expression<Func<TObject, TObject>>>? ObjectPredicate
     {
@@ -71,10 +77,11 @@ public class ObjectCommand<TObject> where TObject : IQueryableObject
         private set;
     }
 
-    public ObjectCommand(QueryPartType commandPartType, CommandValueType commandValueType)
+    public ObjectCommand(QueryPartType commandPartType, CommandValueType commandValueType, ReturnType returnType = ReturnType.None)
     {
         CommandValueType = commandValueType;
         CommandPartType = commandPartType;
+        ReturnType = returnType;
     }
 
     public void SetObjectPredicate(ICollection<Expression<Func<TObject, TObject>>> predicate) => ObjectPredicate = predicate;
@@ -94,4 +101,12 @@ public class ObjectCommand<TObject> where TObject : IQueryableObject
     public void SetObjectsPredicate(ICollection<Expression<Func<TObject, IEnumerable<TObject>>>> predicates) => ObjectsPredicate = predicates;
 
     public void SetObjectFiltering(QueryObjectFiltering<TObject> filter) => Filter = filter;
+}
+
+public enum ReturnType
+{
+    None,
+    KeyValue,
+    Record,
+    RowAffected
 }

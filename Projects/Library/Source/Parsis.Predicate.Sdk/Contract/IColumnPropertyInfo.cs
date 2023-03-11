@@ -83,7 +83,7 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
 
     string GetJoinCreateSelector();
 
-    string GetCombinedAlias();
+    string GetCombinedAlias(bool getParent = false);
 
     void SetParameterData(string schema, string dataSet, string name, string columnName, ColumnDataType objectType);
 }
