@@ -47,19 +47,20 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
             foreach (var column in columnProperties)
             {
                 var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name) ?? column.ColumnPropertyInfo?.DefaultValue;
+                GetOption("Command", out var command);
+                if (command.ToString() != "Edit" && (column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null)
+                    throw new ArgumentNullException($"Value of {column.ColumnPropertyInfo.Name} can not be null.");
 
-                if ((column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null)
-                    throw new NotSupported("e0"); //todo
                 if (dynamicValue == null)
                 {
                     column.SetValue(null);
-                    break;
+                    continue;
                 }
 
                 if (column.ColumnPropertyInfo?.Type.GetInterface(nameof(IQueryableObject)) != null)
                 {
                     var cacheObject = CacheObjectCollection.GetLastDatabaseObjectInfo(column.ColumnPropertyInfo?.Type!) ?? throw new System.Exception(); //todo
-                    var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey) ?? throw new System.Exception(); //todo
+                    var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new System.Exception(); //todo
 
                     var objectColumnValue = Dynamic.InvokeGet(dynamicValue, key.Name);
                     column.SetValue(objectColumnValue);

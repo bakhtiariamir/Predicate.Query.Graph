@@ -56,18 +56,18 @@ public static class SqlParameterHelper
     };
 
     public static string GetParameterStringBasedOnSqlDbType(this ColumnDataType columnDataType, string parameterName, object? value) => columnDataType switch {
-        ColumnDataType.Char => value != null ? $"N'{parameterName}'" : "NULL",
-        ColumnDataType.String => value != null ? $"N'{parameterName}'" : "NULL",
+        ColumnDataType.Char => value != null ? $"{parameterName}" : "NULL",
+        ColumnDataType.String => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Boolean => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Byte => value != null ? $"'{parameterName}'" : "NULL",
+        ColumnDataType.Byte => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Int => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.UInt => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Long => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Float => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Decimal => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Double => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.DateTime => value != null ? $"'{parameterName}'" : "NULL",
-        ColumnDataType.Object => value != null ? $"'{parameterName}'" : "NULL",
+        ColumnDataType.DateTime => value != null ? $"{parameterName}" : "NULL",
+        ColumnDataType.Object => value != null ? $"{parameterName}" : "NULL",
         ColumnDataType.Structure => value != null ? $"({parameterName})" : "NULL",
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };

@@ -109,7 +109,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
     {
         if (query.Filters?.ReturnType != ReturnType.None)
         {
-            var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey) ?? throw new ArgumentNullException("Primary key can not be null.");
+            var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("Primary key can not be null.");
             var clause = new WhereClause(key, null, ConditionOperatorType.Equal);
             switch (query.Filters?.ReturnType)
             {
@@ -235,7 +235,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                 if (relatedObjectInfo == null)
                     throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey)?.Clone() ?? throw new NotFound(@join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator);
+                var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key)?.Clone() ?? throw new NotFound(@join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 joinColumnPropertyInfo.Parent = @join;
 
@@ -293,7 +293,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         switch (command.CommandValueType)
         {
             case CommandValueType.Record:
-                GenerateRecordCommand(command, commandSqlVisitor, commandQueries);
+                GenerateRecordCommand(command, commandSqlVisitor, commandQueries, operationType);
 
                 break;
             case CommandValueType.Bulk:
@@ -307,7 +307,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         QueryPartCollection.Command = commandObject;
     }
 
-    private static void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, ICollection<DatabaseCommandQueryPart> commandQueries)
+    private static void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, ICollection<DatabaseCommandQueryPart> commandQueries, QueryOperationType operationType)
     {
         if (command.ObjectPredicate == null && command.ObjectsPredicate == null) throw new NotFound("as"); //todo
 
@@ -320,7 +320,10 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 
                 if (objectPredicate is LambdaExpression expression)
                 {
+                    commandSqlVisitor.AddOption("Command", operationType);
                     var queryCommand = commandSqlVisitor.Generate(expression.Body);
+                    commandSqlVisitor.RemoveOption("Command");
+
                     commandQueries.Add(queryCommand);
                 }
                 else

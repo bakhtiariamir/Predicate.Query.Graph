@@ -24,7 +24,7 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
         AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
         AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
         //AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {SetColumnAlias(item, (item.Parent != null))}_{item.ColumnName}",
-        AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.Alias ?? item.GetCombinedAlias()}"
+        AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.GetCombinedAlias()}"
         //اگر ستون جوین بود شناسه رو نزاره مثل Domain.parentId  چون تو خودش داره یا هر روش دیگه ای
         //
     };

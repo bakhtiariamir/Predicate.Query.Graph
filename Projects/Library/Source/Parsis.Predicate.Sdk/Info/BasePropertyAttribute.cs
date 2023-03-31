@@ -4,15 +4,41 @@ namespace Parsis.Predicate.Sdk.Info;
 
 public abstract class BasePropertyAttribute : Attribute
 {
+    public bool Key
+    {
+        get;
+    }
+
     public string Name
     {
         get;
     }
 
-    public bool? Required
+    public string Title
     {
         get;
     }
+
+    public bool Required
+    {
+        get;
+    }
+
+    public bool ReadOnly
+    {
+        get;
+    }
+
+    public bool NotMapped
+    {
+        get;
+    }
+
+    public bool IsUnique
+    {
+        get;
+    }
+
 
     public Dictionary<string, string>? ErrorMessage
     {
@@ -24,29 +50,36 @@ public abstract class BasePropertyAttribute : Attribute
         get;
     }
 
-    public bool IsUnique
-    {
-        get;
-    }
-
     public ColumnDataType DataType
     {
         get;
     }
 
-    public string Title
+    public int MaxLength
     {
         get;
+        set;
     }
 
-    protected BasePropertyAttribute(string name, bool isUnique, ColumnDataType dataType, string? title = null, bool? required = null, object? defaultValue = null, params string[]? errorMessage)
+    public int MinLength
     {
+        get;
+        set;
+    }
+
+    protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, params string[]? errorMessage)
+    {
+        Key = key;
         Name = name;
         IsUnique = isUnique;
         Required = required;
+        ReadOnly = readOnly;
+        NotMapped = notMapped;
         DefaultValue = defaultValue;
         Title = title ?? Name;
         DataType = dataType;
+        MaxLength = maxLength;
+        MinLength = minLength;
         if (errorMessage != null)
         {
             ErrorMessage = new Dictionary<string, string>();

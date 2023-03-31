@@ -20,12 +20,4 @@ public abstract class DatabaseQueryOperation<TObject> : QueryOperation<TObject, 
     }
 
     protected abstract Task<DatabaseQueryPartCollection> RunQueryAsync();
-
-    //protected abstract Task<DatabaseQueryPartCollection> SelectAsync();
-
-    //protected abstract Task<DatabaseQueryPartCollection> InsertAsync();
-
-    //protected abstract Task<DatabaseQueryPartCollection> UpdateAsync();
-
-    //protected abstract Task<DatabaseQueryPartCollection> DeleteAsync();
 }

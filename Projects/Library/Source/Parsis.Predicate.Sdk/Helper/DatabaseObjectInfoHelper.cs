@@ -82,19 +82,38 @@ public static class ObjectInfoHelper
         return new ObjectInfo<IPropertyInfo>(properties, ObjectInfoType.Unknown, type);
     }
 
+    public static IEnumerable<IPropertyInfo> GetObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type)
+    {
+        var objectInfo = cacheInfoCollection.GetLastObjectInfo(type) ?? throw new ArgumentNullException($"Object information is null for {type.Name}.");
+        return objectInfo.PropertyInfos;
+    }
+
+    public static IEnumerable<IPropertyInfo> GetObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type, Func<IPropertyInfo, bool> predicate)
+    {
+        var objectInfo = cacheInfoCollection.GetLastObjectInfo(type) ?? throw new ArgumentNullException($"Object information is null for {type.Name}.");
+        return objectInfo.PropertyInfos.Where(predicate);
+    }
+
+    public static IEnumerable<IPropertyInfo> GetObjectPropertiesInfo<TObject>(this ICacheInfoCollection cacheInfoCollection) => cacheInfoCollection.GetObjectPropertiesInfo(typeof(TObject));
+
+    public static IEnumerable<IPropertyInfo> GetObjectPropertiesInfo<TObject>(this ICacheInfoCollection cacheInfoCollection, Func<IPropertyInfo, bool> predicate) => cacheInfoCollection.GetObjectPropertiesInfo(typeof(TObject), predicate);
+
+
+
     private static void GetPropertyInfo(System.Reflection.PropertyInfo property, List<IPropertyInfo> properties)
     {
+        var isObject = property.PropertyType.GetInterface(nameof(IQueryableObject)) != null;
+
         var info = property.GetPropertyAttribute<BasePropertyAttribute>();
         if (info != null)
         {
-            var required = info.Required ?? false;
-            properties.Add(new Info.PropertyInfo(info.Name, info.IsUnique, info.DataType, property.PropertyType, required, info.Title, null, info.ErrorMessage, info.DefaultValue));
+            properties.Add(new Info.PropertyInfo(info.Key, info.Name, info.IsUnique, info.ReadOnly, info.NotMapped, info.DataType, property.PropertyType, info.Required, info.Title, info.ErrorMessage, info.DefaultValue, isObject, info.MaxLength == 0 ? null : info.MaxLength, info.MinLength == 0 ? null : info.MinLength));
         }
         else
         {
             var required = property.GetPropertyAttribute<RequiredAttribute>() != null || property.PropertyType.IsNullable();
             var columnDataType = property.PropertyType.GetColumnDataType();
-            properties.Add(new Info.PropertyInfo(property.Name, false, columnDataType, property.PropertyType, required, property.Name, null, null, null));
+            properties.Add(new Info.PropertyInfo(property.Name =="Id" , property.Name, false, false, false, columnDataType, property.PropertyType, required, property.Name, null,   null, isObject));
         }
     }
 }
@@ -199,12 +218,11 @@ public static class DatabaseObjectInfoHelper
         var info = property.GetPropertyAttribute<ColumnInfoAttribute>();
         if (info != null)
         {
-            var required = info.Required ?? false;
             if (info.RankingFunctionType != RankingFunctionType.None && info.AggregateFunctionType != AggregateFunctionType.None) throw new NotSupported(dataSet, info.Name, ExceptionCode.DataSetInfoAttribute, "Property can not become aggregateWindowFunction and rankingWindowFunction");
 
             if (!info.NotMapped)
             {
-                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.IsPrimaryKey, info.IsIdentity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, required, info.Title, null, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject));
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.Key, info.Identity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, info.Required, info.Title, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject, info.MaxLength, info.MinLength));
             }
         }
         else
@@ -229,18 +247,18 @@ public static class DatabaseObjectInfoHelper
         }
     }
 
-    public static (string dataSetName, string schemaName, DataSetType dataSetType) DataSetInfo<TObject>(this Type type) where TObject : IQueryableObject => type.GetClassAttribute<DataSetInfoAttribute, (string dataSetName, string schemaName, DataSetType dataSetType)>(item => (item.DataSetName, item.SchemaName, item.Type));
+    public static (string dataSetName, string schemaName, DataSetType dataSetType) DataSetInfo(this Type type) => type.GetClassAttribute<DataSetInfoAttribute, (string dataSetName, string schemaName, DataSetType dataSetType)>(item => (item.DataSetName, item.SchemaName, item.Type));
 
-    public static TValue? GetClassAttribute<TAttribute, TValue>(this Type type, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
+    public static TValue? GetClassAttribute<TAttribute, TValue>(this Type type, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default;
 
     public static TAttribute? GetClassAttribute<TAttribute>(this Type type) => (TAttribute?)type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
 
     public static TValue? GetPropertyAttribute<TObject, TAttribute, TValue>(this Expression<Func<TObject, object>> propertyExpression, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute
         where TObject : IQueryableObject => ((MemberExpression)propertyExpression.Body).Member.GetPropertyAttribute(valueSelector);
 
-    public static TValue? GetPropertyAttribute<TAttribute, TValue>(this System.Reflection.PropertyInfo property, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => property.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
+    public static TValue? GetPropertyAttribute<TAttribute, TValue>(this System.Reflection.PropertyInfo property, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => property.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default;
 
-    public static TValue? GetPropertyAttribute<TAttribute, TValue>(this MemberInfo member, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => member.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default(TValue);
+    public static TValue? GetPropertyAttribute<TAttribute, TValue>(this MemberInfo member, Func<TAttribute, TValue> valueSelector) where TAttribute : Attribute => member.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute attr ? valueSelector(attr) : default;
 
     public static TAttribute? GetPropertyAttribute<TAttribute>(this MemberInfo member) where TAttribute : Attribute => (TAttribute?)member.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault();
 

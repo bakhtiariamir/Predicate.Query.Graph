@@ -4,22 +4,7 @@ namespace Parsis.Predicate.Sdk.Contract;
 
 public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
 {
-    bool IsPrimaryKey
-    {
-        get;
-    }
-
-    bool IsIdentity
-    {
-        get;
-    }
-
-    bool ReadOnly
-    {
-        get;
-    }
-
-    bool NotMapped
+    bool Identity
     {
         get;
     }

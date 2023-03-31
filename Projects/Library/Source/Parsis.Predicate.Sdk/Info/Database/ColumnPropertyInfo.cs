@@ -23,25 +23,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         set;
     }
 
-    public bool IsPrimaryKey
-    {
-        get;
-        set;
-    }
-
-    public bool IsIdentity
-    {
-        get;
-        set;
-    }
-
-    public bool ReadOnly
-    {
-        get;
-        set;
-    }
-
-    public bool NotMapped
+    public bool Identity
     {
         get;
         set;
@@ -91,16 +73,14 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     {
     }
 
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool isPrimaryKey, bool isIdentity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string? alias = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false) : base(name, isUnique, dataType, type, required, title, alias, errorMessage, defaultValue, isObject)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool key, bool identity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength)
     {
         Schema = schema;
         DataSet = dataSet;
         ColumnName = columnName;
-        IsPrimaryKey = isPrimaryKey;
+        Key = key;
         FieldType = fieldType;
-        IsIdentity = isIdentity;
-        ReadOnly = readOnly;
-        NotMapped = notMapped;
+        Identity = identity;
         WindowPartitionColumns = windowPartitionColumns;
         WindowOrderColumns = windowOrderColumns;
         AggregateFunctionType = aggregateFunctionType;
@@ -151,7 +131,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
 
         var column = (IColumnPropertyInfo)obj;
 
-        if (column.DataSet == this.DataSet && column.Schema == this.Schema && column.ColumnName == this.ColumnName && column.Name == this.Name)
+        if (column.DataSet == DataSet && column.Schema == Schema && column.ColumnName == ColumnName && column.Name == Name)
             return true;
 
         return false;
@@ -165,5 +145,5 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         Name = name;
     }
 
-    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, IsPrimaryKey, IsIdentity, DataType, FieldType, Type, IsIdentity, IsUnique, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, Alias, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
+    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, Key, Identity, DataType, FieldType, Type, Identity, IsUnique, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
 }

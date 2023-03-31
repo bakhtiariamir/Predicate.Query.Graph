@@ -9,17 +9,17 @@ public interface IPropertyInfo<out TProperty> : IPropertyInfo where TProperty : 
 
 public interface IPropertyInfo
 {
+    bool Key
+    {
+        get;
+    }
+
     string Name
     {
         get;
     }
 
     string? Title
-    {
-        get;
-    }
-
-    string? Alias
     {
         get;
     }
@@ -35,6 +35,26 @@ public interface IPropertyInfo
     }
 
     bool IsUnique
+    {
+        get;
+    }
+
+    bool ReadOnly
+    {
+        get;
+    }
+    
+    bool NotMapped
+    {
+        get;
+    }
+
+    int? MaxLength
+    {
+        get;
+    }
+
+    int? MinLength
     {
         get;
     }

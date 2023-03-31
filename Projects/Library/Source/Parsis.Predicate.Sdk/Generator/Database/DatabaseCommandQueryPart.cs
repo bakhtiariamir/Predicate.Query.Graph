@@ -147,7 +147,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 var recordValue = new List<Tuple<int, string?>>();
                 foreach (var columnProperty in columnProperties)
                 {
-                    if (columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false) continue;
+                    if (columnProperty.ColumnPropertyInfo?.Key ?? false) continue;
                     if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
                     if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
                     if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
@@ -240,7 +240,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                             };
                             SqlParameters.Add(sqlParameter);
 
-                            if (columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false)
+                            if (columnProperty.ColumnPropertyInfo?.Key ?? false)
                             {
                                 recordsWhere.Add(new Tuple<int, string>(index, columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue)));
                                 continue;
@@ -261,7 +261,6 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                     var valueList = new List<string>();
                     foreach (var columnProperty in columnProperties)
                     {
-                        if ((columnProperty.ColumnPropertyInfo?.ReadOnly ?? true)) continue;
                         if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
                         if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
                         if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
@@ -274,11 +273,11 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                         };
                         SqlParameters.Add(sqlParameter);
 
-                        if (columnProperty.ColumnPropertyInfo?.IsPrimaryKey ?? false)
+                        if (columnProperty.ColumnPropertyInfo?.Key ?? false)
                         {
                             _commandParts["Where"] = columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value);
                             if (returnType == ReturnType.Record)
-                                _commandParts.Add("result", $"DECLARE @ResultId INT = @{parameterName}");
+                                _commandParts.Add("result", $"DECLARE @ResultId INT = {parameterName}");
                             continue;
                         }
 
@@ -308,7 +307,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
                 var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
-                var primaryKey = columnProperties.FirstOrDefault(item => item.ColumnPropertyInfo?.IsPrimaryKey ?? false) ?? throw new NotSupported("asd"); //todo
+                var primaryKey = columnProperties.FirstOrDefault(item => item.ColumnPropertyInfo?.Key ?? false) ?? throw new NotSupported("asd"); //todo
 
                 var primaryKeyColumn = primaryKey?.ColumnPropertyInfo ?? throw new NotSupported("asd"); //todo
                 var parameterName = BaseSetParameterName(primaryKeyColumn);

@@ -25,7 +25,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
         SetText();
     }
 
-    private static string SetColumnName(IColumnPropertyInfo item) => $"{item.Alias ?? item.GetCombinedAlias()}.{item.ColumnName}";
+    private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetCombinedAlias()}.{item.ColumnName}";
 
     private void SetText() => _text = string.Join(" ", Parameter.Select(SetJoinText));
 
@@ -39,7 +39,7 @@ public class DatabaseJoinsClauseQueryPart : DatabaseQueryPart<ICollection<JoinPr
             _ => throw new NotSupported(joinPredicate.JoinType.ToString(), ExceptionCode.DatabaseQueryJoiningGenerator)
         };
         //ToDo : Need PersonObjectInfo For Get id
-        var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.IsPrimaryKey);
+        var joinProperty = joinPredicate.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key);
         return $"{joinString} {joinPredicate.JoinObjectInfo} AS [{joinPredicate.JoinColumn}] ON [{joinPredicate.JoinColumn}].[{joinProperty.ColumnName}] = {joinPredicate.JoinColumn.GetSelector()}.[{joinPredicate.JoinColumn.ColumnName}]";
     }
 

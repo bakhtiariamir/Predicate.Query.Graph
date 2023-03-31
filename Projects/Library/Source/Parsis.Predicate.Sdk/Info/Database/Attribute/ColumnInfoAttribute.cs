@@ -10,22 +10,7 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         get;
     }
 
-    public bool IsPrimaryKey
-    {
-        get;
-    }
-
-    public bool IsIdentity
-    {
-        get;
-    }
-
-    public bool ReadOnly
-    {
-        get;
-    }
-
-    public bool NotMapped
+    public bool Identity
     {
         get;
     }
@@ -60,14 +45,11 @@ public class ColumnInfoAttribute : BasePropertyAttribute
         get;
     }
 
-    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isUnique = false, bool isPrimaryKey = false, bool isIdentity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, object? defaultValue = null, params string[]? errorMessage) : base(name ?? columnName, isUnique, dataType, title, required, defaultValue, errorMessage)
+    public ColumnInfoAttribute(string columnName, ColumnDataType dataType, DatabaseFieldType type, string? name = null, bool isUnique = false, bool key = false, bool identity = false, bool required = false, bool readOnly = false, bool notMapped = false, AggregateFunctionType aggregateFunctionType = AggregateFunctionType.None, RankingFunctionType rankingFunctionType = RankingFunctionType.None, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, string functionName = "", string? title = null, object? defaultValue = null, int maxLength = 0, int minLength = 0, params string[]? errorMessage) : base(key, name ?? columnName, isUnique, dataType, readOnly, notMapped, title, required, defaultValue, maxLength, minLength, errorMessage)
     {
         ColumnName = columnName;
-        IsPrimaryKey = isPrimaryKey;
         Type = type;
-        IsIdentity = isIdentity;
-        ReadOnly = readOnly;
-        NotMapped = notMapped;
+        Identity = identity;
         WindowOrderColumns = windowOrderColumns;
         WindowPartitionColumns = windowPartitionColumns;
         RankingFunctionType = rankingFunctionType;
