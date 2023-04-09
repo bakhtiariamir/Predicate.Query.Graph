@@ -13,10 +13,7 @@ public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> wh
     {
     }
 
-    public virtual TProperty Clone()
-    {
-        throw new NotImplementedException();
-    }
+    public virtual TProperty Clone() => throw new NotImplementedException();
 }
 
 public class PropertyInfo : IPropertyInfo
@@ -126,4 +123,6 @@ public class PropertyInfo : IPropertyInfo
         MaxLength = maxLength;
         MinLength = minLength;
     }
+
+    public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, ErrorMessage, DefaultValue, IsObject, MaxLength, MinLength);
 }

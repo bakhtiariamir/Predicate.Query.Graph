@@ -78,4 +78,6 @@ public interface IPropertyInfo
     {
         get;
     }
+
+    IPropertyInfo ClonePropertyInfo();
 }

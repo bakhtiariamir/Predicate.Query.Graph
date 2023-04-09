@@ -1,15 +1,17 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 
-namespace Parsis.Predicate.Sdk.Builder.Database;
+namespace Parsis.Predicate.Sdk.Builder.Cache;
 
-public class DatabaseQueryContext : QueryContext, IDatabaseQueryContext
+public class CacheQueryContext : QueryContext, IDatabaseQueryContext
 {
     public ICacheInfoCollection CacheInfoCollection
     {
         get;
     }
 
-    public DatabaseQueryContext(ICacheInfoCollection cacheCacheInfoCollection)
+    //IMemoryCache options
+
+    public CacheQueryContext(ICacheInfoCollection cacheCacheInfoCollection)
     {
         CacheInfoCollection = cacheCacheInfoCollection;
     }

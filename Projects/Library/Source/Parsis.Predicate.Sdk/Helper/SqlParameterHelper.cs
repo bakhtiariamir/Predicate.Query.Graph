@@ -5,6 +5,25 @@ using System.Data.SqlClient;
 
 namespace Parsis.Predicate.Sdk.Helper;
 
+
+public static class BaseQueryParameterHelper
+{
+    public static IEnumerable<BaseQueryParameter> ArrayParameters<TDataType>(string baseParameterName, IEnumerable<TDataType> values, ColumnDataType columnDataType, int? index = 0)
+    {
+        var dbType = columnDataType.GetSqlDbType();
+
+        foreach (var value in values)
+        {
+            var parameterName = $"@{baseParameterName}_{index++}";
+            var parameter = new BaseQueryParameter(parameterName, dbType)
+            {
+                Value = value
+            };
+
+            yield return parameter;
+        }
+    }
+}
 public static class SqlParameterHelper
 {
     public static SqlDbType GetSqlDbType(this ColumnDataType columnDataType) => columnDataType switch {

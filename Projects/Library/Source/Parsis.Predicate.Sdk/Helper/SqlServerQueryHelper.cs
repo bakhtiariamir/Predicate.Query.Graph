@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Parsis.Predicate.Sdk.Helper;
 
-public static class DatabaseQueryHelper
+public static class SqlServerQueryHelper
 {
     public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts, out ICollection<SqlParameter>? parameters)
     {

@@ -1,6 +1,6 @@
 ﻿namespace Parsis.Predicate.Sdk.Contract;
 
-public interface IDatabaseQueryContext : IQueryContext
+public interface IMemoryCacheQueryContext : IQueryContext
 {
     ICacheInfoCollection CacheInfoCollection
     {
