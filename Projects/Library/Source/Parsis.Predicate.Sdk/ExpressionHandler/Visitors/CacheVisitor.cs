@@ -99,7 +99,7 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult, IObjectInfo<IProp
             {
                 if (expr.Type == mainObjectInfo.ObjectType)
                 {
-                    //property = new PropertyInfo(objectInfo.Schema, objectInfo.DataSet, objectInfo.DataSet, objectInfo.ObjectType.Name, false, false, ColumnDataType.Object, DatabaseFieldType.Column, objectInfo.ObjectType);
+                    //property = new PropertySelector(objectInfo.Schema, objectInfo.DataSet, objectInfo.DataSet, objectInfo.ObjectType.Name, false, false, ColumnDataType.Object, DatabaseFieldType.Column, objectInfo.ObjectType);
 
                     property = new PropertyInfo(false, mainObjectInfo.ObjectType.Name, false, false, false, ColumnDataType.Object, mainObjectInfo.ObjectType, false);
                 }

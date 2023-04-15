@@ -111,7 +111,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
 
 
 
-        //        //var columnPropertyInfos = Parameter.CachePredicates.First().ColumnProperties.Select(item => item.PropertyInfo);
+        //        //var columnPropertyInfos = Parameter.CachePredicates.First().ColumnProperties.Select(item => item.PropertySelector);
 
         //        //var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new System.Exception(); //todo
 
@@ -125,21 +125,21 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //        //var recordValue = new List<Tuple<int, string?>>();
         //        //foreach (var columnProperty in columnProperties)
         //        //{
-        //        //    if (columnProperty.PropertyInfo?.Key ?? false) continue;
-        //        //    if ((columnProperty.PropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-        //        //    if ((columnProperty.PropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-        //        //    if (!(string.IsNullOrWhiteSpace(columnProperty.PropertyInfo?.FunctionName ?? string.Empty))) continue;
+        //        //    if (columnProperty.PropertySelector?.Key ?? false) continue;
+        //        //    if ((columnProperty.PropertySelector?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+        //        //    if ((columnProperty.PropertySelector?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+        //        //    if (!(string.IsNullOrWhiteSpace(columnProperty.PropertySelector?.FunctionName ?? string.Empty))) continue;
 
-        //        //    columnList.Add(columnProperty.PropertyInfo?.ColumnName);
-        //        //    var dbType = columnProperty.PropertyInfo.DataType.GetSqlDbType();
+        //        //    columnList.Add(columnProperty.PropertySelector?.ColumnName);
+        //        //    var dbType = columnProperty.PropertySelector.DataType.GetSqlDbType();
         //        //    if (records?.Length > 1)
         //        //    {
         //        //        var index = 0;
         //        //        foreach (var record in records)
         //        //        {
-        //        //            var columnValue = Dynamic.InvokeGet(record, columnProperty.PropertyInfo?.Name);
+        //        //            var columnValue = Dynamic.InvokeGet(record, columnProperty.PropertySelector?.Name);
 
-        //        //            var parameterName = $"@{SetParameterName(columnProperty.PropertyInfo, index)}";
+        //        //            var parameterName = $"@{SetParameterName(columnProperty.PropertySelector, index)}";
         //        //            var sqlParameter = new SqlParameter(parameterName, dbType) {
         //        //                Value = columnValue ?? DBNull.Value
         //        //            };
@@ -151,7 +151,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //        //    else
         //        //    {
         //        //        //1 if value is iqueryable object
-        //        //        var parameterName = $"@{SetParameterName(columnProperty.PropertyInfo, 0)}";
+        //        //        var parameterName = $"@{SetParameterName(columnProperty.PropertySelector, 0)}";
         //        //        var sqlParameter = new SqlParameter(parameterName, dbType) {
         //        //            Value = columnProperty.Value ?? DBNull.Value
         //        //        };
@@ -193,7 +193,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //        if (Parameter.CachePredicates == null)
         //            throw new NotSupported("asdasd"); //todo
 
-        //        //var columnPropertyInfos = Parameter.CachePredicates.First().ColumnProperties.Select(item => item.PropertyInfo);
+        //        //var columnPropertyInfos = Parameter.CachePredicates.First().ColumnProperties.Select(item => item.PropertySelector);
 
         //        //var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupported("asd"); //todo
         //        //_commandParts.Add("Selector", selector);
@@ -212,27 +212,27 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //        //        ICollection<string> recordValue = new List<string>();
         //        //        foreach (var columnProperty in columnProperties)
         //        //        {
-        //        //            if ((columnProperty.PropertyInfo?.ReadOnly ?? true)) continue;
-        //        //            if ((columnProperty.PropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-        //        //            if ((columnProperty.PropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-        //        //            if (!(string.IsNullOrWhiteSpace(columnProperty.PropertyInfo?.FunctionName ?? string.Empty))) continue;
+        //        //            if ((columnProperty.PropertySelector?.ReadOnly ?? true)) continue;
+        //        //            if ((columnProperty.PropertySelector?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+        //        //            if ((columnProperty.PropertySelector?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+        //        //            if (!(string.IsNullOrWhiteSpace(columnProperty.PropertySelector?.FunctionName ?? string.Empty))) continue;
 
-        //        //            var dbType = columnProperty.PropertyInfo?.DataType.GetSqlDbType();
-        //        //            var columnValue = Dynamic.InvokeGet(record, columnProperty.PropertyInfo?.Name);
-        //        //            var parameterName = $"@{SetParameterName(columnProperty.PropertyInfo, index)}";
+        //        //            var dbType = columnProperty.PropertySelector?.DataType.GetSqlDbType();
+        //        //            var columnValue = Dynamic.InvokeGet(record, columnProperty.PropertySelector?.Name);
+        //        //            var parameterName = $"@{SetParameterName(columnProperty.PropertySelector, index)}";
 
         //        //            var sqlParameter = new SqlParameter(parameterName, dbType) {
         //        //                Value = columnValue
         //        //            };
         //        //            SqlParameters.Add(sqlParameter);
 
-        //        //            if (columnProperty.PropertyInfo?.Key ?? false)
+        //        //            if (columnProperty.PropertySelector?.Key ?? false)
         //        //            {
-        //        //                recordsWhere.Add(new Tuple<int, string>(index, columnProperty.PropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue)));
+        //        //                recordsWhere.Add(new Tuple<int, string>(index, columnProperty.PropertySelector.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue)));
         //        //                continue;
         //        //            }
 
-        //        //            recordValue.Add(columnProperty.PropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue));
+        //        //            recordValue.Add(columnProperty.PropertySelector.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue));
         //        //        }
 
         //        //        recordsValue.Add(new Tuple<int, string?>(index, string.Join(", ", recordValue)));
@@ -247,27 +247,27 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //        //    var valueList = new List<string>();
         //        //    foreach (var columnProperty in columnProperties)
         //        //    {
-        //        //        if ((columnProperty.PropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-        //        //        if ((columnProperty.PropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-        //        //        if (!(string.IsNullOrWhiteSpace(columnProperty.PropertyInfo?.FunctionName ?? string.Empty))) continue;
+        //        //        if ((columnProperty.PropertySelector?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+        //        //        if ((columnProperty.PropertySelector?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+        //        //        if (!(string.IsNullOrWhiteSpace(columnProperty.PropertySelector?.FunctionName ?? string.Empty))) continue;
 
-        //        //        var dbType = columnProperty.PropertyInfo?.DataType.GetSqlDbType();
-        //        //        var parameterName = $"@{SetParameterName(columnProperty.PropertyInfo, 0)}";
+        //        //        var dbType = columnProperty.PropertySelector?.DataType.GetSqlDbType();
+        //        //        var parameterName = $"@{SetParameterName(columnProperty.PropertySelector, 0)}";
 
         //        //        var sqlParameter = new SqlParameter(parameterName, dbType) {
         //        //            Value = columnProperty.Value
         //        //        };
         //        //        SqlParameters.Add(sqlParameter);
 
-        //        //        if (columnProperty.PropertyInfo?.Key ?? false)
+        //        //        if (columnProperty.PropertySelector?.Key ?? false)
         //        //        {
-        //        //            _commandParts["Where"] = columnProperty.PropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value);
+        //        //            _commandParts["Where"] = columnProperty.PropertySelector.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value);
         //        //            if (returnType == ReturnType.Record)
         //        //                _commandParts.Add("result", $"DECLARE @ResultId INT = {parameterName}");
         //        //            continue;
         //        //        }
 
-        //        //        valueList.Add(columnProperty.PropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value));
+        //        //        valueList.Add(columnProperty.PropertySelector.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value));
         //        //    }
 
         //        //    var values = string.Join(", ", valueList);
@@ -307,9 +307,9 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
 
                 //var columnProperties = Parameter.CachePredicates?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<CacheCommandProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
-                //var primaryKey = columnProperties.FirstOrDefault(item => item.PropertyInfo?.Key ?? false) ?? throw new NotSupported("asd"); //todo
+                //var primaryKey = columnProperties.FirstOrDefault(item => item.PropertySelector?.Key ?? false) ?? throw new NotSupported("asd"); //todo
 
-                //var primaryKeyColumn = primaryKey?.PropertyInfo ?? throw new NotSupported("asd"); //todo
+                //var primaryKeyColumn = primaryKey?.PropertySelector ?? throw new NotSupported("asd"); //todo
                 //var parameterName = BaseSetParameterName(primaryKeyColumn);
 
                 //var records = Parameter.CachePredicates?.SelectMany(item => item.Records ?? Enumerable.Empty<object>()).ToArray();

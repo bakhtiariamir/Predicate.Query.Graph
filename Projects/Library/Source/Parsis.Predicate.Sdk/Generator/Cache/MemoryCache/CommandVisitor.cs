@@ -33,7 +33,7 @@ public class CommandVisitor : CacheVisitor<CacheCommandQueryPart>
         //    var value = member switch
         //    {
         //        FieldInfo field => field.GetValue(objectValue),
-        //        PropertyInfo info => info.GetValue(objectValue, null),
+        //        PropertySelector info => info.GetValue(objectValue, null),
         //        _ => throw new NotSupported("asd")
         //    } ?? throw new NotFound("asd");
 

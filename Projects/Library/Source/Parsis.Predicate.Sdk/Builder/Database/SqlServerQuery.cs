@@ -169,22 +169,19 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         {
             var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
             var sortingGenerator = new SqlServerSortingVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
-            sortExpression.GroupBy(item => item.DirectionType).ToList().ForEach(sortPredicate =>
+            sortExpression.ToList().ForEach(sortPredicate =>
             {
                 Expression? expression = null;
-                foreach (var field in sortPredicate)
+                if (sortPredicate.Expression != null)
                 {
-                    if (field.Expression != null)
-                    {
-                        expression = field.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-                    }
-
-                    if (expression == null)
-                        throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-                    var orderByProperty = sortingGenerator.Generate(expression);
-                    QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : DatabaseOrdersByClauseQueryPart.Merged(new[] {QueryPartCollection.OrderByClause, orderByProperty});
+                    expression = sortPredicate.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
                 }
+
+                if (expression == null)
+                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+                var orderByProperty = sortingGenerator.Generate(expression);
+                QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : DatabaseOrdersByClauseQueryPart.Merged(new[] { QueryPartCollection.OrderByClause, orderByProperty });
             });
         }
 

@@ -168,7 +168,7 @@ public class FilteringVisitor : CacheVisitor<CacheWhereClauseQueryPart>
     //        return member switch
     //        {
     //            FieldInfo fieldInfo => fieldInfo.GetValue(container),
-    //            PropertyInfo info => info.GetValue(container, null),
+    //            PropertySelector info => info.GetValue(container, null),
     //            _ => null
     //        };
     //    }

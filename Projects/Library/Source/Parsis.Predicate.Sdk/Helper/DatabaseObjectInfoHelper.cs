@@ -99,6 +99,12 @@ public static class ObjectInfoHelper
     public static IEnumerable<IPropertyInfo> GetObjectPropertiesInfo<TObject>(this ICacheInfoCollection cacheInfoCollection, Func<IPropertyInfo, bool> predicate) => cacheInfoCollection.GetObjectPropertiesInfo(typeof(TObject), predicate);
 
 
+    public static string GetKeyName(Type type, ICacheInfoCollection infoCollection)
+    {
+        var objectInfo = infoCollection.GetLastObjectInfo(type) ?? throw new ArgumentNullException("ObjectInfo", $"Objectinfo cannot be null for {type.Name}.");
+        var key = objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("Key", $"key not found for {type.Name}.");
+        return key.Name;
+    }
 
     private static void GetPropertyInfo(System.Reflection.PropertyInfo property, List<IPropertyInfo> properties)
     {

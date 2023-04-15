@@ -3,6 +3,7 @@ using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Generator.Cache;
 using Parsis.Predicate.Sdk.Generator.Cache.MemoryCache;
+using Parsis.Predicate.Sdk.Generator.Database;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
@@ -86,23 +87,21 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
             var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var sortingGenerator = new SortingVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
-            sortExpression.GroupBy(item => item.DirectionType).ToList().ForEach(sortPredicate =>
+            var columnSortPredicates = new List<CacheSortPredicate>();
+            sortExpression.ToList().ForEach(sortPredicate =>
             {
                 Expression? expression = null;
-                foreach (var field in sortPredicate)
+                if (sortPredicate.Expression != null)
                 {
-                    if (field.Expression != null)
-                    {
-                        expression = field.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-                    }
-
-                    if (expression == null)
-                        throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-                    var orderByProperty = sortingGenerator.Generate(expression);
-                    QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : CacheOrdersByClauseQueryPart.Merged(new[] {QueryPartCollection.OrderByClause, orderByProperty});
+                    expression = sortPredicate.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
                 }
+
+                if (expression == null)
+                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+
+                columnSortPredicates.Add(new CacheSortPredicate(sortPredicate.Expression, sortPredicate.DirectionType));
             });
+            CacheOrdersByClauseQueryPart.Create(columnSortPredicates.ToArray());
         }
 
         return Task.CompletedTask;

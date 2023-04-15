@@ -1,6 +1,7 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
 using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
+using System.Linq.Expressions;
 
 namespace Parsis.Predicate.Sdk.Generator.Cache;
 
@@ -20,7 +21,7 @@ public class CacheOrdersByClauseQueryPart : CacheQueryPart<ICollection<CacheSort
 
     public static CacheOrdersByClauseQueryPart Create(CacheSortPredicate cacheSortPredicate) => new(cacheSortPredicate);
 
-    public static CacheOrdersByClauseQueryPart Merged(IEnumerable<CacheOrdersByClauseQueryPart> orderByClauses) => new CacheOrdersByClauseQueryPart(orderByClauses.SelectMany(item => item.Parameter).ToArray());
+    public static CacheOrdersByClauseQueryPart Merged(IEnumerable<CacheOrdersByClauseQueryPart> orderByClauses) => new(orderByClauses.SelectMany(item => item.Parameter).ToArray());
 
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
@@ -33,7 +34,7 @@ public class CacheOrdersByClauseQueryPart : CacheQueryPart<ICollection<CacheSort
 
 public class CacheSortPredicate
 {
-    public IPropertyInfo PropertyInfo
+    public LambdaExpression PropertySelector
     {
         get;
     }
@@ -43,9 +44,9 @@ public class CacheSortPredicate
         get;
     }
 
-    public CacheSortPredicate(IPropertyInfo propertyInfo, DirectionType directionType = DirectionType.Asc)
+    public CacheSortPredicate(LambdaExpression propertySelector, DirectionType directionType = DirectionType.Asc)
     {
-        PropertyInfo = propertyInfo;
+        PropertySelector = propertySelector;
         DirectionType = directionType;
     }
 }
