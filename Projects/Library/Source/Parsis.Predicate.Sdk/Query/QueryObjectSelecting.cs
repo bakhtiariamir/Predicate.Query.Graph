@@ -10,6 +10,8 @@ public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecti
 {
     private ICollection<QueryColumn<TObject>> _columns;
 
+    private Dictionary<string, string> _queryOptions = new();
+
     private QueryObjectSelecting() => _columns = new List<QueryColumn<TObject>> { new(item => item)};
 
     public static QueryObjectSelecting<TObject> Init() => new();
@@ -26,9 +28,27 @@ public class QueryObjectSelecting<TObject> : IQueryObjectPart<QueryObjectSelecti
         return this;
     }
 
+    public QueryObjectSelecting<TObject> AddOption(string key, string value)
+    {
+        _queryOptions.Add(key, value);
+        return this;
+    }
+
+    public QueryObjectSelecting<TObject> AddOptions(IEnumerable<KeyValuePair<string, string>> options)
+    {
+        foreach (var keyValuePair in options)
+        {
+            _queryOptions.Add(keyValuePair.Key, keyValuePair.Value);
+        }
+
+        return this;
+    }
+
     public ICollection<QueryColumn<TObject>> Return() => _columns.Count > 0 ? _columns : Add(item => item).Return();
 
     public QueryObjectSelecting<TObject> Validate() => this;
+
+    public Dictionary<string, string> GetQueryOptions() => _queryOptions;
 }
 
 public class QueryColumn<TObject>

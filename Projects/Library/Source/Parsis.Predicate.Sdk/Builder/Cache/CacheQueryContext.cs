@@ -4,16 +4,9 @@ namespace Parsis.Predicate.Sdk.Builder.Cache;
 
 public class CacheQueryContext : QueryContext, IDatabaseQueryContext
 {
-    public ICacheInfoCollection CacheInfoCollection
+    public CacheQueryContext(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
-        get;
-    }
 
-    //IMemoryCache options
-
-    public CacheQueryContext(ICacheInfoCollection cacheCacheInfoCollection)
-    {
-        CacheInfoCollection = cacheCacheInfoCollection;
     }
 
     public override void UpdateCacheObjectInfo()

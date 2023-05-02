@@ -28,7 +28,7 @@ public class CacheWhereClauseQueryPart : CacheQueryPart<CacheWhereClause>
     //    return columnProperties;
     //}
 
-    //public static ICollection<WhereClause> GeHavingClause(WhereClause parameter)
+    //public static ICollection<WhereClause> GetHavingClause(WhereClause parameter)
     //{
     //    var columnProperties = new List<WhereClause>();
     //    if (parameter.Left == null || parameter.Right == null) return columnProperties;
@@ -47,7 +47,7 @@ public class CacheWhereClauseQueryPart : CacheQueryPart<CacheWhereClause>
     //        }
     //    }
     //    else if (left.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
-    //        columnProperties.AddRange((GeHavingClause(left)));
+    //        columnProperties.AddRange((GetHavingClause(left)));
 
     //    if (parameter.Right.ColumnPropertyInfo != null)
     //    {
@@ -60,7 +60,7 @@ public class CacheWhereClauseQueryPart : CacheQueryPart<CacheWhereClause>
     //        }
     //    }
     //    else if (right.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
-    //        columnProperties.AddRange((GeHavingClause(right)));
+    //        columnProperties.AddRange((GetHavingClause(right)));
 
     //    return columnProperties;
     //}

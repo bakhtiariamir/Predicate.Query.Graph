@@ -14,6 +14,8 @@ public class QueryObjectPaging : IQueryObjectPart<QueryObjectPaging, PagePredica
     public QueryObjectPaging Validate() => this;
 
     public PagePredicate Return() => _pagePredicate;
+
+    public Dictionary<string, string> GetQueryOptions() => new();
 }
 
 public class PagePredicate

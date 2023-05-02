@@ -47,6 +47,19 @@ public class QueryObject<TObject> where TObject : IQueryableObject
         set;
     }
 
+
+    public Dictionary<string, string> QueryOptions
+    {
+        get;
+        set;
+    } = new();
+
+    public IEnumerable<Type> ObjectTypeStructures
+    {
+        get;
+        set;
+    }
+
     private QueryObject(QueryOperationType queryOperationType) => QueryOperationType = queryOperationType;
 
     public static QueryObject<TObject> Init(QueryOperationType queryOperationType) => new(queryOperationType);

@@ -39,7 +39,9 @@ public class QueryObjectFiltering<TObject> : IQueryObjectPart<QueryObjectFilteri
     public QueryObjectFiltering<TObject> Or(Expression<Func<TObject, bool>> expression) => CreatePredicate(expression, ConnectorOperatorType.Or);
 
     public FilterPredicate<TObject> Return() => _filterPredicate;
-    
+
+    public Dictionary<string, string> GetQueryOptions() => new();
+
     private QueryObjectFiltering<TObject> CreatePredicate(Expression<Func<TObject, bool>> expression, ConnectorOperatorType connectorOperatorType)
     {
         _filterPredicate.Expression = connectorOperatorType switch {

@@ -11,7 +11,7 @@ public static class DatabaseQueryPartHelper
     {
         if (queryParts == null) throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
-        var sqlParameters = DatabaseWhereClauseQueryPart.GetParameters(queryParts.WhereClause?.Parameter);
+        var sqlParameters = DatabaseWhereClauseQueryPart.GetParameters(queryParts.WhereClause?.Parameter, queryParts.WhereClause?.QuerySetting);
 
         foreach (var parameter in sqlParameters)
             yield return parameter;

@@ -50,6 +50,8 @@ public class QueryObjectInserting<TObject> : IQueryObjectPart<QueryObjectInserti
     public QueryObjectInserting<TObject> Validate() => this;
 
     public ObjectInitializing<TObject> Return() => _inserting;
+
+    public Dictionary<string, string> GetQueryOptions() => new();
 }
 
 public class ObjectInitializing<TObject> where TObject : IQueryableObject

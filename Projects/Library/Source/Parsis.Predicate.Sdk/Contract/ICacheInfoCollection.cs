@@ -1,7 +1,14 @@
-﻿namespace Parsis.Predicate.Sdk.Contract;
+﻿using Parsis.Predicate.Sdk.Setup;
+
+namespace Parsis.Predicate.Sdk.Contract;
 
 public interface ICacheInfoCollection
 {
+    QuerySetting QuerySetting
+    {
+        get;
+        set;
+    }
     IDictionary<string, object> Cache
     {
         get;

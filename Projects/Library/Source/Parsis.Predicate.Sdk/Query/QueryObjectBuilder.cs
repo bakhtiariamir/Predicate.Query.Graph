@@ -21,6 +21,7 @@ public class QueryObjectBuilder<TObject> : IQueryObjectBuilder where TObject : I
     {
         if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
         _queryObjectObject.Columns = objectSelecting.Validate().Return();
+        _queryObjectObject.QueryOptions = objectSelecting.GetQueryOptions();
         return this;
     }
 

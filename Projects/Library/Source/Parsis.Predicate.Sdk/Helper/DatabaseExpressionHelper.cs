@@ -30,9 +30,9 @@ public static class DatabaseExpressionHelper
 
     public static LambdaExpression GenerateGetPropertyExpression(this IColumnPropertyInfo @join, IDatabaseObjectInfo propertyObjectInfo, string? indexer = null) => propertyObjectInfo.ObjectType.GenerateGetPropertyExpression($"{join.DataSet}{join.Name}{indexer}", join.Name);
 
-    public static LambdaExpression GenerateJoinExpression(this IColumnPropertyInfo @join, Type propertyObjectType, JoinType joinType, string? indexer = null)
+    public static LambdaExpression GenerateJoinExpression(this IColumnPropertyInfo @join, Type propertyObjectType, JoinType joinType, Type[] objectTypes, string? indexer = null)
     {
-        var parameter = GenerateParameterExpression(GetParameterType(join), $"{GetParameterName(join)}{indexer}", MainMemberName(join.Parent), out var member);
+        var parameter = GenerateParameterExpression(GetParameterType(join), $"{GetParameterName(join)}{indexer}", MainMemberName(join.Parent), objectTypes, out var member);
         var returnType = member.Type;
         return member.GenerateJoinExpression(GetParameterType(join), returnType, parameter);
     }
@@ -72,17 +72,33 @@ public static class DatabaseExpressionHelper
         return expression;
     }
 
-    private static ParameterExpression GenerateParameterExpression(Type objectType, string parameterName, string memberName, out MemberExpression member)
+    private static ParameterExpression GenerateParameterExpression(Type objectType, string parameterName, string memberName, Type[] objectTypeStructures, out MemberExpression member)
     {
         var parameter = Expression.Parameter(objectType, parameterName);
         Expression lastMember = parameter;
         var memberList = new List<Expression>();
+
         foreach (var property in memberName.Split('.'))
         {
-            member = Expression.Property(lastMember, property);
-            memberList.Add(member);
-            lastMember = member;
+            MemberExpression? propertyMember = null;
+            if (parameter.Type.GetProperty(property) != null)
+                propertyMember = Expression.Property(lastMember, property);
+            else
+            {
+                Type? propertyType = null;
+                foreach (var type in objectTypeStructures)
+                    if (type.GetProperty(property) != null)
+                        propertyType = type;
+
+                if (propertyType == null)
+                    throw new ArgumentNullException($"Member expression for {property} can not null.");
+
+                propertyMember = Expression.Property(lastMember, propertyType, property);
+            }
+
+            lastMember = propertyMember ?? throw new ArgumentNullException($"Member expression for {property} can not null.");
         }
+
         member = (lastMember as MemberExpression)!;
 
         return parameter;

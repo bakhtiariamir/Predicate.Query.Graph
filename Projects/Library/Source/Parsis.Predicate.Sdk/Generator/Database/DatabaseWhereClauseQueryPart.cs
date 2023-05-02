@@ -3,14 +3,23 @@ using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Helper;
 using Parsis.Predicate.Sdk.Query;
+using Parsis.Predicate.Sdk.Setup;
+using System.Collections;
+using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Parsis.Predicate.Sdk.Generator.Database;
 
 public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 {
+    private QuerySetting? _setting;
     private string? _text;
 
+    public QuerySetting? QuerySetting
+    {
+        get => _setting;
+    }
     public override string? Text
     {
         get => _text;
@@ -22,7 +31,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
     public static DatabaseWhereClauseQueryPart Create(WhereClause property) => new(property);
 
     public void SetText(ReturnType returnType = ReturnType.None, WhereClause? returnClause = null) =>
-        _text = returnType switch 
+        _text = returnType switch
         {
             ReturnType.Record => ReturnResultRecordWhereClause(returnClause ?? throw new ArgumentNullException($"object prameter key can not be null.")),
             _ or ReturnType.None => SetWhereClauseText(Parameter)
@@ -35,19 +44,19 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         var columnProperties = new List<IColumnPropertyInfo>();
         switch (parameter)
         {
-            case {PartType: PartType.ColumnInfo}:
-                columnProperties.Add(parameter.ColumnPropertyInfo);
+            case { PartType: PartType.ColumnInfo }:
+                columnProperties.Add(parameter.ColumnPropertyInfo!);
                 break;
-            case {PartType: PartType.WhereClause}:
-                columnProperties.AddRange((GetColumnProperties(parameter.Left)));
-                columnProperties.AddRange((GetColumnProperties(parameter.Right)));
+            case { PartType: PartType.WhereClause }:
+                columnProperties.AddRange((GetColumnProperties(parameter.Left!)));
+                columnProperties.AddRange((GetColumnProperties(parameter.Right!)));
                 break;
         }
 
         return columnProperties;
     }
 
-    public static ICollection<WhereClause> GeHavingClause(WhereClause parameter)
+    public static ICollection<WhereClause> GetHavingClause(WhereClause parameter)
     {
         var columnProperties = new List<WhereClause>();
         if (parameter.Left == null || parameter.Right == null) return columnProperties;
@@ -66,7 +75,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             }
         }
         else if (left.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
-            columnProperties.AddRange((GeHavingClause(left)));
+            columnProperties.AddRange((GetHavingClause(left)));
 
         if (parameter.Right.ColumnPropertyInfo != null)
         {
@@ -79,12 +88,12 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             }
         }
         else if (right.Operator is not ConditionOperatorType.IsNotNull or ConditionOperatorType.IsNull)
-            columnProperties.AddRange((GeHavingClause(right)));
+            columnProperties.AddRange((GetHavingClause(right)));
 
         return columnProperties;
     }
 
-    public static IEnumerable<SqlParameter>? GetParameters(WhereClause? parameter)
+    public static IEnumerable<SqlParameter>? GetParameters(WhereClause? parameter, QuerySetting setting)
     {
         if (parameter == null) yield break;
 
@@ -99,24 +108,29 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 {
                     if (whereClause.Operator is not ConditionOperatorType.IsNotNull and not ConditionOperatorType.IsNull)
                     {
-                        if (whereClause.Right is {PartType: PartType.ParameterInfo} && (whereClause.Right.ValueType?.IsArray ?? false))
-                            yield break;
-
-                        sqlParameter = GetParameters(whereClause.Left)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
-                        var valueParameter = GetParameters(whereClause.Right)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
+                        sqlParameter = GetParameters(whereClause.Left, setting)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
+                        var valueParameter = GetParameters(whereClause.Right, setting)?.FirstOrDefault() ?? throw new ArgumentNullException(); //todo
                         sqlParameter.ParameterName = valueParameter.ParameterName;
-                        sqlParameter.Value = valueParameter.Value;
+                        if (whereClause.Right?.ValueType?.IsArray ?? false)
+                        {
+                            sqlParameter.SqlDbType = SqlDbType.Structured;
+                            sqlParameter.Value = valueParameter.Value;
+                            sqlParameter.TypeName = valueParameter.TypeName;
+                        }
+                        else 
+                            sqlParameter.Value = valueParameter.Value;
+
                         yield return sqlParameter;
                     }
                 }
                 else
                 {
-                    var leftParameters = GetParameters(whereClause.Left);
+                    var leftParameters = GetParameters(whereClause.Left, setting);
                     if (leftParameters != null)
                         foreach (var leftParameter in leftParameters)
                             yield return leftParameter;
 
-                    var rightParameters = GetParameters(whereClause.Right);
+                    var rightParameters = GetParameters(whereClause.Right, setting);
                     if (rightParameters != null)
                         foreach (var rightParameter in rightParameters)
                             yield return rightParameter;
@@ -124,10 +138,94 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
                 break;
             case PartType.ParameterInfo:
-                sqlParameter = new SqlParameter {
-                    ParameterName = SetParameterName(whereClause),
-                    Value = parameter.Value
-                };
+
+                var parameterName = string.Empty;
+                var typeParam = "";
+                if (whereClause.ValueType?.IsArray ?? false)
+                {
+                    parameterName = SetParameterName(whereClause, true);
+                    var userDefinedTables = setting?.Database?.QueryOptions?.SelectOption?.UserDefinedTables?.ToArray() ?? Array.Empty<UserDefinedTable>();
+                    var elementType = whereClause.ValueType?.GetElementType();
+                    if (elementType == typeof(int))
+                    {
+                        if (userDefinedTables?.FirstOrDefault(item => item.Key == "Int") != null)
+                        {
+                            typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "Int")?.Type;
+
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured) {
+                                TypeName = typeParam,
+                                Value = CreateIntValueDataTable((IEnumerable<int>)parameter.Value!)
+                            };
+                        }
+                        else
+                        {
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            {
+                                TypeName = typeParam,
+                                Value = (IEnumerable<object>)parameter.Value!
+                            };
+                        }
+                    }
+                    else if (elementType == typeof(long))
+                    {
+                        if (userDefinedTables?.FirstOrDefault(item => item.Key == "Bigint") != null)
+                        {
+                            typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "Bigint")?.Type;
+
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            {
+                                TypeName = typeParam,
+                                Value = (IEnumerable<long>)parameter.Value!
+                            };
+                        }
+                        else
+                        {
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            {
+                                TypeName = typeParam,
+                                Value = (IEnumerable<object>)parameter.Value!
+                            };
+                        }
+                    }
+                    else if (elementType == typeof(string))
+                    {
+                        if (userDefinedTables?.FirstOrDefault(item => item.Key == "String") != null)
+                        {
+                            typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "String")?.Type;
+
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            {
+                                TypeName = typeParam,
+                                Value = (IEnumerable<string>)parameter.Value!
+                            };
+                        }
+                        else
+                        {
+                            sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            {
+                                TypeName = typeParam,
+                                Value = (IEnumerable<object>)parameter.Value!
+                            };
+                        }
+                    }
+                    else
+                    {
+                        sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                        {
+                            TypeName = typeParam,
+                            Value = (IEnumerable<object>)parameter.Value!
+                        };
+                    }
+                }
+                else
+                {
+                    sqlParameter = new SqlParameter
+                    {
+                        ParameterName = SetParameterName(whereClause),
+                        Value = parameter.Value
+                    };
+                }
+
                 yield return sqlParameter;
                 break;
             case PartType.ColumnInfo:
@@ -140,7 +238,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         }
     }
 
-    private static string? SetWhereClauseText(WhereClause? parameter)
+    private string? SetWhereClauseText(WhereClause? parameter)
     {
         if (parameter == null) return null;
 
@@ -150,17 +248,17 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             switch (whereClause.PartType)
             {
                 case PartType.ColumnInfo:
-                    return SetColumnName(whereClause.ColumnPropertyInfo);
+                    return SetColumnName(whereClause.ColumnPropertyInfo!);
                 case PartType.WhereClause:
                     var wherePart = whereClause;
                     if (wherePart.Left is not null)
                     {
                         var left = SetWhereClauseText(wherePart.Left);
-                        string? right = null;
+                        string? right;
                         var isString = false;
                         var isArray = false;
                         if (wherePart.Right is null && wherePart.Operator != ConditionOperatorType.None)
-                            throw new NotFound(whereClause.ToString(), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                            throw new NotFound(whereClause.ToString()!, whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
 
                         if (wherePart.Operator is ConditionOperatorType.IsNull or ConditionOperatorType.IsNotNull)
                         {
@@ -170,7 +268,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                         {
                             right = SetWhereClauseText(wherePart.Right);
                             isArray = wherePart.Right?.ValueType?.IsArray ?? false;
-                            isString = wherePart.Left.ColumnPropertyInfo != null && new[] {ColumnDataType.Char, ColumnDataType.String}.Contains(wherePart.Left.ColumnPropertyInfo.DataType);
+                            isString = wherePart.Left.ColumnPropertyInfo != null && new[] { ColumnDataType.Char, ColumnDataType.String }.Contains(wherePart.Left.ColumnPropertyInfo.DataType);
                         }
 
                         return GenerateClausePhrase(left, wherePart.Operator, right, isString, isArray);
@@ -181,8 +279,42 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
                     if (whereClause.ValueType?.IsArray ?? false)
                     {
-                        if (whereClause.Value is IEnumerable<int> enumerableInt)
-                            return string.Join(", ", enumerableInt);
+                        var userDefinedTables = _setting?.Database?.QueryOptions?.SelectOption?.UserDefinedTables;
+                        var elementType = whereClause.ValueType.GetElementType();
+                        if (elementType == typeof(int))
+                        {
+                            if (userDefinedTables?.FirstOrDefault(item => item.Key == "Int") != null)
+                            {
+                                var parameterName = $"@{SetParameterName(whereClause, true)}";
+                                return $"SELECT [Value] FROM {parameterName}";
+                            }
+
+                            if (whereClause.Value is IEnumerable<int> enumerableInt)
+                                return string.Join(", ", enumerableInt);
+                        }
+                        else if (elementType == typeof(long))
+                        {
+                            if (userDefinedTables?.FirstOrDefault(item => item.Key == "Bigint") != null)
+                            {
+                                var parameterName = $"@{SetParameterName(whereClause, true)}";
+                                return $"SELECT [Value] FROM {parameterName}";
+                            }
+
+                            if (whereClause.Value is IEnumerable<long> enumerableInt)
+                                return string.Join(", ", enumerableInt);
+                        }
+                        else if (elementType == typeof(string))
+                        {
+                            if (userDefinedTables?.FirstOrDefault(item => item.Key == "String") != null)
+                            {
+                                var parameterName = $"@{SetParameterName(whereClause, true)}";
+                                return $"SELECT [Value] FROM {parameterName}";
+                            }
+
+                            if (whereClause.Value is IEnumerable<string> enumerableString)
+                                return string.Join(", ", $"N'{enumerableString}'");
+                        }
+                        //ToDo : Complete all types
                     }
 
                     else if (string.IsNullOrWhiteSpace(whereClause.ParameterName))
@@ -199,7 +331,6 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
         return null;
     }
-
 
     private static WhereClause? ReduceWhereClause(WhereClause? parameter)
     {
@@ -233,17 +364,15 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         return null;
     }
 
-    private static string GenerateClausePhrase(string left, ConditionOperatorType operatorType, string? right, bool isString, bool isArray = false)
-    {
-        var startQuote = isString ? "N'" : string.Empty;
-        var endQuote = isString ? "'" : string.Empty;
-        return operatorType switch {
+    private static string GenerateClausePhrase(string left, ConditionOperatorType operatorType, string? right, bool isString, bool isArray = false) =>
+        operatorType switch
+        {
             ConditionOperatorType.Equal => $"{left} = {right}",
             ConditionOperatorType.NotEqual => $"{left} <> {right}",
             ConditionOperatorType.Like => $"{left} LIKE {right}",
             ConditionOperatorType.NotLike => $"{left} NOT LIKE {right}",
             ConditionOperatorType.LeftLike => $"{left} LIKE %{right}",
-            ConditionOperatorType.NotLeftLike => $"{left} NOT LIKE %{right}{endQuote}",
+            ConditionOperatorType.NotLeftLike => $"{left} NOT LIKE %{right}",
             ConditionOperatorType.RightLike => $"{left} LIKE {right}%",
             ConditionOperatorType.NotRightLike => $"{left} NOT LIKE {right}%",
             ConditionOperatorType.GreaterThan => $"{left} > {right}",
@@ -262,12 +391,11 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
             ConditionOperatorType.Set => $"",
             ConditionOperatorType.Between or _ => throw new NotSupported(left, ExceptionCode.DatabaseQueryFilteringGenerator)
         };
-    }
 
     //ToDo : add these methods in helper for use by all QueryPart
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
-    private static string SetParameterName(WhereClause item) => item.ParameterName + (item.Index > 0 ? $"_{item.Index}" : "");
+    private static string SetParameterName(WhereClause item, bool isArray = false) => item.ParameterName+ (isArray ? "s" :"") + (item.Index > 0 ? $"_{item.Index}" : "");
 
     public void ReduceParameter(WhereClause? parameter = null, Dictionary<string, int>? parameterIndex = null)
     {
@@ -308,6 +436,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         }
     }
 
+    public void SetQuerySetting(QuerySetting setting) => _setting = setting;
     private static void SetParameterIndex(WhereClause parameter, Dictionary<string, int> parameterIndex)
     {
         if (parameterIndex.ContainsKey(parameter?.ParameterName!))
@@ -316,6 +445,17 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
         }
         else
             parameterIndex.Add(parameter?.ParameterName!, 0);
+    }
+
+    private static DataTable CreateIntValueDataTable(IEnumerable<int> intValues)
+    {
+        var table = new DataTable();
+        table.Columns.Add("Value", typeof(int));
+        foreach (long intValue in intValues)
+        {
+            table.Rows.Add(intValue);
+        }
+        return table;
     }
 }
 

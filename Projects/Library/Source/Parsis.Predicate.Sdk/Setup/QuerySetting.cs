@@ -2,21 +2,17 @@
 
 public class QuerySetting
 {
-    public Global GlobalConfig
+    public IEnumerable<QueryProvider>? Providers
     {
         get;
         set;
     }
 
-    public SelectConfig SelectConfig
+    public Database? Database
     {
         get;
         set;
     }
-}
-
-public class Global
-{
 }
 
 public class SelectConfig
@@ -40,24 +36,114 @@ public enum ArrayParameter
     PassAsParameter = 2
 }
 
-//public enum SqlInsertDataProvider
-//{
-//    Value = 1,
-//    ListOfValue = 2,
-//    DataTable = 3,
-//    Select = 4,
-//}
+public enum QueryProvider
+{
+    Database,
+    RestService,
+    SoapService,
+    Cache,
+    MessageBroker
+}
 
-//public enum SqlUpdateDataProvider
-//{
-//    Value = 1,
-//    ListOfValue = 2,
-//    Select = 3
-//}
+public class Database
+{
+    public QueryOptions QueryOptions
+    {
+        get;
+        set;
+    }
+}
 
-//public enum LoadRelatedData
-//{
-//    Explicit = 1,
-//    Eager = 2,
-//    Lazy = 3
-//}
+public class QueryOptions
+{
+    public InsertOption? InsertOption
+    {
+        get;
+        set;
+    }
+
+    public UpdateOption? UpdateOption
+    {
+        get;
+        set;
+    }
+
+    public DeleteOption? DeleteOption
+    {
+        get;
+        set;
+    }
+
+    public SelectOption? SelectOption
+    {
+        get;
+        set;
+    }
+}
+
+public class SelectOption
+{
+    public int DefaultPageSize
+    {
+        get;
+        set;
+    } = 10;
+
+    public LoadingRelatedObject LoadingRelatedObject
+    {
+        get;
+        set;
+    } = LoadingRelatedObject.Eager;
+
+    public int QueryDepth
+    {
+        get;
+        set;
+    } = 2; //use Force tag to join more than Value of QueryDepth objects
+
+    public IEnumerable<UserDefinedTable>? UserDefinedTables
+    {
+        get;
+        set;
+    }
+}
+
+public class UserDefinedTable
+{
+    public string Key
+    {
+        get;
+        set;
+    }
+
+    public bool Status
+    {
+        get;
+        set;
+    }
+
+    public string Type
+    {
+        get;
+        set;
+    }
+}
+
+public class DeleteOption
+{
+}
+
+public class UpdateOption
+{
+}
+
+public class InsertOption
+{
+}
+
+public enum LoadingRelatedObject
+{
+    Explicit = 1,
+    Eager = 2,
+    Lazy = 3
+}

@@ -20,6 +20,8 @@ public class QueryObjectSorting<TObject> : IQueryObjectPart<QueryObjectSorting<T
 
     public ICollection<SortPredicate<TObject>> Return() => _orderPredicates;
 
+    public Dictionary<string, string> GetQueryOptions() => new();
+
     public QueryObjectSorting<TObject> Validate() => this;
 }
 

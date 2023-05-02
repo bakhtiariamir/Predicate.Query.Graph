@@ -1,17 +1,25 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.Setup;
 
 namespace Parsis.Predicate.Sdk.Info
 {
     public class CacheInfoCollection : ICacheInfoCollection
     {
+        public QuerySetting QuerySetting
+        {
+            get;
+            set;
+        }
+
         public IDictionary<string, object> Cache
         {
             get;
             set;
         }
 
-        public CacheInfoCollection()
+        public CacheInfoCollection(QuerySetting querySetting)
         {
+            QuerySetting = querySetting;
             Cache = new Dictionary<string, object>();
         }
 

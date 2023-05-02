@@ -36,14 +36,14 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartC
                 await GenerateColumnAsync(query);
                 await GenerateWhereAsync(query);
                 await GenerateOrderByAsync(query);
-                await GenerateJoinAsync();
+                await GenerateJoinAsync(query);
                 await GeneratePagingAsync(query);
                 await GenerateFunctionByClause();
                 break;
             case QueryOperationType.GetCount:
                 await GenerateColumnAsync(query, true);
                 await GenerateWhereAsync(query);
-                await GenerateJoinAsync();
+                await GenerateJoinAsync(query);
                 break;
             case QueryOperationType.Add:
                 await GenerateInsertAsync(query);
@@ -73,7 +73,7 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartC
 
     protected abstract Task GenerateOrderByAsync(QueryObject<TObject> query);
 
-    protected abstract Task GenerateJoinAsync();
+    protected abstract Task GenerateJoinAsync(QueryObject<TObject> query);
 
     protected abstract Task GenerateFunctionByClause();
 }

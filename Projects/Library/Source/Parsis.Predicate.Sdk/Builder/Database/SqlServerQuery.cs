@@ -118,6 +118,16 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                     whereClause.SetText(ReturnType.Record, clause);
                     QueryPartCollection.WhereClause = whereClause;
                     break;
+                case ReturnType.None:
+                    break;
+                case ReturnType.KeyValue:
+                    break;
+                case ReturnType.RowAffected:
+                    break;
+                case null:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -134,6 +144,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             var parameterExpression = lambdaExpression.Parameters[0];
             var whereGenerator = new SqlServerFilteringVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             var whereClause = whereGenerator.Generate(body);
+            whereClause.SetQuerySetting(Context.CacheInfoCollection.QuerySetting);
             whereClause.ReduceParameter();
             whereClause.SetText();
             QueryPartCollection.WhereClause = whereClause;
@@ -188,7 +199,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateJoinAsync()
+    protected override Task GenerateJoinAsync(QueryObject<TObject> query)
     {
         var joins = new List<Tuple<IColumnPropertyInfo, int>>();
 
@@ -238,7 +249,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 
                 var indexer = index > 0 ? $"_{index}" : "";
                 var joinType = @join.Required ? JoinType.Inner : JoinType.Left;
-                var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType, joinType, indexer);
+                var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType,  joinType, query.ObjectTypeStructures.ToArray(), indexer);
                 queryObjectJoining.Add(expression, joinType, order);
 
                 index++;
@@ -268,7 +279,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         ICollection<WhereClause>? havingClauses = null;
         if (whereQueryPart != null)
         {
-            havingClauses = DatabaseWhereClauseQueryPart.GeHavingClause(whereQueryPart.Parameter);
+            havingClauses = DatabaseWhereClauseQueryPart.GetHavingClause(whereQueryPart.Parameter);
             grouping = havingClauses.Count > 0;
         }
 

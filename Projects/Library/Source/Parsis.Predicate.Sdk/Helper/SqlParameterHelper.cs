@@ -54,7 +54,7 @@ public static class SqlParameterHelper
         not null when type == typeof(byte) => ColumnDataType.Byte,
         not null when type == typeof(uint) => ColumnDataType.UInt,
         not null when type == typeof(DateTime) => ColumnDataType.DateTime,
-        //not null when type == typeof(int) => ColumnDataType.Object // ToDo : check if object get PrimaryKey
+        not null when type == typeof(IQueryableObject) => ColumnDataType.Object,
         _ => throw new NotImplementedException(),
     };
 

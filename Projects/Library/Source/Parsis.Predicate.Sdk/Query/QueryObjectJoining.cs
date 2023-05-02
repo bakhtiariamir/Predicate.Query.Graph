@@ -23,6 +23,8 @@ public class QueryObjectJoining : IQueryObjectPart<QueryObjectJoining, ICollecti
     public QueryObjectJoining Validate() => this;
 
     public ICollection<JoinPredicate> Return() => _joinPredicates;
+
+    public Dictionary<string, string> GetQueryOptions() => new();
 }
 
 public enum JoinType

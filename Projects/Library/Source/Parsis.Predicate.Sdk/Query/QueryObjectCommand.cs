@@ -40,6 +40,8 @@ public class QueryObjectCommand<TObject> : IQueryObjectPart<QueryObjectCommand<T
     public QueryObjectCommand<TObject> Validate() => this;
 
     public ObjectCommand<TObject> Return() => _objectCommand;
+
+    public Dictionary<string, string> GetQueryOptions() => new();
 }
 
 public class ObjectCommand<TObject> where TObject : IQueryableObject
