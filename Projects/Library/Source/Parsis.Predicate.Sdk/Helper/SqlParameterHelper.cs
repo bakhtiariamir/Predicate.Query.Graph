@@ -39,6 +39,7 @@ public static class SqlParameterHelper
         ColumnDataType.Double => SqlDbType.Decimal,
         ColumnDataType.DateTime => SqlDbType.DateTime,
         ColumnDataType.Object => SqlDbType.VarBinary,
+        ColumnDataType.Binary => SqlDbType.VarBinary,
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
 
@@ -71,6 +72,7 @@ public static class SqlParameterHelper
         ColumnDataType.Double => value != null ? $"{value}" : "NULL",
         ColumnDataType.DateTime => value != null ? $"'{value}'" : "NULL",
         ColumnDataType.Object => value != null ? $"'{value}'" : "NULL",
+        ColumnDataType.Binary => value != null ? $"'{value}'" : "NULL",
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
 

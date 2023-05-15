@@ -46,7 +46,17 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
 
             foreach (var column in columnProperties)
             {
-                var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name) ?? column.ColumnPropertyInfo?.DefaultValue;
+                var isDefault = false;
+                var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name);
+                if (dynamicValue == null)
+                {
+                    var columnDefaultValue = column.ColumnPropertyInfo?.DefaultValue;
+                    if (column.ColumnPropertyInfo?.DefaultValue != null)
+                    {
+                        isDefault = true;
+                        dynamicValue = columnDefaultValue;
+                    }
+                }
                 GetOption("Command", out var command);
                 if (command.ToString() != "Edit" && (column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null)
                     throw new ArgumentNullException($"Value of {column.ColumnPropertyInfo.Name} can not be null.");
@@ -61,8 +71,11 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
                 {
                     var cacheObject = CacheObjectCollection.GetLastDatabaseObjectInfo(column.ColumnPropertyInfo?.Type!) ?? throw new System.Exception(); //todo
                     var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new System.Exception(); //todo
-
-                    var objectColumnValue = Dynamic.InvokeGet(dynamicValue, key.Name);
+                    object? objectColumnValue = default;
+                    if (isDefault)
+                        objectColumnValue = dynamicValue;
+                    else 
+                        objectColumnValue = Dynamic.InvokeGet(dynamicValue, key.Name);
                     column.SetValue(objectColumnValue);
                 }
                 else
