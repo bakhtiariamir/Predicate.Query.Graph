@@ -8,43 +8,39 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     public string DataSet
     {
         get;
-        set;
+        private set;
     }
 
     public string Schema
     {
         get;
-        set;
+        private set;
     }
 
     public string ColumnName
     {
         get;
-        set;
+        private set;
     }
 
     public bool Identity
     {
         get;
-        set;
     }
 
     public DatabaseFieldType FieldType
     {
         get;
-        set;
     }
 
     public AggregateFunctionType? AggregateFunctionType
     {
         get;
-        set;
     }
 
     public RankingFunctionType? RankingFunctionType
     {
         get;
-        set;
     }
 
     public string[]? WindowPartitionColumns
@@ -60,7 +56,6 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     public string? FunctionName
     {
         get;
-        set;
     }
 
     public IColumnPropertyInfo? Parent

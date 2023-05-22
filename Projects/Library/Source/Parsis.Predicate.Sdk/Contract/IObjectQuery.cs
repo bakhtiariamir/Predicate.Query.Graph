@@ -60,7 +60,7 @@ public interface IObjectQuery<TParameter>
 
 public class ParameterValue
 {
-    public string Name
+    public string? Name
     {
         get;
         set;

@@ -27,7 +27,7 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult, IObjectInfo<IProp
         get;
     }
 
-    protected override ParameterExpression? ParameterExpression
+    protected override ParameterExpression ParameterExpression
     {
         get;
     }

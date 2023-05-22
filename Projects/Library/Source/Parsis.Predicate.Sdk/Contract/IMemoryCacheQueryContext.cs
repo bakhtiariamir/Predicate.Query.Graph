@@ -2,8 +2,4 @@
 
 public interface IMemoryCacheQueryContext : IQueryContext
 {
-    ICacheInfoCollection CacheInfoCollection
-    {
-        get;
-    }
 }

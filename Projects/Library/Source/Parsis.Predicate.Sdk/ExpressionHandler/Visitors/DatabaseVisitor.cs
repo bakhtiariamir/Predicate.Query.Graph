@@ -27,7 +27,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
         get;
     }
 
-    protected override ParameterExpression? ParameterExpression
+    protected override ParameterExpression ParameterExpression
     {
         get;
     }

@@ -2,8 +2,4 @@
 
 public interface IDatabaseQueryContext : IQueryContext
 {
-    ICacheInfoCollection CacheInfoCollection
-    {
-        get;
-    }
 }
