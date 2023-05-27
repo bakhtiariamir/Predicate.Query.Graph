@@ -234,9 +234,8 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                             var dbType = columnProperty.ColumnPropertyInfo?.DataType.GetSqlDbType();
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-
                             var sqlParameter = new SqlParameter(parameterName, dbType) {
-                                Value = columnValue
+                                Value = columnValue ?? DBNull.Value
                             };
                             SqlParameters.Add(sqlParameter);
 
@@ -267,9 +266,8 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
                         var dbType = columnProperty.ColumnPropertyInfo?.DataType.GetSqlDbType();
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-
                         var sqlParameter = new SqlParameter(parameterName, dbType) {
-                            Value = columnProperty.Value
+                            Value = columnProperty.Value ?? DBNull.Value
                         };
                         SqlParameters.Add(sqlParameter);
 

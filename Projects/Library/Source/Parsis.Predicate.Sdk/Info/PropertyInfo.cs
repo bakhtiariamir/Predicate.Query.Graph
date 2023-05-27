@@ -9,7 +9,7 @@ public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> wh
     {
     }
 
-    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength)
+    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup)
     {
     }
 
@@ -31,6 +31,12 @@ public class PropertyInfo : IPropertyInfo
     }
 
     public bool IsUnique
+    {
+        get;
+        set;
+    }
+
+    public string? UniqueFieldGroup
     {
         get;
         set;
@@ -105,8 +111,7 @@ public class PropertyInfo : IPropertyInfo
     {
     }
 
-    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null)
-
+    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFields = null)
     {
         Key = key;
         Name = name;
@@ -122,6 +127,7 @@ public class PropertyInfo : IPropertyInfo
         IsObject = isObject;
         MaxLength = maxLength;
         MinLength = minLength;
+        UniqueFieldGroup = uniqueFields;
     }
 
     public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, ErrorMessage, DefaultValue, IsObject, MaxLength, MinLength);

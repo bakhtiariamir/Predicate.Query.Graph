@@ -68,7 +68,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     {
     }
 
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool key, bool identity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool key, bool identity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup)
     {
         Schema = schema;
         DataSet = dataSet;
@@ -140,5 +140,5 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         Name = name;
     }
 
-    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, Key, Identity, DataType, FieldType, Type, Identity, IsUnique, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, ErrorMessage, WindowPartitionColumns, WindowOrderColumns);
+    public override IColumnPropertyInfo Clone() => new ColumnPropertyInfo(Schema, DataSet, ColumnName, Name, Key, Identity, DataType, FieldType, Type, Identity, IsUnique, NotMapped, FunctionName, AggregateFunctionType, RankingFunctionType, Required, Title, ErrorMessage, WindowPartitionColumns, WindowOrderColumns, UniqueFieldGroup);
 }

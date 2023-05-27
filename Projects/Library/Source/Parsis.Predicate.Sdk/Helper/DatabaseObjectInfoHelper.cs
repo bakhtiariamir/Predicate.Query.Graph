@@ -101,8 +101,8 @@ public static class ObjectInfoHelper
 
     public static string GetKeyName(Type type, ICacheInfoCollection infoCollection)
     {
-        var objectInfo = infoCollection.GetLastObjectInfo(type) ?? throw new ArgumentNullException("ObjectInfo", $"Objectinfo cannot be null for {type.Name}.");
-        var key = objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("Key", $"key not found for {type.Name}.");
+        var objectInfo = infoCollection.GetLastObjectInfo(type) ?? throw new ArgumentNullException(nameof(type), $"Objectinfo cannot be null for {type.Name}.");
+        var key = objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException(nameof(IPropertyInfo.Key), $"key not found for {type.Name}.");
         return key.Name;
     }
 
@@ -113,7 +113,7 @@ public static class ObjectInfoHelper
         var info = property.GetPropertyAttribute<BasePropertyAttribute>();
         if (info != null)
         {
-            properties.Add(new Info.PropertyInfo(info.Key, info.Name, info.IsUnique, info.ReadOnly, info.NotMapped, info.DataType, property.PropertyType, info.Required, info.Title, info.ErrorMessage, info.DefaultValue, isObject, info.MaxLength == 0 ? null : info.MaxLength, info.MinLength == 0 ? null : info.MinLength));
+            properties.Add(new Info.PropertyInfo(info.Key, info.Name, info.IsUnique, info.ReadOnly, info.NotMapped, info.DataType, property.PropertyType, info.Required, info.Title, info.ErrorMessage, info.DefaultValue, isObject, info.MaxLength == 0 ? null : info.MaxLength, info.MinLength == 0 ? null : info.MinLength, info.UniqueFieldGroup));
         }
         else
         {
@@ -228,7 +228,7 @@ public static class DatabaseObjectInfoHelper
 
             if (!info.NotMapped)
             {
-                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.Key, info.Identity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, info.Required, info.Title, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject, info.MaxLength, info.MinLength));
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.Key, info.Identity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, info.Required, info.Title, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject, info.MaxLength, info.MinLength, info.UniqueFieldGroup));
             }
         }
         else

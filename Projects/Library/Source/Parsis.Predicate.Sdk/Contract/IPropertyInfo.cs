@@ -38,7 +38,13 @@ public interface IPropertyInfo
     {
         get;
     }
-
+    
+    string? UniqueFieldGroup
+    {
+        get;
+        set;
+    }
+    
     bool ReadOnly
     {
         get;
