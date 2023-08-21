@@ -10,19 +10,16 @@ namespace Parsis.Predicate.Sdk.Generator.Database;
 
 public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 {
-    private string? _text;
-    private Dictionary<string, object> _commandParts;
-
     public override string? Text
     {
-        get => _text;
-        set => _text = value;
+        get;
+        set;
     }
 
     public Dictionary<string, object> CommandParts
     {
-        get => _commandParts;
-        set => _commandParts = value;
+        get;
+        set;
     }
 
     public QueryOperationType OperationType
@@ -51,19 +48,17 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
     private DatabaseCommandQueryPart()
     {
         SqlParameters = new List<SqlParameter>();
-        _commandParts = new Dictionary<string, object>();
+        CommandParts = new Dictionary<string, object>();
     }
 
-    private DatabaseCommandQueryPart(IEnumerable<WhereClause> wherePredicates) : this() => Parameter = new CommandPredicate(wherePredicates);
-
-    private DatabaseCommandQueryPart(ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(new[] {columnPropertyCollection});
-
-    private DatabaseCommandQueryPart(ICollection<ColumnPropertyCollection> columnPropertyCollections) : this() => Parameter = new CommandPredicate(columnPropertyCollections);
-
-    private DatabaseCommandQueryPart(IEnumerable<WhereClause> wherePredicates, ColumnPropertyCollection columnPropertyCollection) : this() => Parameter = new CommandPredicate(wherePredicates, new[] {columnPropertyCollection});
-
-    private DatabaseCommandQueryPart(ColumnProperty columnProperty) : this(new ColumnPropertyCollection(new[] {columnProperty}))
+    private DatabaseCommandQueryPart(ColumnPropertyCollection columnPropertyCollection) : this()
     {
+        Parameter = new CommandPredicate(new[] { columnPropertyCollection });
+    }
+
+    private DatabaseCommandQueryPart(ICollection<ColumnPropertyCollection> columnPropertyCollections) : this()
+    {
+        Parameter = new CommandPredicate(columnPropertyCollections);
     }
 
     public static DatabaseCommandQueryPart Create(ColumnPropertyCollection columnPropertyCollection) => new(columnPropertyCollection);
@@ -81,10 +76,10 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
         switch (commandType)
         {
             case CommandValueType.Record:
-                var commands = commandParts.Select(item => item.Parameter.ColumnPropertyCollections);
+                var commands = commandParts.Where(item => item.Parameter.ColumnPropertyCollections != null).Select(item => item.Parameter.ColumnPropertyCollections).ToArray();
 
                 foreach (var columnPropertyCollection in commands)
-                    commandPredicates.AddRange(columnPropertyCollection);
+                    commandPredicates.AddRange(columnPropertyCollection!);
 
                 databaseCommandPart = new DatabaseCommandQueryPart(commandPredicates);
                 break;
@@ -133,10 +128,11 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 if (Parameter.ColumnPropertyCollections == null)
                     throw new NotSupported("asdasd"); //todo
 
-                var columnPropertyInfos = Parameter.ColumnPropertyCollections.First().ColumnProperties.Select(item => item.ColumnPropertyInfo);
+                var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
+                if (columnPropertyInfos == null)
+                    return;
 
-                var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new System.Exception(); //todo
-
+                var selector = columnPropertyInfos.First()!.GetSelector() ?? throw new System.Exception(); //todo
                 var columnList = new List<string>();
                 var recordsValue = new List<string>();
 
@@ -147,19 +143,21 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 var recordValue = new List<Tuple<int, string?>>();
                 foreach (var columnProperty in columnProperties)
                 {
-                    if (columnProperty.ColumnPropertyInfo?.Key ?? false) continue;
-                    if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-                    if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-                    if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
+                    if (columnProperty.ColumnPropertyInfo == null) continue;
+                    if (columnProperty.ColumnPropertyInfo.Key) continue;
+                    if (columnProperty.ColumnPropertyInfo.FieldType == DatabaseFieldType.Related) continue;
+                    if ((columnProperty.ColumnPropertyInfo.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+                    if ((columnProperty.ColumnPropertyInfo.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+                    if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo.FunctionName ?? string.Empty))) continue;
 
-                    columnList.Add(columnProperty.ColumnPropertyInfo?.ColumnName);
+                    columnList.Add(columnProperty.ColumnPropertyInfo.ColumnName);
                     var dbType = columnProperty.ColumnPropertyInfo.DataType.GetSqlDbType();
                     if (records?.Length > 1)
                     {
                         var index = 0;
                         foreach (var record in records)
                         {
-                            var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
+                            var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
 
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
                             var sqlParameter = new SqlParameter(parameterName, dbType) {
@@ -188,13 +186,14 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 var values = string.Join(", ", recordsValue);
                 var columns = string.Join(", ", columnList);
 
-                _commandParts.Add("Selector", selector);
-                _commandParts.Add("Columns", columns);
-                _commandParts.Add("Values", values);
+                CommandParts.Add("Selector", selector);
+                CommandParts.Add("Columns", columns);
+                CommandParts.Add("Values", values);
                 if (returnType == ReturnType.Record)
-                    _commandParts.Add("result", "DECLARE @ResultId INT = (SELECT @@IDENTITY) ");
+                    CommandParts.Add("result", "DECLARE @ResultId INT = (SELECT @@IDENTITY) ");
                 else if (returnType == ReturnType.KeyValue)
-                    _commandParts.Add("result", "SELECT @@IDENTITY AS Id");
+                    CommandParts.Add("result", "SELECT @@IDENTITY AS Id");
+
                 break;
         }
     }
@@ -207,16 +206,18 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 if (Parameter.ColumnPropertyCollections == null)
                     throw new NotSupported("asdasd"); //todo
 
-                var columnPropertyInfos = Parameter.ColumnPropertyCollections.First().ColumnProperties.Select(item => item.ColumnPropertyInfo);
+                var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
+                if (columnPropertyInfos == null)
+                    return;
 
                 var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupported("asd"); //todo
-                _commandParts.Add("Selector", selector);
+                CommandParts.Add("Selector", selector);
 
                 var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
                 var records = Parameter.ColumnPropertyCollections?.SelectMany(item => item.Records ?? Enumerable.Empty<object>()).ToArray();
 
-                if (records.Length > 1)
+                if (records is {Length: > 0})
                 {
                     ICollection<Tuple<int, string?>> recordsValue = new List<Tuple<int, string?>>();
                     ICollection<Tuple<int, string>> recordsWhere = new List<Tuple<int, string>>();
@@ -226,64 +227,68 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                         ICollection<string> recordValue = new List<string>();
                         foreach (var columnProperty in columnProperties)
                         {
-                            if ((columnProperty.ColumnPropertyInfo?.ReadOnly ?? true)) continue;
-                            if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-                            if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-                            if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
+                            if (columnProperty.ColumnPropertyInfo is null) continue;
+                            if (columnProperty.ColumnPropertyInfo.ReadOnly) continue;
+                            if (columnProperty.ColumnPropertyInfo.FieldType == DatabaseFieldType.Related) continue;
+                            if ((columnProperty.ColumnPropertyInfo.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+                            if ((columnProperty.ColumnPropertyInfo.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+                            if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo.FunctionName ?? string.Empty))) continue;
 
-                            var dbType = columnProperty.ColumnPropertyInfo?.DataType.GetSqlDbType();
-                            var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo?.Name);
+                            var dbType = columnProperty.ColumnPropertyInfo.DataType.GetSqlDbType();
+                            var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
                             var sqlParameter = new SqlParameter(parameterName, dbType) {
                                 Value = columnValue ?? DBNull.Value
                             };
                             SqlParameters.Add(sqlParameter);
 
-                            if (columnProperty.ColumnPropertyInfo?.Key ?? false)
+                            if (columnProperty.ColumnPropertyInfo.Key)
                             {
-                                recordsWhere.Add(new Tuple<int, string>(index, columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue)));
+                                recordsWhere.Add(new Tuple<int, string>(index, columnProperty.ColumnPropertyInfo.GetParameterPhrase(parameterName)));
                                 continue;
                             }
 
-                            recordValue.Add(columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, (object)columnValue));
+                            recordValue.Add(columnProperty.ColumnPropertyInfo.GetParameterPhrase(parameterName));
                         }
 
                         recordsValue.Add(new Tuple<int, string?>(index, string.Join(", ", recordValue)));
                         index += 1;
                     }
 
-                    _commandParts.Add("RecordsValue", recordsValue);
-                    _commandParts.Add("RecordsWhere", recordsWhere);
+                    CommandParts.Add("RecordsValue", recordsValue);
+                    CommandParts.Add("RecordsWhere", recordsWhere);
                 }
                 else
                 {
                     var valueList = new List<string>();
                     foreach (var columnProperty in columnProperties)
                     {
-                        if ((columnProperty.ColumnPropertyInfo?.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
-                        if ((columnProperty.ColumnPropertyInfo?.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
-                        if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo?.FunctionName ?? string.Empty))) continue;
+                        if (columnProperty.ColumnPropertyInfo is null) continue;
+                        if (columnProperty.ColumnPropertyInfo.FieldType == DatabaseFieldType.Related) continue;
+                        if ((columnProperty.ColumnPropertyInfo.AggregateFunctionType ?? AggregateFunctionType.None) != AggregateFunctionType.None) continue;
+                        if ((columnProperty.ColumnPropertyInfo.RankingFunctionType ?? RankingFunctionType.None) != RankingFunctionType.None) continue;
+                        if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo.FunctionName ?? string.Empty))) continue;
 
-                        var dbType = columnProperty.ColumnPropertyInfo?.DataType.GetSqlDbType();
+                        var dbType = columnProperty.ColumnPropertyInfo.DataType.GetSqlDbType();
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
                         var sqlParameter = new SqlParameter(parameterName, dbType) {
                             Value = columnProperty.Value ?? DBNull.Value
                         };
                         SqlParameters.Add(sqlParameter);
 
-                        if (columnProperty.ColumnPropertyInfo?.Key ?? false)
+                        if (columnProperty.ColumnPropertyInfo.Key)
                         {
-                            _commandParts["Where"] = columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value);
+                            CommandParts["Where"] = columnProperty.ColumnPropertyInfo.GetParameterPhrase(parameterName);
                             if (returnType == ReturnType.Record)
-                                _commandParts.Add("result", $"DECLARE @ResultId INT = {parameterName}");
+                                CommandParts.Add("result", $"DECLARE @ResultId INT = {parameterName}");
                             continue;
                         }
 
-                        valueList.Add(columnProperty.ColumnPropertyInfo.GetParameterPhraseBasedOnSqlDbType(parameterName, columnProperty.Value));
+                        valueList.Add(columnProperty.ColumnPropertyInfo.GetParameterPhrase(parameterName));
                     }
 
                     var values = string.Join(", ", valueList);
-                    _commandParts["Values"] = values;
+                    CommandParts["Values"] = values;
                 }
 
                 break;
@@ -298,10 +303,12 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 if (Parameter.ColumnPropertyCollections == null)
                     throw new NotSupported("asdasd"); //todo
 
-                var columnPropertyInfos = Parameter.ColumnPropertyCollections.First().ColumnProperties.Select(item => item.ColumnPropertyInfo);
+                var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
+                if (columnPropertyInfos == null)
+                    return;
 
                 var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupported("asd"); //todo
-                _commandParts.Add("Selector", selector);
+                CommandParts.Add("Selector", selector);
 
                 var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
@@ -314,7 +321,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
                 string where;
 
-                if (records.Length > 1)
+                if (records is {Length: > 0})
                 {
                     var ids = records.Select(record => Dynamic.InvokeGet(record, primaryKeyColumn.Name)).ToArray() ?? throw new System.Exception(); //todo
 
@@ -325,7 +332,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                 }
                 else
                 {
-                    where = primaryKeyColumn.GetParameterPhraseBasedOnSqlDbType(parameterName, primaryKey.Value);
+                    where = primaryKeyColumn.GetParameterPhrase(parameterName);
                     var dbType = primaryKeyColumn?.DataType.GetSqlDbType();
 
                     var sqlParameter = new SqlParameter(parameterName, dbType) {
@@ -334,7 +341,7 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
                     SqlParameters.Add(sqlParameter);
                 }
 
-                _commandParts["Where"] = where;
+                CommandParts["Where"] = where;
 
                 break;
         }
@@ -357,21 +364,14 @@ public class DatabaseCommandQueryPart : DatabaseQueryPart<CommandPredicate>
 
 public class CommandPredicate
 {
-    private IEnumerable<WhereClause>? _wherePredicates;
-
     public ICollection<ColumnPropertyCollection>? ColumnPropertyCollections
     {
         get;
     }
 
-    public CommandPredicate(IEnumerable<WhereClause> wherePredicates) => _wherePredicates = wherePredicates;
-
-    public CommandPredicate(ICollection<ColumnPropertyCollection> columnPropertyCollections) => ColumnPropertyCollections = columnPropertyCollections;
-
-    public CommandPredicate(IEnumerable<WhereClause> wherePredicates, ICollection<ColumnPropertyCollection> columnPropertyCollections)
+    public CommandPredicate(ICollection<ColumnPropertyCollection> columnPropertyCollections)
     {
         ColumnPropertyCollections = columnPropertyCollections;
-        _wherePredicates = wherePredicates;
     }
 }
 
@@ -388,9 +388,15 @@ public class ColumnPropertyCollection
         private set;
     }
 
-    public ColumnPropertyCollection(ICollection<ColumnProperty> columnProperties) => ColumnProperties = columnProperties;
+    public ColumnPropertyCollection(ICollection<ColumnProperty> columnProperties)
+    {
+        ColumnProperties = columnProperties;
+    }
 
-    public ColumnPropertyCollection(IEnumerable<object>? records) => Records = records;
+    public ColumnPropertyCollection(IEnumerable<object>? records)
+    {
+        Records = records;
+    }
 
     public void SetData(IEnumerable<object>? records) => Records = records;
 
@@ -410,9 +416,15 @@ public class ColumnProperty
         private set;
     }
 
-    public ColumnProperty(IColumnPropertyInfo columnPropertyInfo) => ColumnPropertyInfo = columnPropertyInfo;
+    public ColumnProperty(IColumnPropertyInfo columnPropertyInfo)
+    {
+        ColumnPropertyInfo = columnPropertyInfo;
+    }
 
-    public ColumnProperty(object value) => Value = value;
+    public ColumnProperty(object value)
+    {
+        Value = value;
+    }
 
     public void SetValue(object? value) => Value = value;
 }

@@ -1,4 +1,5 @@
 ﻿using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.Query;
 using System.Linq.Expressions;
@@ -13,17 +14,29 @@ public static class DatabaseExpressionHelper
     {
         expandedProperties = null;
         if (!databaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(parent.Type, out var objectInfo))
-        {
-            //if (!databaseCacheInfoCollection.TryGet(parent.Type.Name, out objectInfo))
             return false;
-        }
+
 
         if (objectInfo == null)
             throw new NotFound("DatabaseObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
+        var properties = objectInfo.PropertyInfos.Where(item => item.FieldType != DatabaseFieldType.Related).ToArray();
         expandedProperties = new List<IColumnPropertyInfo>();
-        foreach (var child in objectInfo?.PropertyInfos.GetProperties(parent, !(parent.Parent == null && objectInfo.DataSet == parent.Name))!)
+        foreach (var child in properties.GetProperties(parent, !(parent.Parent == null && objectInfo.DataSet == parent.Name)))
+        {
+            // if (child.Type.IsAssignableTo(typeof(IQueryableObject)))
+            // {
+            //     if (!databaseCacheInfoCollection.TryGetLastDatabaseObjectInfo(child.Type, out var childObjectInfo))
+            //     {
+            //         var childKeyProperty = childObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException(child.Name, $"Column info is not complete for {child.Name}");
+            //         childKeyProperty.Parent = child;
+            //         expandedProperties.Add(childKeyProperty);
+            //     }
+            //     continue;
+            // }
+            //
             expandedProperties.Add(child);
+        }
 
         return expandedProperties.Count > 0;
     }

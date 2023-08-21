@@ -16,5 +16,6 @@ public enum ColumnDataType
     Object = 12,
     Structure = 13,
     Generic = 14,
-    Binary = 15
+    Binary = 15,
+    Guid = 16
 }

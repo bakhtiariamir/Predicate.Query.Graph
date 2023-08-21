@@ -105,6 +105,9 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         {
             if (Parent.Parent != null)
             {
+                if (Type.IsAssignableTo(typeof(IQueryableObject)))
+                    getParent = true;
+                
                 if (getParent)
                     return $"{Parent.GetCombinedAlias(true)}_{Name}";
 

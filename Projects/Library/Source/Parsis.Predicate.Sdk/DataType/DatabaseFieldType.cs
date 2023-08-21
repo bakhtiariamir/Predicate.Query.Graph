@@ -7,5 +7,6 @@ public enum DatabaseFieldType
     RankingWindowFunction = 3,
     ValueWindowFunction = 4,
     Functional = 5,
-    NotMapped = 6
+    NotMapped = 6,
+    Related = 7
 }

@@ -7,15 +7,16 @@ namespace Parsis.Predicate.Sdk.Generator.Database;
 public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<IColumnPropertyInfo>>
 {
     private string? _text;
-    private bool _isCount = false;
-
     public override string? Text
     {
         get => _text;
         set => _text = value;
     }
 
-    private DatabaseColumnsClauseQueryPart(ICollection<IColumnPropertyInfo> properties) => Parameter = properties;
+    private DatabaseColumnsClauseQueryPart(ICollection<IColumnPropertyInfo> properties)
+    {
+        Parameter = properties;
+    }
 
     private string SetColumnName(IColumnPropertyInfo item) => item.AggregateFunctionType switch {
         AggregateFunctionType.Count => $"COUNT(*){SetOverPartition(item)} AS COUNT_{item.GetCombinedAlias()}",
@@ -23,31 +24,8 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
         AggregateFunctionType.Max => $"MAX({SetColumnSelector(item)}) {SetOverPartition(item)} AS MAX_{item.GetCombinedAlias()}",
         AggregateFunctionType.Min => $"MIN({SetColumnSelector(item)}) {SetOverPartition(item)} AS MIN_{item.GetCombinedAlias()}",
         AggregateFunctionType.Sum => $"SUM({SetColumnSelector(item)}) {SetOverPartition(item)} AS SUM_{item.GetCombinedAlias()}",
-        //AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {SetColumnAlias(item, (item.Parent != null))}_{item.ColumnName}",
-        AggregateFunctionType.None or _ or null => $"{SetColumnSelector(item)} As {item.GetCombinedAlias()}"
-        //اگر ستون جوین بود شناسه رو نزاره مثل Domain.parentId  چون تو خودش داره یا هر روش دیگه ای
-        //
+        _ or null => $"{SetColumnSelector(item)} As {item.GetCombinedAlias()}"
     };
-
-    private string SetColumnAlias(IColumnPropertyInfo item, bool hasParent)
-    {
-        var columnAlias = string.Empty;
-        if (hasParent)
-        {
-            if (item.Parent == null)
-                return columnAlias;
-
-            var parentAliasSelector = SetColumnAlias(item.Parent, hasParent);
-            var parentAlias = !string.IsNullOrWhiteSpace(parentAliasSelector) ? $"{parentAliasSelector}_" : "";
-            columnAlias = $"{parentAlias}{item.Name}";
-        }
-        else
-        {
-            columnAlias = item.Name;
-        }
-
-        return columnAlias;
-    }
 
     private string? SetOverPartition(IColumnPropertyInfo columnPropertyInfo)
     {
@@ -72,12 +50,9 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
     public static DatabaseColumnsClauseQueryPart CreateCount()
     {
         var queryPart = new DatabaseColumnsClauseQueryPart(new List<IColumnPropertyInfo>());
-        queryPart._isCount = true;
         queryPart._text = " COUNT(*) AS COUNT ";
         return queryPart;
     }
-
-    public bool IsCountQuery() => _isCount;
 
     public static DatabaseColumnsClauseQueryPart Merged(IEnumerable<DatabaseColumnsClauseQueryPart> columnsClause)
     {
@@ -91,19 +66,9 @@ public class DatabaseColumnsClauseQueryPart : DatabaseQueryPart<ICollection<ICol
         var relatedObjects = list.Where(item => item.Type.GetInterface(nameof(IQueryableObject)) != null && item.Parent == null).ToArray();
         var removeRelatedObjects = new List<IColumnPropertyInfo>();
         if (relatedObjects.Any())
-        {
-            foreach (var relatedObject in relatedObjects)
-            {
-                if (list.Any(item => item.Parent?.Name == relatedObject.Name))
-                {
-                    removeRelatedObjects.Add(relatedObject);
-                    continue;
-                }
-            }
-        }
+            removeRelatedObjects.AddRange(relatedObjects.Where(relatedObject => list.Any(item => item.Parent?.Name == relatedObject.Name)));
 
         var columns = list.Where(property => !(removeRelatedObjects.Contains(property) && property.Parent == null)).ToList();
-
         var column = new DatabaseColumnsClauseQueryPart(columns);
         column.SetText();
 

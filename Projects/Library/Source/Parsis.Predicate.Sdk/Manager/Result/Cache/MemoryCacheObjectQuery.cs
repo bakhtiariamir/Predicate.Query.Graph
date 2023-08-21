@@ -21,11 +21,12 @@ public class MemoryCacheObjectQuery : ObjectQuery<BaseQueryParameter>, IMemoryCa
         CacheQueryObject = cacheQueryObject;
     }
 
-    public override void UpdateParameter(params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
+    public override void UpdateParameter(string type, params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
     {
         var newParam = parameters.FirstOrDefault(item => string.Equals(parameter.Name, item.Name, StringComparison.CurrentCultureIgnoreCase));
         if (newParam != null)
-            parameter.Value = newParam.Value;
+        {
+        }
     });
 }
 

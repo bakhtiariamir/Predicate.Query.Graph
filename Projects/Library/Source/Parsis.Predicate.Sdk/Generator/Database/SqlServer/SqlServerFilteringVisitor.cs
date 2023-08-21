@@ -42,7 +42,7 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
         var clauseType = ClauseType.None;
         if (left.Parameter.ColumnPropertyInfo != null && (left.Parameter.ClauseType == ClauseType.Having || right.Parameter.ClauseType == ClauseType.Having))
             clauseType = ClauseType.Having;
-        if (left.Parameter.ColumnPropertyInfo != null && left.Parameter.ClauseType is ClauseType.Where or ClauseType.None || right.Parameter.ClauseType is ClauseType.Where or ClauseType.None)
+        if (left.Parameter is { ColumnPropertyInfo: not null, ClauseType: ClauseType.Where or ClauseType.None } || right.Parameter.ClauseType is ClauseType.Where or ClauseType.None)
             clauseType = ClauseType.Where;
 
         return DatabaseWhereClauseQueryPart.Create(WhereClause.CreateWhereClause(left.Parameter, right.Parameter, ConditionOperatorType.Not, clauseType));
@@ -180,8 +180,8 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     private DatabaseWhereClauseQueryPart VisitCall(MethodCallExpression expression, ConditionOperatorType operatorType = ConditionOperatorType.And)
     {
-        DatabaseWhereClauseQueryPart? left = null;
-        DatabaseWhereClauseQueryPart? right = null;
+        DatabaseWhereClauseQueryPart? left;
+        DatabaseWhereClauseQueryPart? right;
         MemberExpression? memberExpression = null;
         ConstantExpression? constantExpression = null;
 
@@ -309,7 +309,7 @@ public class SqlServerFilteringVisitor : DatabaseVisitor<DatabaseWhereClauseQuer
 
     private static DatabaseWhereClauseQueryPart VisitDatabaseWhereClause(ConditionOperatorType operatorType, DatabaseWhereClauseQueryPart right, DatabaseWhereClauseQueryPart left)
     {
-        if (right.Parameter.ParameterName != null && right.Parameter.ColumnPropertyInfo == null && right.Parameter.PartType == PartType.ParameterInfo && right.Parameter.ParameterName.ToLower() == left.Parameter.ColumnPropertyInfo.ColumnName.ToLower())
+        if (right.Parameter is { ParameterName: not null, ColumnPropertyInfo: null, PartType: PartType.ParameterInfo })
             right.Parameter.SetParameterColumnInfo(left.Parameter.ColumnPropertyInfo);
 
         if (right.Parameter.PartType == PartType.ParameterInfo && left.Parameter.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)

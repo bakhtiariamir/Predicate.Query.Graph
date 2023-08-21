@@ -113,7 +113,7 @@ public class UserDefinedTable
     public string Key
     {
         get;
-        set;
+        init;
     }
 
     public bool Status

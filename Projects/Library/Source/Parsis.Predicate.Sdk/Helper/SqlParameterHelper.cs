@@ -77,23 +77,23 @@ public static class SqlParameterHelper
     };
 
     public static string GetParameterStringBasedOnSqlDbType(this ColumnDataType columnDataType, string parameterName, object? value) => columnDataType switch {
-        ColumnDataType.Char => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.String => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Boolean => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Byte => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Int => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.UInt => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Long => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Float => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Decimal => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Double => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.DateTime => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Object => value != null ? $"{parameterName}" : "NULL",
-        ColumnDataType.Structure => value != null ? $"({parameterName})" : "NULL",
+        ColumnDataType.Char => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.String => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Boolean => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Byte => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Int => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.UInt => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Long => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Float => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Decimal => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Double => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.DateTime => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Object => value != null ? $"{parameterName}" : $"{parameterName}",
+        ColumnDataType.Structure => value != null ? $"({parameterName})" : $"({parameterName})",
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
 
-    public static string GetParameterPhraseBasedOnSqlDbType(this IColumnPropertyInfo? columnPropertyInfo, string parameterName, object? value) => $"[{columnPropertyInfo.ColumnName}] = {columnPropertyInfo.DataType.GetParameterStringBasedOnSqlDbType(parameterName, value)}";
+    public static string GetParameterPhrase(this IColumnPropertyInfo columnPropertyInfo, string parameterName) => $"[{columnPropertyInfo.ColumnName}] = {parameterName}";
 
     public static IEnumerable<SqlParameter> ArrayParameters<TDataType>(string baseParameterName, IEnumerable<TDataType> values, ColumnDataType columnDataType, int? index = 0)
     {

@@ -21,8 +21,8 @@ public static class SqlServerQueryHelper
         select.Append(queryParts.WhereClause != null ? $"WHERE {queryParts.WhereClause.Text} " : "");
         select.Append(queryParts.GroupByClause != null ? $"GROUP BY {queryParts.GroupByClause.Text} " : "");
         select.Append(queryParts.GroupByClause is {Having: { }} ? $"HAVING {queryParts.GroupByClause?.Having} " : "");
-        select.Append(queryParts.OrderByClause != null ? $"{queryParts.OrderByClause.Text}" : "");
-
+        select.Append(queryParts.OrderByClause != null ? $"{queryParts.OrderByClause.Text} " : "");
+        select.Append(queryParts.Paging != null ? queryParts.Paging.Text : "");
         return select.ToString();
     }
 

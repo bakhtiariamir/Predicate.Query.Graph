@@ -28,7 +28,7 @@ public abstract class ObjectQuery<TParameter> : IObjectQuery<TParameter>
         get;
     }
 
-    public abstract void UpdateParameter(params ParameterValue[] parameters);
+    public abstract void UpdateParameter(string type, params ParameterValue[] parameters);
 }
 
 public abstract class ObjectQueryGenerator<TParameter, TObjectQuery, TQueryResult> : IObjectQueryGenerator<TParameter, TObjectQuery, TQueryResult> where TObjectQuery : IObjectQuery<TParameter>

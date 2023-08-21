@@ -30,6 +30,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                 throw new ArgumentNullException($"Columns for insert query in return record mode for {typeof(TObject).Name} can not be null.");
 
             var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
+            selectQuery.ObjectTypeStructures = query.ObjectTypeStructures;
             var sqlQuery = await Build(selectQuery);
             QueryPartCollection.ResultQuery = sqlQuery;
         }
@@ -47,6 +48,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
 
 
             var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
+            selectQuery.ObjectTypeStructures = query.ObjectTypeStructures;
             var sqlQuery = await Build(selectQuery);
             QueryPartCollection.ResultQuery = sqlQuery;
         }
@@ -216,6 +218,9 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                 if (joins.Any(item => item.Item1.Equals(parameter.Parent)))
                     continue;
 
+                if (parameter.FieldType == DatabaseFieldType.Related)
+                    continue;
+                
                 joins.Add(new Tuple<IColumnPropertyInfo, int>(parameter.Parent, level));
                 getJoins?.Invoke(new[] {parameter.Parent}, ++level);
             }

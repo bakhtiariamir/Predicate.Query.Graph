@@ -18,9 +18,14 @@ public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
         Phrase = phrase;
     }
 
-    public override void UpdateParameter(params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
+    public override void UpdateParameter(string type, params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
     {
-        var newParam = parameters.FirstOrDefault(item => string.Equals(parameter.ParameterName, $"@{item.Name}", StringComparison.CurrentCultureIgnoreCase));
+        ParameterValue? newParam;
+        if  (type == "command")
+            newParam = parameters.FirstOrDefault(item => string.Equals(parameter.ParameterName, $"@{item.Name}", StringComparison.CurrentCultureIgnoreCase));
+        else 
+            newParam = parameters.FirstOrDefault(item => string.Equals(parameter.ParameterName, item.Name, StringComparison.CurrentCultureIgnoreCase));
+
         if (newParam != null)
             parameter.Value = newParam.Value;
     });

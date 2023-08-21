@@ -11,9 +11,14 @@ public static class DatabaseQueryPartHelper
     {
         if (queryParts == null) throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
-        var sqlParameters = DatabaseWhereClauseQueryPart.GetParameters(queryParts.WhereClause?.Parameter, queryParts.WhereClause?.QuerySetting);
+        var sqlParameters = DatabaseWhereClauseQueryPart.GetParameters(queryParts.WhereClause?.Parameter, queryParts.WhereClause?.QuerySetting).ToArray();
 
-        foreach (var parameter in sqlParameters)
+        var pageParameters = DatabasePagingClauseQueryPart.GetParameters(queryParts.Paging?.Parameter)?.ToArray();
+
+
+        var parameters = sqlParameters.Concat(pageParameters ?? Array.Empty<SqlParameter>());
+
+        foreach (var parameter in parameters)
             yield return parameter;
     }
 }

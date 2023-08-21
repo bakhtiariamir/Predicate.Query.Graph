@@ -1,5 +1,6 @@
 ﻿using Dynamitey;
 using Parsis.Predicate.Sdk.Contract;
+using Parsis.Predicate.Sdk.DataType;
 using Parsis.Predicate.Sdk.Exception;
 using Parsis.Predicate.Sdk.ExpressionHandler.Visitors;
 using Parsis.Predicate.Sdk.Helper;
@@ -20,7 +21,7 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
         if (expression.Expression == null)
             throw new NotSupported(ExceptionCode.ObjectInfo); //ToDo
 
-        var columnProperties = ObjectInfo.PropertyInfos.Select(item => new ColumnProperty(item)).ToArray();
+        var columnProperties = ObjectInfo.PropertyInfos.Select(item => new ColumnProperty(item)).Where(item => item.ColumnPropertyInfo.FieldType != DatabaseFieldType.Related).ToArray();
         var columnCommandQueryPart = DatabaseCommandQueryPart.Create(columnProperties);
 
         var valueQueryPart = Visit(expression.Expression);
@@ -71,7 +72,7 @@ public class SqlServerCommandVisitor : DatabaseVisitor<DatabaseCommandQueryPart>
                 {
                     var cacheObject = CacheObjectCollection.GetLastDatabaseObjectInfo(column.ColumnPropertyInfo?.Type!) ?? throw new System.Exception(); //todo
                     var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new System.Exception(); //todo
-                    object? objectColumnValue = default;
+                    object? objectColumnValue;
                     if (isDefault)
                         objectColumnValue = dynamicValue;
                     else 

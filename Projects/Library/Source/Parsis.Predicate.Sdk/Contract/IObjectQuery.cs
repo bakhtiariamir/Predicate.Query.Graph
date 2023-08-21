@@ -55,7 +55,7 @@ public interface IObjectQuery<TParameter>
         get;
     }
 
-    void UpdateParameter(params ParameterValue[] parameters);
+    void UpdateParameter(string type, params ParameterValue[] parameters);
 }
 
 public class ParameterValue

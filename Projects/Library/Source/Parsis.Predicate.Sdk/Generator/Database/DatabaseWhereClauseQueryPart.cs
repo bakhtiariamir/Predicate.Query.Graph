@@ -139,7 +139,7 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 break;
             case PartType.ParameterInfo:
 
-                var parameterName = string.Empty;
+                string parameterName;
                 var typeParam = "";
                 if (whereClause.ValueType?.IsArray ?? false)
                 {
@@ -219,9 +219,31 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
                 }
                 else
                 {
+                    // if (whereClause.ColumnPropertyInfo!.Name != whereClause.ParameterName)
+                    // {
+                    //     parameterName = SetParameterName(whereClause);
+                    // }
+                    // else
+                    // {
+                    //     //Todo : 228
+                    //     var columnName = whereClause.ColumnPropertyInfo.Name;
+                    //     var dataSet = whereClause.ColumnPropertyInfo.DataSet;
+                    //     parameterName = $"{dataSet}{columnName}";
+                    // }
+                    if (whereClause.ColumnPropertyInfo == null)
+                    {
+                        parameterName = SetParameterName(whereClause);
+                    }
+                    else
+                    {
+                        var columnName = whereClause.ColumnPropertyInfo.Name;
+                        var dataSet = whereClause.ColumnPropertyInfo.DataSet;
+                        parameterName = $"{dataSet}{columnName}";
+                    }
+
                     sqlParameter = new SqlParameter
                     {
-                        ParameterName = SetParameterName(whereClause),
+                        ParameterName = parameterName,
                         Value = parameter.Value
                     };
                 }
@@ -319,8 +341,21 @@ public class DatabaseWhereClauseQueryPart : DatabaseQueryPart<WhereClause>
 
                     else if (string.IsNullOrWhiteSpace(whereClause.ParameterName))
                     {
+
                         return $"@{whereClause.ParameterName}";
                     }
+                    else
+                    {
+                        if (whereClause.ColumnPropertyInfo == null)
+                        {
+                            return $"@{SetParameterName(whereClause)}";
+                        }
+                        
+                        var columnName = whereClause.ColumnPropertyInfo.Name;
+                        var dataSet = whereClause.ColumnPropertyInfo.DataSet;
+                        return $"@{dataSet}{columnName}";
+                    }
+
 
                     return $"@{SetParameterName(whereClause)}";
 

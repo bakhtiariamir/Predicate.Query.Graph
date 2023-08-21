@@ -18,6 +18,8 @@ public class QueryObjectSorting<TObject> : IQueryObjectPart<QueryObjectSorting<T
         return this;
     }
 
+    public bool HasOrder() => _orderPredicates.Count > 0;
+
     public ICollection<SortPredicate<TObject>> Return() => _orderPredicates;
 
     public Dictionary<string, string> GetQueryOptions() => new();

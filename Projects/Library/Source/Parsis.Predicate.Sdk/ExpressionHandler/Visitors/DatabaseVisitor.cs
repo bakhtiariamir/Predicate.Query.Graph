@@ -63,9 +63,9 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
             return objectInfo;
         };
 
-        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo>? getMemberExpression = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, bool, IColumnPropertyInfo?>? getMemberExpression = null;
 
-        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo>>? getMemberExpressions = null;
+        Func<Expression, IDatabaseObjectInfo, ICacheInfoCollection, ICollection<IColumnPropertyInfo?>>? getMemberExpressions = null;
 
         getMemberExpression = (expr, databaseObjectInfo, databaseCacheInfoCollection, isMain) =>
         {
@@ -91,8 +91,9 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                     throw new NotFound(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
 
                 property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFound(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+
                 if (memberExpression.Expression is MemberExpression || memberExpression.Expression is ParameterExpression)
-                    property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);
+                    property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);   
             }
             else if (expr is ParameterExpression parameterExpression)
             {
@@ -128,7 +129,14 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                 throw new NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
             }
 
-            return property;
+            if (property.FieldType != DatabaseFieldType.Related)
+            {
+                return property;
+            }
+            else
+            {
+                return null;
+            }
         };
 
         getMemberExpressions = (expr, databaseObjectInfo, databaseCacheInfoCollection) =>
@@ -139,9 +147,17 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                 foreach (var item in arrayExpression.Expressions)
                 {
                     if (item.NodeType == ExpressionType.Convert)
-                        properties.Add(getMemberExpression.Invoke(((UnaryExpression)item).Operand, databaseObjectInfo, databaseCacheInfoCollection, true));
+                    {
+                        var convertedProperty = getMemberExpression.Invoke(((UnaryExpression)item).Operand, databaseObjectInfo, databaseCacheInfoCollection, true);
+                        if (convertedProperty != null)
+                            properties.Add(convertedProperty);
+                    }
                     else
-                        properties.Add(getMemberExpression.Invoke(item, databaseObjectInfo, databaseCacheInfoCollection, true));
+                    {
+                        var property = getMemberExpression.Invoke(item, databaseObjectInfo, databaseCacheInfoCollection, true);
+                        if (property != null)
+                            properties.Add(property);
+                    }
                 }
             }
             else
