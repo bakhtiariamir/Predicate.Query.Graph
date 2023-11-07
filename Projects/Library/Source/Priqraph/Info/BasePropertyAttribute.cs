@@ -63,13 +63,11 @@ public abstract class BasePropertyAttribute : Attribute
     public int MaxLength
     {
         get;
-        set;
     }
 
     public int MinLength
     {
         get;
-        set;
     }
 
     protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, string? uniqueFieldGroup = null, params string[]? errorMessage)

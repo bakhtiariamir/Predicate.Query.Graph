@@ -4,13 +4,16 @@ namespace Priqraph.Builder.Database;
 
 public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> where TObject : IQueryableObject
 {
-    private readonly DatabaseQueryContextBuilder _contextBuilder;
+    private readonly QueryContextBuilder _contextBuilder;
 
     private IQueryContext? _queryContext;
 
-    private IQuery<TObject, DatabaseQueryPartCollection>? _query;
+    private IQuery<TObject, DatabaseQueryResult>? _query;
 
-    private SqlServerQueryBuilder(ICacheInfoCollection info) => _contextBuilder = new DatabaseQueryContextBuilder(info);
+    private SqlServerQueryBuilder(ICacheInfoCollection info)
+    {
+        _contextBuilder = QueryContextBuilder.Init(info);
+    }
 
     public static SqlServerQueryBuilder<TObject> Init(ICacheInfoCollection info) => new(info);
 
@@ -29,7 +32,7 @@ public class SqlServerQueryBuilder<TObject> : DatabaseQueryBuilder<TObject> wher
         return Task.FromResult(this);
     }
 
-    public override Task<IQuery<TObject, DatabaseQueryPartCollection>> BuildAsync()
+    public override Task<IQuery<TObject, DatabaseQueryResult>> BuildAsync()
     {
         if (_queryContext == null)
             throw new System.Exception("asd"); //ToDo : Exception

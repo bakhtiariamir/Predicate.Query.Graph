@@ -8,7 +8,7 @@ public class MemoryCacheQueryBuilder<TObject> : CacheQueryBuilder<TObject> where
 
     private IQueryContext? _queryContext;
 
-    private IQuery<TObject, CacheQueryPartCollection>? _query;
+    private IQuery<TObject, CacheQueryResult>? _query;
 
     private MemoryCacheQueryBuilder(ICacheInfoCollection info) => _contextBuilder = new CacheQueryContextBuilder(info);
 
@@ -29,7 +29,7 @@ public class MemoryCacheQueryBuilder<TObject> : CacheQueryBuilder<TObject> where
         return Task.FromResult(this);
     }
 
-    public override Task<IQuery<TObject, CacheQueryPartCollection>> BuildAsync()
+    public override Task<IQuery<TObject, CacheQueryResult>> BuildAsync()
     {
         if (_queryContext == null)
             throw new System.Exception("asd"); //ToDo : Exception

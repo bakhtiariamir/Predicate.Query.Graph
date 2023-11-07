@@ -2,71 +2,76 @@
 using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Generator.Database;
-using Priqraph.Generator.Database.SqlServer;
+using Priqraph.Generator.Database.Visitors;
 using Priqraph.Helper;
 using Priqraph.Query;
+using Priqraph.Query.Builders;
+using Priqraph.Query.Predicates;
+using Priqraph.Setup;
 using System.Linq.Expressions;
 
 namespace Priqraph.Builder.Database;
 
-public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQueryableObject
+internal class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQueryableObject
 {
-    private IDatabaseObjectInfo _objectInfo;
+    private readonly IDatabaseObjectInfo _objectInfo;
     public SqlServerQuery(IQueryContext context) : base(context)
     {
-        _objectInfo = Context.CacheInfoCollection?.GetLastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
-        QueryPartCollection.DatabaseObjectInfo = _objectInfo;
+        _objectInfo = Context.CacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
+        QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override async Task GenerateInsertAsync(QueryObject<TObject> query)
+    protected override async Task GenerateInsertAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
-        var commandSqlVisitor = new SqlServerCommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Add);
 
-        if (QueryPartCollection.Command != null && command.ReturnType == ReturnType.Record && QueryPartCollection.Command.CommandParts.ContainsKey("result"))
+        if (QueryResult.Command != null && command.ReturnType == ReturnType.Record && QueryResult.Command.CommandParts.ContainsKey("result"))
         {
-            if (query.Columns == null)
+            if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for insert query in return record mode for {typeof(TObject).Name} can not be null.");
 
-            var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
-            selectQuery.ObjectTypeStructures = query.ObjectTypeStructures;
+            var builder = new QueryObjectBuilder<TObject>(QueryProvider.SqlServer);
+            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = await Build(selectQuery);
-            QueryPartCollection.ResultQuery = sqlQuery;
+            QueryResult.ResultQuery = sqlQuery;
         }
     }
 
-    protected override async Task GenerateUpdateAsync(QueryObject<TObject> query)
+    protected override async Task GenerateUpdateAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
-        var commandSqlVisitor = new SqlServerCommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Edit);
-        if (QueryPartCollection.Command != null && command.ReturnType == ReturnType.Record && QueryPartCollection.Command.CommandParts.ContainsKey("result"))
+        if (QueryResult.Command != null && command.ReturnType == ReturnType.Record && QueryResult.Command.CommandParts.ContainsKey("result"))
         {
-            if (query.Columns == null)
+            if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for update query in return record mode for {typeof(TObject).Name} can not be null.");
 
-
-            var selectQuery = QueryObjectBuilder<TObject>.Init(QueryObject<TObject>.Init(QueryOperationType.GetData)).SetSelecting(query.Columns).SetFilterPredicate(QueryObjectFiltering<TObject>.Init(ReturnType.Record).Return()).Generate();
-            selectQuery.ObjectTypeStructures = query.ObjectTypeStructures;
+            var builder = new QueryObjectBuilder<TObject>(QueryProvider.SqlServer);
+            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = await Build(selectQuery);
-            QueryPartCollection.ResultQuery = sqlQuery;
+            QueryResult.ResultQuery = sqlQuery;
         }
     }
 
-    protected override Task GenerateDeleteAsync(QueryObject<TObject> query)
+    protected override Task GenerateDeleteAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
-        var commandSqlVisitor = new SqlServerCommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Remove);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateColumnAsync(QueryObject<TObject> query, bool getCount = false)
+    protected override Task GenerateColumnAsync(IQueryObject<TObject> query, bool getCount = false)
     {
         if (!getCount)
         {
-            var fieldsExpression = query.Columns?.ToList();
+            var fieldsExpression = query.ColumnPredicates?.ToList();
             ParameterExpression? parameterExpression = null;
             if (fieldsExpression[0]?.Expression != null)
             {
@@ -77,8 +82,8 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                 parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
             }
 
-            var selectingGenerator = new SqlServerSelectingVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
-            var columns = new List<DatabaseColumnsClauseQueryPart>();
+            var selectingGenerator = new ColumnVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
+            var columns = new List<ColumnQueryFragment>();
             fieldsExpression.ToList().ForEach(field =>
             {
                 Expression? expression = null;
@@ -95,34 +100,34 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                 columns.Add(property);
             });
 
-            var queryColumns = DatabaseColumnsClauseQueryPart.Merged(columns.Select(item => item));
-            QueryPartCollection.Columns = queryColumns;
+            var queryColumns = ColumnQueryFragment.Merged(columns.Select(item => item));
+            QueryResult.Columns = queryColumns;
             JoinColumns.AddRange(queryColumns.Parameter);
         }
         else
         {
-            QueryPartCollection.Columns = DatabaseColumnsClauseQueryPart.CreateCount();
+            QueryResult.Columns = ColumnQueryFragment.CreateCount();
         }
 
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateWhereAsync(QueryObject<TObject> query)
+    protected override Task GenerateWhereAsync(IQueryObject<TObject> query)
     {
-        if (query.Filters?.ReturnType != ReturnType.None)
+        if (query.FilterPredicates?.ReturnType != ReturnType.None)
         {
             var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("Primary key can not be null.");
-            var clause = new WhereClause(key, null, ConditionOperatorType.Equal);
-            switch (query.Filters?.ReturnType)
+            var clause = new FilterClause(key, null, ConditionOperatorType.Equal);
+            switch (query.FilterPredicates?.ReturnType)
             {
                 case ReturnType.Record:
-                    var whereClause = DatabaseWhereClauseQueryPart.Create(clause);
+                    var whereClause = FilterQueryFragment.Create(clause);
                     whereClause.SetText(ReturnType.Record, clause);
-                    QueryPartCollection.WhereClause = whereClause;
+                    QueryResult.WhereClause = whereClause;
                     break;
                 case ReturnType.None:
                     break;
-                case ReturnType.KeyValue:
+                case ReturnType.Key:
                     break;
                 case ReturnType.RowAffected:
                     break;
@@ -133,7 +138,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             }
         }
 
-        var expression = query.Filters?.Expression;
+        var expression = query.FilterPredicates?.Expression;
         if (expression == null)
             return Task.CompletedTask;
 
@@ -144,22 +149,22 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             var lambdaExpression = (LambdaExpression)expression;
             var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
             var parameterExpression = lambdaExpression.Parameters[0];
-            var whereGenerator = new SqlServerFilteringVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
+            var whereGenerator = new FilterVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             var whereClause = whereGenerator.Generate(body);
             whereClause.SetQuerySetting(Context.CacheInfoCollection.QuerySetting);
             whereClause.ReduceParameter();
             whereClause.SetText();
-            QueryPartCollection.WhereClause = whereClause;
-            var joinColumns = DatabaseWhereClauseQueryPart.GetColumnProperties(whereClause.Parameter);
+            QueryResult.WhereClause = whereClause;
+            var joinColumns = FilterQueryFragment.GetColumnProperties(whereClause.Parameter);
             JoinColumns.AddRange(joinColumns);
         }
 
         return Task.CompletedTask;
     }
 
-    protected override Task GeneratePagingAsync(QueryObject<TObject> query)
+    protected override Task GeneratePagingAsync(IQueryObject<TObject> query)
     {
-        var expression = query.Paging?.Predicate;
+        var expression = query.PagePredicate?.Predicate;
         if (expression == null)
             return Task.CompletedTask;
 
@@ -169,19 +174,19 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         var lambdaExpression = (LambdaExpression)expression;
         var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        var pagingVisitor = new SqlServerPagingVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        QueryPartCollection.Paging = pagingVisitor.Generate(body);
+        var pagingVisitor = new PageVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        QueryResult.Paging = pagingVisitor.Generate(body);
 
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateOrderByAsync(QueryObject<TObject> query)
+    protected override Task GenerateOrderByAsync(IQueryObject<TObject> query)
     {
-        var sortExpression = query.Sorts?.ToList();
+        var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)
         {
             var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
-            var sortingGenerator = new SqlServerSortingVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
+            var sortingGenerator = new SortVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             sortExpression.ToList().ForEach(sortPredicate =>
             {
                 Expression? expression = null;
@@ -194,18 +199,18 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
                     throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 var orderByProperty = sortingGenerator.Generate(expression);
-                QueryPartCollection.OrderByClause = QueryPartCollection.OrderByClause == null ? orderByProperty : DatabaseOrdersByClauseQueryPart.Merged(new[] { QueryPartCollection.OrderByClause, orderByProperty });
+                QueryResult.OrderByClause = QueryResult.OrderByClause == null ? orderByProperty : SortQueryFragment.Merged(new[] { QueryResult.OrderByClause, orderByProperty });
             });
         }
 
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateJoinAsync(QueryObject<TObject> query)
+    protected override Task GenerateJoinAsync(IQueryObject<TObject> query)
     {
         var joins = new List<Tuple<IColumnPropertyInfo, int>>();
 
-        var joinGenerator = new SqlServerJoiningVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var joinGenerator = new JoinVisitor(Context.CacheInfoCollection, _objectInfo, null);
 
         Action<ICollection<IColumnPropertyInfo>, int>? getJoins = null;
         getJoins = (parameters, level) =>
@@ -227,7 +232,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         };
 
         getJoins(JoinColumns.Where(item => item.Parent is not null && item.Parent.Name != _objectInfo.DataSet).DistinctBy(item => new {item.Schema, item.DataSet, item.ColumnName, item.Name}).ToList(), 0);
-        var queryObjectJoining = QueryObjectJoining.Init();
+        var queryObjectJoining = JoinPredicateBuilder.Init();
 
         joins.OrderBy(item => item.Item2).Select(item => item).GroupBy(item => new {item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name}).ToList().ForEach(item =>
         {
@@ -262,7 +267,7 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
         });
 
         var joinPredicates = queryObjectJoining.Validate().Return().OrderBy(item => item.Order);
-        var databaseJoinClauses = new List<DatabaseJoinsClauseQueryPart>();
+        var databaseJoinClauses = new List<JoinQueryFragment>();
         foreach (var join in joinPredicates)
         {
             joinGenerator.AddOption("JoinType", join.Type);
@@ -270,43 +275,43 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             joinGenerator.RemoveOption("JoinType");
         }
 
-        QueryPartCollection.JoinClause = DatabaseJoinsClauseQueryPart.Merged(databaseJoinClauses);
+        QueryResult.JoinClause = JoinQueryFragment.Merged(databaseJoinClauses);
 
         return Task.CompletedTask;
     }
 
     protected override Task GenerateFunctionByClause()
     {
-        var columnQueryPart = QueryPartCollection.Columns ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
-        var whereQueryPart = QueryPartCollection.WhereClause;
+        var columnQueryPart = QueryResult.Columns ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
+        var whereQueryPart = QueryResult.WhereClause;
 
         var grouping = false;
-        ICollection<WhereClause>? havingClauses = null;
+        ICollection<FilterClause>? havingClauses = null;
         if (whereQueryPart != null)
         {
-            havingClauses = DatabaseWhereClauseQueryPart.GetHavingClause(whereQueryPart.Parameter);
+            havingClauses = FilterQueryFragment.GetHavingClause(whereQueryPart.Parameter);
             grouping = havingClauses.Count > 0;
         }
 
         if (!grouping) return Task.CompletedTask;
         var groupingColumns = columnQueryPart.Parameter.Where(item => item.AggregateFunctionType == AggregateFunctionType.None) ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
-        var groupClauses = DatabaseGroupByClauseQueryPart.Create(new GroupingPredicate(groupingColumns, havingClauses));
+        var groupClauses = GroupByQueryFragment.Create(new GroupByProperty(groupingColumns, havingClauses));
 
         groupClauses.GroupingText();
         groupClauses.HavingText();
 
-        QueryPartCollection.GroupByClause = groupClauses;
+        QueryResult.GroupByClause = groupClauses;
 
         return Task.CompletedTask;
     }
 
-    private void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, QueryOperationType operationType)
+    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, QueryOperationType operationType)
     {
-        var commandQueries = new List<DatabaseCommandQueryPart>();
-        switch (command.CommandValueType)
+        var commandQueries = new List<CommandQueryFragment>();
+        switch (commandPredicate.CommandValueType)
         {
             case CommandValueType.Record:
-                GenerateRecordCommand(command, commandSqlVisitor, commandQueries, operationType);
+                GenerateRecordCommand(commandPredicate, commandSqlVisitor, commandQueries, operationType);
 
                 break;
             case CommandValueType.Bulk:
@@ -315,18 +320,18 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             default:
                 throw new NotSupported(ExceptionCode.ApiQueryBuilder); //Too
         }
-        commandSqlVisitor.AddOption("returnRecord", command.ReturnType);
-        var commandObject = DatabaseCommandQueryPart.Merge(operationType, command.ReturnType, commandQueries.ToArray());
-        QueryPartCollection.Command = commandObject;
+        commandSqlVisitor.AddOption("returnRecord", commandPredicate.ReturnType);
+        var commandObject = CommandQueryFragment.Merge(operationType, commandPredicate.ReturnType, commandQueries.ToArray());
+        QueryResult.Command = commandObject;
     }
 
-    private static void GenerateRecordCommand(ObjectCommand<TObject> command, SqlServerCommandVisitor commandSqlVisitor, ICollection<DatabaseCommandQueryPart> commandQueries, QueryOperationType operationType)
+    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CommandQueryFragment> commandQueries, QueryOperationType operationType)
     {
-        if (command.ObjectPredicate == null && command.ObjectsPredicate == null) throw new NotFound("as"); //todo
+        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFound("as"); //todo
 
-        if (command.ObjectPredicate != null)
+        if (commandPredicate.ObjectPredicate != null)
         {
-            foreach (var objectPredicate in command.ObjectPredicate)
+            foreach (var objectPredicate in commandPredicate.ObjectPredicate)
             {
                 if (objectPredicate.NodeType != ExpressionType.Lambda)
                     throw new NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -344,9 +349,9 @@ public class SqlServerQuery<TObject> : DatabaseQuery<TObject> where TObject : IQ
             }
         }
 
-        if (command.ObjectsPredicate != null)
+        if (commandPredicate.ObjectsPredicate != null)
         {
-            foreach (var objectsPredicate in command.ObjectsPredicate)
+            foreach (var objectsPredicate in commandPredicate.ObjectsPredicate)
             {
                 if (objectsPredicate.NodeType != ExpressionType.Lambda)
                     throw new NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);

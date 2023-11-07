@@ -9,7 +9,7 @@ namespace Priqraph.Helper;
 
 public static class CacheQueryHelper
 {
-    public static CacheQueryObject GetSelectQuery(this CacheQueryPartCollection queryParts)
+    public static CacheQueryObject GenerateSelect(this CacheQueryResult queryParts)
     {
         if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
 
@@ -26,24 +26,24 @@ public static class CacheQueryHelper
 
         return new CacheQueryObject
         {
-            GetDataQueryObject = getData
+            DataQueryObject = getData
         };
     }
 
-    public static CacheQueryObject GetCommandQuery(this CacheQueryPartCollection queryParts)
+    public static CacheQueryObject GenerateCommandQuery(this CacheQueryResult queryParts)
     {
         if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
 
         return queryParts.Command.OperationType switch
         {
-            QueryOperationType.Add => queryParts.Command.GetAddQuery(),
-            QueryOperationType.Remove => queryParts.Command.GetDeleteQuery(),
-            QueryOperationType.Edit => queryParts.Command.GetUpdateQuery(),
+            QueryOperationType.Add => queryParts.Command.GenerateAddQuery(),
+            QueryOperationType.Remove => queryParts.Command.GenerateDeleteQuery(),
+            QueryOperationType.Edit => queryParts.Command.GenerateUpdateQuery(),
             _ => throw new NotSupported(ExceptionCode.QueryGenerator)
         };
     }
 
-    private static CacheQueryObject GetAddQuery(this CacheCommandQueryPart command)
+    private static CacheQueryObject GenerateAddQuery(this CacheCommandQueryPart command)
     {
         var objects = (ICollection<CacheClausePredicate>)command.CommandParts["Values"];
         var type = objects.FirstOrDefault()!.GetType();
@@ -64,7 +64,7 @@ public static class CacheQueryHelper
         };
     }
 
-    private static CacheQueryObject GetUpdateQuery(this CacheCommandQueryPart command)
+    private static CacheQueryObject GenerateUpdateQuery(this CacheCommandQueryPart command)
     {
         var objects = (ICollection<CacheClausePredicate>)command.CommandParts["Values"];
         var type = objects.FirstOrDefault()!.GetType();
@@ -86,7 +86,7 @@ public static class CacheQueryHelper
     }
 
 
-    private static CacheQueryObject GetDeleteQuery(this CacheCommandQueryPart command)
+    private static CacheQueryObject GenerateDeleteQuery(this CacheCommandQueryPart command)
     {
         var objects = (ICollection<CacheClausePredicate>)command.CommandParts["Keys"];
         var type = objects.FirstOrDefault()!.GetType();

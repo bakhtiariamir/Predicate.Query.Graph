@@ -2,6 +2,6 @@
 
 namespace Priqraph.Builder.Database;
 
-public abstract class DatabaseQueryBuilder<TObject> : QueryBuilder<TObject, DatabaseQueryPartCollection> where TObject : IQueryableObject
+public abstract class DatabaseQueryBuilder<TObject> : QueryBuilder<TObject, DatabaseQueryResult> where TObject : IQueryableObject
 {
 }

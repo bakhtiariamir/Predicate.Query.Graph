@@ -1,8 +1,6 @@
-﻿using Priqraph.Query;
-
-namespace Priqraph.Contract;
+﻿namespace Priqraph.Contract;
 
 public interface IQuery<TObject, TQueryResult> where TObject : IQueryableObject
 {
-    Task<TQueryResult> Build(QueryObject<TObject> query);
+    Task<TQueryResult> Build(IQueryObject<TObject> query);
 }

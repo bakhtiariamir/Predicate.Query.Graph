@@ -9,19 +9,19 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
     {
         get;
         private set;
-    }
+    } = string.Empty;
 
     public string Schema
     {
         get;
         private set;
-    }
+    } = string.Empty;
 
     public string ColumnName
     {
         get;
         private set;
-    }
+    } = string.Empty;
 
     public bool Identity
     {
@@ -64,7 +64,7 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         set;
     }
 
-    public ColumnPropertyInfo() : base()
+    public ColumnPropertyInfo() 
     {
     }
 
@@ -120,19 +120,6 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         if (!getParent) return $"{DataSet}_{Name}";
 
         return Name;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return true;
-
-        var column = (IColumnPropertyInfo)obj;
-
-        if (column.DataSet == DataSet && column.Schema == Schema && column.ColumnName == ColumnName && column.Name == Name)
-            return true;
-
-        return false;
     }
 
     public void SetParameterData(string schema, string dataSet, string name, string columnName, ColumnDataType objectType)

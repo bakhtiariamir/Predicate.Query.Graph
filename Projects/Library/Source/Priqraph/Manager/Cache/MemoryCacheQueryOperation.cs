@@ -3,7 +3,7 @@ using Priqraph.Contract;
 
 namespace Priqraph.Manager.Cache;
 
-public class MemoryCacheQueryOperation<TObject> : CacheQueryOperation<TObject> where TObject : IQueryableObject
+internal class MemoryCacheQueryOperation<TObject> : CacheQueryOperation<TObject> where TObject : IQueryableObject
 {
     private readonly ICacheInfoCollection _databaseCacheInfoCollection;
 
@@ -17,7 +17,7 @@ public class MemoryCacheQueryOperation<TObject> : CacheQueryOperation<TObject> w
         return Task.FromResult(true); // todo
     }
 
-    protected override async Task<CacheQueryPartCollection> RunQueryAsync()
+    protected override async Task<CacheQueryResult> RunQueryAsync()
     {
         if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
 

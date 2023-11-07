@@ -1,7 +1,7 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.ExpressionHandler;
-using Priqraph.Query;
+using Priqraph.Query.Predicates;
 using System.Linq.Expressions;
 
 namespace Priqraph.Generator.Predicate;

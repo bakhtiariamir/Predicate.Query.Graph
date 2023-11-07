@@ -1,22 +1,23 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
+using Priqraph.Query.Predicates;
 
 namespace Priqraph.Query
 {
     public class QueryObjectReducer<TObject> where TObject : IQueryableObject
     {
-        private QueryObjectSelectingReducer<TObject> _objectSelecting;
-        private QueryObjectFilteringReducer<TObject> _objectFiltering;
-        private QueryObject<TObject> _query;
+        private ColumnPredicateReducer<TObject> _objectSelecting;
+        private FilterPredicateReducer<TObject> _objectFiltering;
+        private IQueryObject<TObject> _query;
 
-        private QueryObjectReducer(QueryObject<TObject> query)
+        private QueryObjectReducer(IQueryObject<TObject> query)
         {
-            _objectSelecting = new QueryObjectSelectingReducer<TObject>();
-            _objectFiltering = new QueryObjectFilteringReducer<TObject>();
+            _objectSelecting = new ColumnPredicateReducer<TObject>();
+            _objectFiltering = new FilterPredicateReducer<TObject>();
             _query = query;
         }
 
-        public static QueryObjectReducer<TObject> Init(QueryObject<TObject> query) => new(query);
+        public static QueryObjectReducer<TObject> Init(IQueryObject<TObject> query) => new(query);
 
         public QueryObjectReducer<TObject> Reduce()
         {
@@ -28,6 +29,6 @@ namespace Priqraph.Query
             return this;
         }
 
-        public QueryObject<TObject> Return() => _query;
+        public IQueryObject<TObject> Return() => _query;
     }
 }

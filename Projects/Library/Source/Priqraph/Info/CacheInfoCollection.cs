@@ -23,11 +23,11 @@ namespace Priqraph.Info
             Cache = new Dictionary<string, object>();
         }
 
-        public virtual void InitCache(string key, object value) => Cache.Add(key, value);
+        public void InitCache(string key, object value) => Cache.Add(key, value);
 
-        public virtual bool RemoveCache(string key) => Cache.Remove(key);
+        public bool RemoveCache(string key) => Cache.Remove(key);
 
-        public virtual bool TryGet(string key, out object? value) => Cache.TryGetValue(key, out value);
+        public bool TryGet(string key, out object? value) => Cache.TryGetValue(key, out value);
 
         public bool TryGetFirst(string key, out object? value)
         {
@@ -37,9 +37,5 @@ namespace Priqraph.Info
 
             return Cache.TryGetValue(firstKey, out value);
         }
-        //void InitCache(string key, IDatabaseObjectInfo value);
-        //bool TryRemove(string key, out IDatabaseObjectInfo? value); 
-        //bool TryGet(string key, out IDatabaseObjectInfo? value);
-        //bool TryGet(string key, out IDatabaseObjectInfo? value);
     }
 }

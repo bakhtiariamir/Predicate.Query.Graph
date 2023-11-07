@@ -1,82 +1,96 @@
 ﻿using Priqraph.Contract;
+using Priqraph.DataType;
+using Priqraph.Query.Builders;
+using Priqraph.Query.Predicates;
+using Priqraph.Setup;
 
 namespace Priqraph.Query;
 
-public class QueryObjectBuilder<TObject> : IQueryObjectBuilder where TObject : IQueryableObject
+internal class QueryObjectBuilder<TObject> : IQueryObjectBuilder<TObject> where TObject : IQueryableObject
 {
-    private QueryObject<TObject> _queryObjectObject;
+    private IQueryObject<TObject>? _queryObject;
 
-    private QueryObjectBuilder(QueryObject<TObject> queryObject) => _queryObjectObject = queryObject;
-
-    public static QueryObjectBuilder<TObject> Init(QueryObject<TObject> queryObject) => new(queryObject);
-
-    public QueryObjectBuilder<TObject> SetCommand(QueryObjectCommand<TObject> objectCommand)
+    public QueryProvider QueryProvider
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Command = objectCommand.Validate().Return();
+        get;
+        set;
+    }
+
+    public QueryObjectBuilder(QueryProvider provider)
+    {
+        QueryProvider = provider;
+    }
+
+    public void Init(QueryOperationType operationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => _queryObject = QueryObject<TObject>.Init(operationType, queryProvider, objectTypeStructures);
+
+    public IQueryObjectBuilder<TObject> SetCommand(CommandPredicateBuilder<TObject> objectCommandPredicateBuilder)
+    {
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.CommandPredicates = objectCommandPredicateBuilder.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetSelecting(QueryObjectSelecting<TObject> objectSelecting)
+    public IQueryObjectBuilder<TObject> SetColumn(ColumnPredicateBuilder<TObject> objectSelecting)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Columns = objectSelecting.Validate().Return();
-        _queryObjectObject.QueryOptions = objectSelecting.GetQueryOptions();
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.ColumnPredicates = objectSelecting.Validate().Return();
+        _queryObject.QueryOptions = objectSelecting.GetQueryOptions();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetSelecting(ICollection<QueryColumn<TObject>> columns)
+    public IQueryObjectBuilder<TObject> SetColumns(ICollection<ColumnPredicate<TObject>> columns)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Columns = columns;
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.ColumnPredicates = columns;
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetFiltering(QueryObjectFiltering<TObject> objectFiltering)
+    public IQueryObjectBuilder<TObject> SetFilter(FilterPredicateBuilder<TObject> objectFiltering)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Filters = objectFiltering.Validate().Return();
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.FilterPredicates = objectFiltering.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetFilterPredicate(FilterPredicate<TObject> filterPredicate)
+    public IQueryObjectBuilder<TObject> SetFilter(FilterPredicate<TObject> filterPredicate)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Filters = filterPredicate;
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.FilterPredicates = filterPredicate;
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetSorting(QueryObjectSorting<TObject> objectSorting)
+    public IQueryObjectBuilder<TObject> SetSort(SortPredicateBuilder<TObject> objectSorting)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Sorts = objectSorting.Validate().Return();
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.SortPredicates = objectSorting.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetSortPredicate(ICollection<SortPredicate<TObject>> sortPredicates)
+    public IQueryObjectBuilder<TObject> SetSorts(ICollection<SortPredicate<TObject>> sortPredicates)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Sorts = sortPredicates;
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.SortPredicates = sortPredicates;
         return this;
     }
 
-    public QueryObjectBuilder<TObject> SetPaging(QueryObjectPaging paging)
+    public IQueryObjectBuilder<TObject> SetPaging(PagePredicateBuilder paging)
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        _queryObjectObject.Paging = paging.Validate().Return();
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.PagePredicate = paging.Validate().Return();
         return this;
     }
 
-    public QueryObjectBuilder<TObject> Validate()
+    public IQueryObject<TObject> Generate()
     {
-        if (_queryObjectObject == null) throw new ArgumentNullException(); //todo
-        //do
-        return this;
+        if (Validate())
+            return _queryObject ?? throw new ArgumentNullException();
+        throw new InvalidOperationException($"Generating query for {typeof(TObject).Name} has error.");
     }
 
-    public QueryObject<TObject> Generate() => Validate()._queryObjectObject ?? throw new ArgumentNullException(); //todo;
+    private bool Validate()
+    {
+        //ToDo Implement 
+        return true;
+    }
 }
 
-public interface IQueryObjectBuilder
-{
-}

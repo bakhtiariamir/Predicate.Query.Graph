@@ -1,9 +1,7 @@
-﻿using Priqraph.Builder.Cache;
-using Priqraph.Contract;
+﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Generator.Cache;
-using Priqraph.Helper;
-using Priqraph.Query;
+using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 
 namespace Priqraph.Manager.Result.Cache;
@@ -16,7 +14,7 @@ public class MemoryCacheObjectQuery : ObjectQuery<BaseQueryParameter>, IMemoryCa
         set;
     }
     //Query cache
-    public MemoryCacheObjectQuery(QueryOperationType queryOperationType, CacheQueryObject cacheQueryObject, ICollection<BaseQueryParameter>? parameters) : base(queryOperationType, parameters)
+    public MemoryCacheObjectQuery(CacheQueryObject cacheQueryObject, ICollection<BaseQueryParameter>? parameters) : base(parameters)
     {
         CacheQueryObject = cacheQueryObject;
     }
@@ -29,45 +27,6 @@ public class MemoryCacheObjectQuery : ObjectQuery<BaseQueryParameter>, IMemoryCa
         }
     });
 }
-
-public class MemoryCacheObjectQueryGenerator : IObjectQueryGenerator<BaseQueryParameter, MemoryCacheObjectQuery, CacheQueryPartCollection>
-{
-    public MemoryCacheObjectQuery? GenerateResult(QueryOperationType operationType, CacheQueryPartCollection query)
-    {
-        CacheQueryObject cacheQuery = new CacheQueryObject();
-        //ICollection<BaseQueryParameter>? parameters = null;
-        switch (operationType)
-        {
-            case QueryOperationType.GetData:
-                cacheQuery = query.GetSelectQuery();
-                break;
-            case QueryOperationType.Add:
-            case QueryOperationType.Edit:
-            case QueryOperationType.Remove:
-            case QueryOperationType.Merge:
-                cacheQuery = query.GetCommandQuery();
-                break;
-        }
-
-        return new MemoryCacheObjectQuery(operationType, cacheQuery, new List<BaseQueryParameter>());
-    }
-}
-
-public class CacheQueryObject
-{
-    public IEnumerable<CacheCommandQueryObject>? CommandQueryObject
-    {
-        get;
-        set;
-    }
-
-    public CacheGetDataQueryObject? GetDataQueryObject
-    {
-        get;
-        set;
-    }
-}
-
 
 public class CacheCommandQueryObject
 {

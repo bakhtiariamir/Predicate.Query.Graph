@@ -2,5 +2,5 @@
 
 public interface IQueryContextBuilder
 {
-    Task<IQueryContext> Build();
+    Task<IQueryContext> BuildAsync();
 }

@@ -3,49 +3,48 @@ using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Generator.Cache;
 using Priqraph.Generator.Cache.MemoryCache;
-using Priqraph.Generator.Database;
 using Priqraph.Helper;
-using Priqraph.Query;
+using Priqraph.Query.Predicates;
 using System.Linq.Expressions;
 
 namespace Priqraph.Builder.Cache;
 
-public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQueryableObject
+internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQueryableObject
 {
     private IObjectInfo<IPropertyInfo> _objectInfo;
     public MemoryCacheQuery(IQueryContext context) : base(context)
     {
-        _objectInfo = Context.CacheInfoCollection?.GetLastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo); //todo
-        QueryPartCollection.DatabaseObjectInfo = _objectInfo;
+        _objectInfo = Context.CacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo); //todo
+        QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override Task GenerateAddAsync(QueryObject<TObject> query)
+    protected override Task GenerateAddAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Add);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateUpdateAsync(QueryObject<TObject> query)
+    protected override Task GenerateUpdateAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Edit);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateRemoveAsync(QueryObject<TObject> query)
+    protected override Task GenerateRemoveAsync(IQueryObject<TObject> query)
     {
-        var command = query.Command ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Remove);
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateWhereAsync(QueryObject<TObject> query)
+    protected override Task GenerateWhereAsync(IQueryObject<TObject> query)
     {
-        var expression = query.Filters?.Expression;
+        var expression = query.FilterPredicates?.Expression;
         if (expression == null)
             return Task.CompletedTask;
 
@@ -55,15 +54,15 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
 
             var lambdaExpression = (LambdaExpression)expression;
             var whereClause = CacheWhereClauseQueryPart.Create(lambdaExpression);
-            QueryPartCollection.WhereClause = whereClause;
+            QueryResult.WhereClause = whereClause;
         }
 
         return Task.CompletedTask;
     }
 
-    protected override Task GeneratePagingAsync(QueryObject<TObject> query)
+    protected override Task GeneratePagingAsync(IQueryObject<TObject> query)
     {
-        var expression = query.Paging?.Predicate;
+        var expression = query.PagePredicate?.Predicate;
         if (expression == null)
             return Task.CompletedTask;
 
@@ -74,14 +73,14 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
         var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
         var pagingVisitor = new PagingVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        QueryPartCollection.Paging = pagingVisitor.Generate(body);
+        QueryResult.Paging = pagingVisitor.Generate(body);
 
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateOrderByAsync(QueryObject<TObject> query)
+    protected override Task GenerateOrderByAsync(IQueryObject<TObject> query)
     {
-        var sortExpression = query.Sorts?.ToList();
+        var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)
         {
             var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -107,13 +106,13 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
         return Task.CompletedTask;
     }
 
-    private void GenerateRecordCommand(ObjectCommand<TObject> command, CommandVisitor commandSqlVisitor, QueryOperationType operationType)
+    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, QueryOperationType operationType)
     {
         var commandQueries = new List<CacheCommandQueryPart>();
-        switch (command.CommandValueType)
+        switch (commandPredicate.CommandValueType)
         {
             case CommandValueType.Record:
-                GenerateRecordCommand(command, commandSqlVisitor, commandQueries, operationType);
+                GenerateRecordCommand(commandPredicate, commandSqlVisitor, commandQueries, operationType);
 
                 break;
             case CommandValueType.Bulk:
@@ -122,18 +121,18 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
             default:
                 throw new NotSupported(ExceptionCode.ApiQueryBuilder); //Too
         }
-        commandSqlVisitor.AddOption("returnRecord", command.ReturnType);
+        commandSqlVisitor.AddOption("returnRecord", commandPredicate.ReturnType);
         var commandObject = CacheCommandQueryPart.Merge(operationType, commandQueries.ToArray());
-        QueryPartCollection.Command = commandObject;
+        QueryResult.Command = commandObject;
     }
 
-    private static void GenerateRecordCommand(ObjectCommand<TObject> command, CommandVisitor commandSqlVisitor, ICollection<CacheCommandQueryPart> commandQueries, QueryOperationType operationType)
+    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CacheCommandQueryPart> commandQueries, QueryOperationType operationType)
     {
-        if (command.ObjectPredicate == null && command.ObjectsPredicate == null) throw new NotFound("as"); //todo
+        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFound("as"); //todo
 
-        if (command.ObjectPredicate != null)
+        if (commandPredicate.ObjectPredicate != null)
         {
-            foreach (var objectPredicate in command.ObjectPredicate)
+            foreach (var objectPredicate in commandPredicate.ObjectPredicate)
             {
                 if (objectPredicate.NodeType != ExpressionType.Lambda)
                     throw new NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -151,9 +150,9 @@ public class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQu
             }
         }
 
-        if (command.ObjectsPredicate != null)
+        if (commandPredicate.ObjectsPredicate != null)
         {
-            foreach (var objectsPredicate in command.ObjectsPredicate)
+            foreach (var objectsPredicate in commandPredicate.ObjectsPredicate)
             {
                 if (objectsPredicate.NodeType != ExpressionType.Lambda)
                     throw new NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);

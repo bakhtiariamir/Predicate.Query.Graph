@@ -38,11 +38,12 @@ public enum ArrayParameter
 
 public enum QueryProvider
 {
-    Database,
-    RestService,
+    SqlServer,
+    Neo4J,
+    RestApi,
     SoapService,
-    Cache,
-    MessageBroker
+    InMemoryCache,
+    DistributedCache 
 }
 
 public class Database

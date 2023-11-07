@@ -1,4 +1,4 @@
-﻿using Priqraph.Query;
+﻿using Priqraph.Query.Builders;
 
 namespace Priqraph.Generator.Cache;
 

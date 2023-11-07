@@ -37,13 +37,13 @@ public class Setup
             var objectAttribute = type.GetCustomAttributes(true);
 
             if (objectAttribute.Length == 0)
-                cacheInfoCollection.GetLastObjectInfo(type);
+                cacheInfoCollection.LastObjectInfo(type);
             else
             {
                 foreach (var attribute in objectAttribute)
                 {
                     if (attribute is DataSetInfoAttribute infoAttribute)
-                        cacheInfoCollection.GetLastDatabaseObjectInfo(type);
+                        cacheInfoCollection.LastDatabaseObjectInfo(type);
                 }
             }
         }

@@ -1,14 +1,13 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
-using Priqraph.Generator.Database;
 using Priqraph.Helper;
 using Priqraph.Info.Database;
 using System.Linq.Expressions;
 
 namespace Priqraph.ExpressionHandler.Visitors;
 
-public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjectInfo, ICacheInfoCollection, IColumnPropertyInfo> where TResult : IDatabaseQueryPart
+public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjectInfo, ICacheInfoCollection, IColumnPropertyInfo> where TResult : IQueryFragment
 {
     protected DatabaseVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression)
     {
@@ -93,7 +92,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult, IDatabaseObjec
                 property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFound(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
                 if (memberExpression.Expression is MemberExpression || memberExpression.Expression is ParameterExpression)
-                    property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);   
+                    property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);
             }
             else if (expr is ParameterExpression parameterExpression)
             {

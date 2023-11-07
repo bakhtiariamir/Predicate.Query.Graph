@@ -10,3 +10,11 @@ public enum QueryOperationType
     Merge = 6,
     Script = 7
 }
+
+public enum CommandType
+{
+    Add,
+    Edit,
+    Remove,
+    Merge
+}

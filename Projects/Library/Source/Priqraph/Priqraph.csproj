@@ -11,15 +11,30 @@
   <ItemGroup>
     <Compile Remove="Info\Database\SqlServer\**" />
     <Compile Remove="Info\Service\**" />
+    <Compile Remove="Manager\Cache\**" />
+    <Compile Remove="Manager\Database\**" />
+    <Compile Remove="Query\NewStructure\**" />
     <EmbeddedResource Remove="Info\Database\SqlServer\**" />
     <EmbeddedResource Remove="Info\Service\**" />
+    <EmbeddedResource Remove="Manager\Cache\**" />
+    <EmbeddedResource Remove="Manager\Database\**" />
+    <EmbeddedResource Remove="Query\NewStructure\**" />
     <None Remove="Info\Database\SqlServer\**" />
     <None Remove="Info\Service\**" />
+    <None Remove="Manager\Cache\**" />
+    <None Remove="Manager\Database\**" />
+    <None Remove="Query\NewStructure\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Builder\Cache\CacheQueryBuilder.cs" />
+    <Compile Remove="Builder\Cache\CacheQueryContextBuilder.cs" />
+    <Compile Remove="Builder\Cache\MemoryCacheQueryBuilder.cs" />
+    <Compile Remove="Builder\Database\DatabaseQueryBuilder.cs" />
+    <Compile Remove="Builder\Database\DatabaseQueryContextBuilder.cs" />
     <Compile Remove="Builder\Database\MySqlQuery.cs" />
     <Compile Remove="Builder\Database\OracleQuery.cs" />
+    <Compile Remove="Builder\Database\SqlServerQueryBuilder.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContext.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContextBuilder.cs" />
     <Compile Remove="Contract\ICacheObjectInfo.cs" />
@@ -28,12 +43,16 @@
     <Compile Remove="Contract\IDatabaseQueryOperation.cs" />
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
     <Compile Remove="Generator\Database\DatabaseInsertQueryPart.cs" />
-    <Compile Remove="Generator\Database\SqlServer\SqlServerInsertingVisitor.cs" />
+    <Compile Remove="Generator\Database\Visitors\SqlServerInsertingVisitor.cs" />
     <Compile Remove="Info\CacheObjectInfo.cs" />
     <Compile Remove="Info\DatabaseCacheInfoCollection.cs" />
     <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
+    <Compile Remove="Info\Database\DatabaseFunctionCollection.cs" />
+    <Compile Remove="Manager\CacheQueryOperation.cs" />
+    <Compile Remove="Manager\DatabaseQueryOperation.cs" />
     <Compile Remove="Manager\Result\Cache\CacheQueryOperation.cs" />
     <Compile Remove="Query\QueryObjectGrouping.cs" />
+    <Compile Remove="Query\QueryObjectInserting.cs" />
   </ItemGroup>
 
   <ItemGroup>

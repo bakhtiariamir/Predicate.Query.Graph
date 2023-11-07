@@ -1,7 +1,7 @@
 ﻿using Priqraph.Contract;
 using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
-using Priqraph.Query;
+using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 
 namespace Priqraph.Generator.Cache.MemoryCache;

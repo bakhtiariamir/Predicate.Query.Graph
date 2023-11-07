@@ -1,10 +1,9 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
-using Priqraph.Query;
 
 namespace Priqraph.Builder.Cache;
 
-public abstract class CacheQuery<TObject> : Query<TObject, CacheQueryPartCollection> where TObject : IQueryableObject
+internal abstract class CacheQuery<TObject> : Query<TObject, CacheQueryResult> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -16,19 +15,19 @@ public abstract class CacheQuery<TObject> : Query<TObject, CacheQueryPartCollect
         get;
     }
 
-    protected CacheQueryPartCollection QueryPartCollection
+    protected CacheQueryResult QueryResult
     {
         get;
     }
 
     protected CacheQuery(IQueryContext context)
     {
-        QueryPartCollection = new();
+        QueryResult = new();
         Context = (CacheQueryContext)context;
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<CacheQueryPartCollection> Build(QueryObject<TObject> query)
+    public override async Task<CacheQueryResult> Build(IQueryObject<TObject> query)
     {
         switch (query.QueryOperationType)
         {
@@ -53,20 +52,20 @@ public abstract class CacheQuery<TObject> : Query<TObject, CacheQueryPartCollect
                 break;
         }
 
-        return QueryPartCollection;
+        return QueryResult;
     }
 
-    protected abstract Task GenerateAddAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateAddAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateUpdateAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateUpdateAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateRemoveAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateRemoveAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateWhereAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateWhereAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GeneratePagingAsync(QueryObject<TObject> query);
+    protected abstract Task GeneratePagingAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateOrderByAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateOrderByAsync(IQueryObject<TObject> query);
 
     //protected abstract Task GenerateJoinAsync();
 

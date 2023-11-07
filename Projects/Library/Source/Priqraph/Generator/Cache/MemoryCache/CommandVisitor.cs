@@ -75,7 +75,7 @@ public class CommandVisitor : CacheVisitor<CacheCommandQueryPart>
 
     protected override CacheCommandQueryPart VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
-        var valueObject = expression.GetObject() ?? throw new NotSupported("easd"); //todo
+        var valueObject = expression.ObjectValue() ?? throw new NotSupported("easd"); //todo
         var baseQueryParameter = new List<CacheClausePredicate>();
         var keyProperty = ObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new System.Exception(); //todo
         if (valueObject.GetType().IsArray)

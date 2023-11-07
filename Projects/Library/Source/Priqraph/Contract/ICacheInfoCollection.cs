@@ -9,11 +9,6 @@ public interface ICacheInfoCollection
         get;
         set;
     }
-    IDictionary<string, object> Cache
-    {
-        get;
-        set;
-    }
 
     void InitCache(string key, object value);
 

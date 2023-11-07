@@ -32,7 +32,7 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
 
     internal void RemoveOption(string key) => _options.Remove(key);
 
-    internal bool GetOption(string key, out object value) => _options.TryGetValue(key, out value);
+    internal bool GetOption(string key, out object? value) => _options.TryGetValue(key, out value);
 
     internal TResult Generate(Expression expression) => Visit(expression);
 
@@ -110,128 +110,53 @@ public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPro
         }
     }
 
-    protected virtual TResult VisitInclude(MethodCallExpression expression, bool condition)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitInclude(MethodCallExpression expression, bool condition) => throw new NotImplementedException();
 
-    protected virtual TResult VisitCheckValue(MethodCallExpression expression, bool condition)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitCheckValue(MethodCallExpression expression, bool condition) => throw new NotImplementedException();
 
-    protected virtual TResult VisitAndAlso(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitAndAlso(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitOrElse(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitOrElse(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitNot(UnaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitNot(UnaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitEqual(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitEqual(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitEqual(MethodCallExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitEqual(MethodCallExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitNotEqual(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitNotEqual(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitGreaterThan(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitGreaterThan(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitGreaterThanOrEqual(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitGreaterThanOrEqual(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitLessThan(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitLessThan(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitLessThanOrEqual(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitLessThanOrEqual(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null) => throw new NotImplementedException();
 
-    protected virtual TResult VisitConvert(UnaryExpression expression, string? memberName = null)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitConvert(UnaryExpression expression, string? memberName = null) => throw new NotImplementedException();
 
-    protected virtual TResult VisitNew(NewExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitNew(NewExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitCall(MethodCallExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitCall(MethodCallExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitContains(MethodCallExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitContains(MethodCallExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitStartsWith(MethodCallExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitStartsWith(MethodCallExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitEndsWith(MethodCallExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitEndsWith(MethodCallExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitLambda(LambdaExpression expression)
-    {
-        return Visit(expression.Body);
-    }
+    protected virtual TResult VisitLambda(LambdaExpression expression) => Visit(expression.Body);
 
-    protected virtual TResult VisitMember(MemberExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitMember(MemberExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitArrayIndex(BinaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitArrayIndex(BinaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitArrayLength(UnaryExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitArrayLength(UnaryExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitParameter(ParameterExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitParameter(ParameterExpression expression) => throw new NotImplementedException();
 
-    protected virtual TResult VisitNewArray(NewArrayExpression expression)
-    {
-        throw new NotImplementedException();
-    }
+    protected virtual TResult VisitNewArray(NewArrayExpression expression) => throw new NotImplementedException();
 }

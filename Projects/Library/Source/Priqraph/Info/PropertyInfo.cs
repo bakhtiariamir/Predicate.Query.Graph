@@ -28,7 +28,7 @@ public class PropertyInfo : IPropertyInfo
     {
         get;
         set;
-    }
+    } = string.Empty;
 
     public bool IsUnique
     {
@@ -58,7 +58,7 @@ public class PropertyInfo : IPropertyInfo
     {
         get;
         set;
-    }
+    } = string.Empty;
 
     public ColumnDataType DataType
     {
@@ -99,7 +99,7 @@ public class PropertyInfo : IPropertyInfo
     public Type Type
     {
         get;
-    }
+    } = typeof(object);
 
     public bool IsObject
     {

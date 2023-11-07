@@ -9,7 +9,7 @@ namespace Priqraph.Helper;
 
 public static class SqlServerQueryHelper
 {
-    public static string GetSelectQuery(this DatabaseQueryPartCollection queryParts, out ICollection<SqlParameter>? parameters)
+    public static string Select(this DatabaseQueryResult queryParts, out ICollection<SqlParameter>? parameters)
     {
         if (queryParts.Columns == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.SelectParameters().ToArray();
@@ -26,7 +26,7 @@ public static class SqlServerQueryHelper
         return select.ToString();
     }
 
-    public static string GetCommandQuery(this DatabaseQueryPartCollection queryParts, out ICollection<SqlParameter> parameters)
+    public static string Command(this DatabaseQueryResult queryParts, out ICollection<SqlParameter> parameters)
     {
         if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.Command.SqlParameters;
@@ -35,15 +35,15 @@ public static class SqlServerQueryHelper
             throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
 
         return queryParts.Command.OperationType switch {
-            QueryOperationType.Add => queryParts.Command.GetInsertQuery(queryParts),
-            QueryOperationType.Remove => queryParts.Command.GetDeleteQuery(),
-            QueryOperationType.Edit => queryParts.Command.GetUpdateQuery(queryParts),
-            QueryOperationType.Merge => queryParts.Command.GetMergeQuery(),
+            QueryOperationType.Add => queryParts.Command.Insert(queryParts),
+            QueryOperationType.Remove => queryParts.Command.Delete(),
+            QueryOperationType.Edit => queryParts.Command.Update(queryParts),
+            QueryOperationType.Merge => queryParts.Command.Merge(),
             QueryOperationType.GetData or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
         };
     }
 
-    private static string GetInsertQuery(this DatabaseCommandQueryPart command, DatabaseQueryPartCollection queryParts)
+    private static string Insert(this CommandQueryFragment command, DatabaseQueryResult queryParts)
     {
         var commandParts = command.CommandParts;
         var insert = new StringBuilder();
@@ -66,7 +66,7 @@ public static class SqlServerQueryHelper
                 if (command.CommandParts.ContainsKey("result") && queryParts.ResultQuery != null)
                 {
                     var resultQueryParts = queryParts.ResultQuery;
-                    var select = GetSelectQuery(resultQueryParts, out var selectParameter);
+                    var select = Select(resultQueryParts, out var selectParameter);
                     //var select = new StringBuilder();
                     //select.Append($"SELECT {resultQueryParts.Columns.Text} ");
                     //select.Append($"FROM {resultQueryParts.DatabaseObjectInfo} ");
@@ -85,7 +85,7 @@ public static class SqlServerQueryHelper
         return insert.ToString();
     }
 
-    private static string GetUpdateQuery(this DatabaseCommandQueryPart command, DatabaseQueryPartCollection queryParts)
+    private static string Update(this CommandQueryFragment command, DatabaseQueryResult queryParts)
     {
         var commandParts = command.CommandParts;
         var update = new StringBuilder();
@@ -129,7 +129,7 @@ public static class SqlServerQueryHelper
                         if (command.CommandParts.ContainsKey("result") && queryParts.ResultQuery != null)
                         {
                             var resultQueryParts = queryParts.ResultQuery;
-                            var select = GetSelectQuery(resultQueryParts, out var selectParameter);
+                            var select = Select(resultQueryParts, out var selectParameter);
                             //var select = new StringBuilder();
                             //select.Append($"SELECT {resultQueryParts.Columns.Text} ");
                             //select.Append($"FROM {resultQueryParts.DatabaseObjectInfo} ");
@@ -158,7 +158,7 @@ public static class SqlServerQueryHelper
         return update.ToString();
     }
 
-    private static string GetDeleteQuery(this DatabaseCommandQueryPart command)
+    private static string Delete(this CommandQueryFragment command)
     {
         var commandParts = command.CommandParts;
         var delete = new StringBuilder();
@@ -183,7 +183,7 @@ public static class SqlServerQueryHelper
         return delete.ToString();
     }
 
-    private static string GetMergeQuery(this DatabaseCommandQueryPart command)
+    private static string Merge(this CommandQueryFragment command)
     {
         return string.Empty;
     }

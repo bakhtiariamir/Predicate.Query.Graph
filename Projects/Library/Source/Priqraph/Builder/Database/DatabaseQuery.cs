@@ -1,10 +1,9 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
-using Priqraph.Query;
 
 namespace Priqraph.Builder.Database;
 
-public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartCollection> where TObject : IQueryableObject
+internal abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryResult> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -16,19 +15,19 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartC
         get;
     }
 
-    protected DatabaseQueryPartCollection QueryPartCollection
+    protected DatabaseQueryResult QueryResult
     {
         get;
     }
 
     protected DatabaseQuery(IQueryContext context)
     {
-        QueryPartCollection = new();
+        QueryResult = new();
         Context = (DatabaseQueryContext)context;
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<DatabaseQueryPartCollection> Build(QueryObject<TObject> query)
+    public override async Task<DatabaseQueryResult> Build(IQueryObject<TObject> query)
     {
         switch (query.QueryOperationType)
         {
@@ -56,24 +55,24 @@ public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryPartC
                 break;
         }
 
-        return QueryPartCollection;
+        return QueryResult;
     }
 
-    protected abstract Task GenerateInsertAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateInsertAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateUpdateAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateUpdateAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateDeleteAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateDeleteAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateColumnAsync(QueryObject<TObject> query, bool getCount = false);
+    protected abstract Task GenerateColumnAsync(IQueryObject<TObject> query, bool getCount = false);
 
-    protected abstract Task GenerateWhereAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateWhereAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GeneratePagingAsync(QueryObject<TObject> query);
+    protected abstract Task GeneratePagingAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateOrderByAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateOrderByAsync(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateJoinAsync(QueryObject<TObject> query);
+    protected abstract Task GenerateJoinAsync(IQueryObject<TObject> query);
 
     protected abstract Task GenerateFunctionByClause();
 }

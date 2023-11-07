@@ -1,42 +1,12 @@
-﻿using Dynamitey.DynamicObjects;
-using Priqraph.DataType;
-using System.Data.SqlClient;
+﻿using Priqraph.DataType;
 
 namespace Priqraph.Contract;
 
-public interface ISqlQuery : IObjectQuery<SqlParameter>
-{
-    public string Phrase
-    {
-        get;
-    }
-}
-
-public interface IMemoryCacheQuery : IObjectQuery<BaseQueryParameter>
-{
-}
-
-
-public class BaseQueryParameter
-{
-    public string Name
-    {
-        get;
-    }
-
-    public object? Value
-    {
-        get;
-        set;
-    }
-
-    public BaseQueryParameter(string name, object? value)
-    {
-        Name = name;
-        Value = value;
-    }
-}
-
+/// <summary>
+/// Main interface that external app using for create and modify queries.
+/// Each type of query that want implement like database, webservice, api , ... must implement this interface.
+/// </summary>
+/// <typeparam name="TParameter">The type of the parameter.</typeparam>
 public interface IObjectQuery<TParameter>
 {
     string? Action
@@ -45,10 +15,6 @@ public interface IObjectQuery<TParameter>
         set;
     }
 
-    QueryOperationType QueryOperationType
-    {
-        get;
-    }
 
     ICollection<TParameter>? Parameters
     {
@@ -56,19 +22,4 @@ public interface IObjectQuery<TParameter>
     }
 
     void UpdateParameter(string type, params ParameterValue[] parameters);
-}
-
-public class ParameterValue
-{
-    public string? Name
-    {
-        get;
-        set;
-    }
-
-    public object? Value
-    {
-        get;
-        set;
-    }
 }

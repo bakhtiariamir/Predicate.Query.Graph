@@ -1,9 +1,10 @@
 ﻿using Priqraph.Builder.Database;
 using Priqraph.Contract;
+using Priqraph.Query;
 
 namespace Priqraph.Manager.Database;
 
-public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : IQueryableObject
+internal class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where TObject : IQueryableObject
 {
     private readonly ICacheInfoCollection _databaseCacheInfoCollection;
 
@@ -17,9 +18,9 @@ public class SqlQueryOperation<TObject> : DatabaseQueryOperation<TObject> where 
         return Task.FromResult(true); // todo
     }
 
-    protected override async Task<DatabaseQueryPartCollection> RunQueryAsync()
+    protected override async Task<DatabaseQueryResult> RunQueryAsync()
     {
-        if (QueryObject == null) throw new System.Exception("adasd"); //ToDo
+        if (QueryObject<> == null) throw new System.Exception("adasd"); //ToDo
 
         var query = await (await (await SqlServerQueryBuilder<TObject>.Init(_databaseCacheInfoCollection).InitContextAsync()).InitQueryAsync()).BuildAsync();
         return await query.Build(QueryObject);

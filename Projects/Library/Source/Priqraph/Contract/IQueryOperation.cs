@@ -1,16 +1,9 @@
-﻿using Priqraph.DataType;
-using Priqraph.Query;
-
-namespace Priqraph.Contract;
+﻿namespace Priqraph.Contract;
 
 public interface IQueryOperation<TObject, TResult> where TObject : IQueryableObject
 {
-    Task<TResult> RunAsync(QueryObject<TObject> queryObject);
+    //ToDo : Change QueryObject to IQueryObject
+    Task<TResult> RunAsync();
 
-    void Init(QueryOperationType queryOperationType);
-
-    QueryObjectBuilder<TObject>? QueryBuilder
-    {
-        get;
-    }
+    void Init(IQueryObject<TObject> queryObject);
 }

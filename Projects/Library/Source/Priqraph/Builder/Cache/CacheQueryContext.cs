@@ -2,7 +2,7 @@
 
 namespace Priqraph.Builder.Cache;
 
-public class CacheQueryContext : QueryContext, IDatabaseQueryContext
+internal class CacheQueryContext : QueryContext, IDatabaseQueryContext
 {
     public CacheQueryContext(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
