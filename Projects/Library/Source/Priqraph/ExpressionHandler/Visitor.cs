@@ -3,38 +3,28 @@ using System.Linq.Expressions;
 
 namespace Priqraph.ExpressionHandler;
 
-public abstract class Visitor<TResult, TObjectInfo, TCacheObjectCollection, TPropertyInfo> where TObjectInfo : IObjectInfo<TPropertyInfo>
-    where TPropertyInfo : IPropertyInfo
+public abstract class Visitor<TResult>
 {
-    protected abstract TCacheObjectCollection CacheObjectCollection
-    {
-        get;
-    }
-
-    protected abstract TObjectInfo ObjectInfo
-    {
-        get;
-    }
-
-    protected abstract ParameterExpression ParameterExpression
+    protected ParameterExpression ParameterExpression
     {
         get;
     }
 
     private IDictionary<string, object> _options;
 
-    protected Visitor()
+    protected Visitor(ParameterExpression parameterExpression)
     {
+        ParameterExpression = parameterExpression;
         _options = new Dictionary<string, object>();
     }
 
-    internal void AddOption(string key, object value) => _options.Add(key, value);
+    public void AddOption(string key, object value) => _options.Add(key, value);
 
-    internal void RemoveOption(string key) => _options.Remove(key);
+    public void RemoveOption(string key) => _options.Remove(key);
 
-    internal bool GetOption(string key, out object? value) => _options.TryGetValue(key, out value);
+    public bool GetOption(string key, out object? value) => _options.TryGetValue(key, out value);
 
-    internal TResult Generate(Expression expression) => Visit(expression);
+    public TResult Generate(Expression expression) => Visit(expression);
 
     protected virtual TResult Visit(Expression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {

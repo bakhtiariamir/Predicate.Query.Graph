@@ -9,20 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Info\Database\SqlServer\**" />
     <Compile Remove="Info\Service\**" />
     <Compile Remove="Manager\Cache\**" />
     <Compile Remove="Manager\Database\**" />
+    <Compile Remove="Manager\Result\Database\**" />
+    <Compile Remove="Parser\**" />
     <Compile Remove="Query\NewStructure\**" />
-    <EmbeddedResource Remove="Info\Database\SqlServer\**" />
     <EmbeddedResource Remove="Info\Service\**" />
     <EmbeddedResource Remove="Manager\Cache\**" />
     <EmbeddedResource Remove="Manager\Database\**" />
+    <EmbeddedResource Remove="Manager\Result\Database\**" />
+    <EmbeddedResource Remove="Parser\**" />
     <EmbeddedResource Remove="Query\NewStructure\**" />
-    <None Remove="Info\Database\SqlServer\**" />
     <None Remove="Info\Service\**" />
     <None Remove="Manager\Cache\**" />
     <None Remove="Manager\Database\**" />
+    <None Remove="Manager\Result\Database\**" />
+    <None Remove="Parser\**" />
     <None Remove="Query\NewStructure\**" />
   </ItemGroup>
 
@@ -37,17 +40,19 @@
     <Compile Remove="Builder\Database\SqlServerQueryBuilder.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContext.cs" />
     <Compile Remove="Builder\Database\SqlServerQueryContextBuilder.cs" />
+    <Compile Remove="Builder\QueryBuilder.cs" />
+    <Compile Remove="Builder\QueryContextBuilder.cs" />
     <Compile Remove="Contract\ICacheObjectInfo.cs" />
     <Compile Remove="Contract\IDatabaseCacheObjectInfo.cs" />
     <Compile Remove="Contract\IDatabaseQuery.cs" />
     <Compile Remove="Contract\IDatabaseQueryOperation.cs" />
+    <Compile Remove="Contract\ISqlQuery.cs" />
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
     <Compile Remove="Generator\Database\DatabaseInsertQueryPart.cs" />
-    <Compile Remove="Generator\Database\Visitors\SqlServerInsertingVisitor.cs" />
+    <Compile Remove="Helper\SqlParameterHelper.cs" />
+    <Compile Remove="Helper\SqlServerQueryHelper.cs" />
     <Compile Remove="Info\CacheObjectInfo.cs" />
     <Compile Remove="Info\DatabaseCacheInfoCollection.cs" />
-    <Compile Remove="Info\Database\DatabaseCacheObjectInfo.cs" />
-    <Compile Remove="Info\Database\DatabaseFunctionCollection.cs" />
     <Compile Remove="Manager\CacheQueryOperation.cs" />
     <Compile Remove="Manager\DatabaseQueryOperation.cs" />
     <Compile Remove="Manager\Result\Cache\CacheQueryOperation.cs" />

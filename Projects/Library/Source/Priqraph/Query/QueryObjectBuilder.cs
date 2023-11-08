@@ -6,7 +6,7 @@ using Priqraph.Setup;
 
 namespace Priqraph.Query;
 
-internal class QueryObjectBuilder<TObject> : IQueryObjectBuilder<TObject> where TObject : IQueryableObject
+public class QueryObjectBuilder<TObject> : IQueryObjectBuilder<TObject> where TObject : IQueryableObject
 {
     private IQueryObject<TObject>? _queryObject;
 

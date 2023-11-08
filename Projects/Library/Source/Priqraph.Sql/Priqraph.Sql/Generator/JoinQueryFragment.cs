@@ -1,28 +1,21 @@
 ﻿using Priqraph.DataType;
 using Priqraph.Exception;
+using Priqraph.Generator.Database;
 
-namespace Priqraph.Generator.Database;
-
-public class JoinQueryFragment : QueryFragment<ICollection<JoinProperty>>
+namespace Priqraph.Sql.Generator;
+public class JoinQueryFragment : DatabaseJoinQueryFragment
 {
-    private string? _text;
-
-    public override string? Text
-    {
-        get => _text;
-        set => _text = value;
-    }
-
     private JoinQueryFragment(ICollection<JoinProperty> joinPredicates)
     {
         Parameter = joinPredicates;
     }
 
-    private void SetText() => _text = string.Join(" ", Parameter?.Select(SetJoinText) ?? new[]{""});
+    private void SetText() => Text = string.Join(" ", Parameter?.Select(SetJoinText) ?? new[] { "" });
 
     private string SetJoinText(JoinProperty joinProperty)
     {
-        var joinString = joinProperty.JoinType switch {
+        var joinString = joinProperty.JoinType switch
+        {
             JoinType.Inner => "INNER JOIN",
             JoinType.Left => "LEFT JOIN",
             JoinType.Right => "RIGHT JOIN",
@@ -43,7 +36,8 @@ public class JoinQueryFragment : QueryFragment<ICollection<JoinProperty>>
 
     public static JoinQueryFragment Merged(IEnumerable<JoinQueryFragment> sqlQueries)
     {
-        var joinFragment = new JoinQueryFragment(sqlQueries.SelectMany(properties => properties.Parameter ?? new List<JoinProperty>()).DistinctBy(item => new {
+        var joinFragment = new JoinQueryFragment(sqlQueries.SelectMany(properties => properties.Parameter ?? new List<JoinProperty>()).DistinctBy(item => new
+        {
             item.JoinColumn,
             item.JoinType
         }).ToList());

@@ -2,43 +2,14 @@
 using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
-using Priqraph.Helper;
+using Priqraph.Generator.Database;
 using Priqraph.Query.Builders;
+using Priqraph.Sql.Extensions;
 using System.Data.SqlClient;
 
-namespace Priqraph.Generator.Database;
-
-public class CommandQueryFragment : QueryFragment<CommandProperty>
+namespace Priqraph.Sql.Generator;
+public class CommandQueryFragment : DatabaseCommandQueryFragment
 {
-    public override string? Text
-    {
-        get;
-        set;
-    }
-
-    public Dictionary<string, object> CommandParts
-    {
-        get;
-        set;
-    }
-
-    public QueryOperationType OperationType
-    {
-        get;
-        private set;
-    } = QueryOperationType.Add;
-
-    public CommandValueType CommandValueType
-    {
-        get;
-        private set;
-    } = CommandValueType.Record;
-
-    public ICollection<SqlParameter> SqlParameters
-    {
-        get;
-    }
-
     private void SetOptions(QueryOperationType operationType, CommandValueType commandValueType)
     {
         OperationType = operationType;
@@ -65,7 +36,7 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
 
     public static CommandQueryFragment Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
 
-    public static CommandQueryFragment Merge(QueryOperationType? operationType, ReturnType returnType = ReturnType.None , params CommandQueryFragment[] commandParts)
+    public static CommandQueryFragment Merge(QueryOperationType? operationType, ReturnType returnType = ReturnType.None, params CommandQueryFragment[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
             throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
@@ -160,7 +131,8 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
 
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-                            var sqlParameter = new SqlParameter(parameterName, dbType) {
+                            var sqlParameter = new SqlParameter(parameterName, dbType)
+                            {
                                 Value = columnValue ?? DBNull.Value
                             };
                             SqlParameters.Add(sqlParameter);
@@ -172,7 +144,8 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
                     {
                         //1 if value is iqueryable object
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-                        var sqlParameter = new SqlParameter(parameterName, dbType) {
+                        var sqlParameter = new SqlParameter(parameterName, dbType)
+                        {
                             Value = columnProperty.Value ?? DBNull.Value
                         };
                         SqlParameters.Add(sqlParameter);
@@ -217,7 +190,7 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
 
                 var records = Parameter.ColumnPropertyCollections?.SelectMany(item => item.Records ?? Enumerable.Empty<object>()).ToArray();
 
-                if (records is {Length: > 0})
+                if (records is { Length: > 0 })
                 {
                     ICollection<Tuple<int, string?>> recordsValue = new List<Tuple<int, string?>>();
                     ICollection<Tuple<int, string>> recordsWhere = new List<Tuple<int, string>>();
@@ -237,7 +210,8 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
                             var dbType = columnProperty.ColumnPropertyInfo.DataType.SqlDbType();
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-                            var sqlParameter = new SqlParameter(parameterName, dbType) {
+                            var sqlParameter = new SqlParameter(parameterName, dbType)
+                            {
                                 Value = columnValue ?? DBNull.Value
                             };
                             SqlParameters.Add(sqlParameter);
@@ -271,7 +245,8 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
 
                         var dbType = columnProperty.ColumnPropertyInfo.DataType.SqlDbType();
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-                        var sqlParameter = new SqlParameter(parameterName, dbType) {
+                        var sqlParameter = new SqlParameter(parameterName, dbType)
+                        {
                             Value = columnProperty.Value ?? DBNull.Value
                         };
                         SqlParameters.Add(sqlParameter);
@@ -321,11 +296,11 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
 
                 string where;
 
-                if (records is {Length: > 0})
+                if (records is { Length: > 0 })
                 {
                     var ids = records.Select(record => Dynamic.InvokeGet(record, primaryKeyColumn.Name)).ToArray() ?? throw new System.Exception(); //todo
 
-                    foreach (var parameter in SqlParameterHelper.ArrayParameters(parameterName, ids, primaryKeyColumn.DataType))
+                    foreach (var parameter in ParameterHelper.ArrayParameters(parameterName, ids, primaryKeyColumn.DataType))
                         SqlParameters.Add(parameter);
 
                     where = primaryKeyColumn.ArrayParameterNames(parameterName, ids.Length);
@@ -335,7 +310,8 @@ public class CommandQueryFragment : QueryFragment<CommandProperty>
                     where = primaryKeyColumn.ParameterPhrase(parameterName);
                     var dbType = primaryKeyColumn?.DataType.SqlDbType();
 
-                    var sqlParameter = new SqlParameter(parameterName, dbType) {
+                    var sqlParameter = new SqlParameter(parameterName, dbType)
+                    {
                         Value = primaryKey.Value
                     };
                     SqlParameters.Add(sqlParameter);

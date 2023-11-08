@@ -8,9 +8,9 @@ public class PagePredicateBuilder : IQueryObjectPart<PagePredicateBuilder, PageP
 {
     private PagePredicate _pagePredicate;
 
-    private PagePredicateBuilder(Expression<Func<Page>> expression) => _pagePredicate = new PagePredicate(expression);
+    private PagePredicateBuilder(Expression<Func<PageClause>> expression) => _pagePredicate = new PagePredicate(expression);
 
-    public static PagePredicateBuilder Init(int skip, int take) => new(() => new Page(skip, take));
+    public static PagePredicateBuilder Init(int skip, int take) => new(() => new PageClause(skip, take));
 
     public PagePredicateBuilder Validate() => this;
 
@@ -19,7 +19,7 @@ public class PagePredicateBuilder : IQueryObjectPart<PagePredicateBuilder, PageP
     public Dictionary<string, string> GetQueryOptions() => new();
 }
 
-public class Page
+public class PageClause
 {
     public int Skip
     {
@@ -31,7 +31,7 @@ public class Page
         get;
     }
 
-    public Page(int skip, int take)
+    public PageClause(int skip, int take)
     {
         Skip = skip;
         Take = take;

@@ -3,11 +3,10 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using System.Linq.Expressions;
 
-namespace Priqraph.Generator.Database.Visitors;
-
+namespace Priqraph.Sql.Generator.Visitors;
 public class ColumnVisitor : DatabaseVisitor<ColumnQueryFragment>
 {
-    public ColumnVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public ColumnVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

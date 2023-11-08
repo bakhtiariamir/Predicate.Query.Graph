@@ -4,12 +4,12 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using Priqraph.Helper;
 using System.Linq.Expressions;
+using Priqraph.Generator.Database;
 
-namespace Priqraph.Generator.Database.Visitors;
-
+namespace Priqraph.Sql.Generator.Visitors;
 public class JoinVisitor : DatabaseVisitor<JoinQueryFragment>
 {
-    public JoinVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public JoinVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

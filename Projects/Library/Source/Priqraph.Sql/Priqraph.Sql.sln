@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Priqraph.Sql", "Priqraph.Sql\Priqraph.Sql.csproj", "{5EC2A840-C4F1-43F9-8999-1A79FCB0B546}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Priqraph.Sql", "Priqraph.Sql\Priqraph.Sql.csproj", "{5EC2A840-C4F1-43F9-8999-1A79FCB0B546}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Priqraph", "..\Priqraph\Priqraph.csproj", "{C4AC2770-8D5E-4EE0-911C-DFD310952A47}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D37AB794-270C-43C1-A9BE-7B848D48C1B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7C0A75D5-F379-44F1-868A-CFE4A3D5C0FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Priqraph.Sql.Test", "Priqraph.Sql.Test\Priqraph.Sql.Test.csproj", "{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +23,22 @@ Global
 		{5EC2A840-C4F1-43F9-8999-1A79FCB0B546}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EC2A840-C4F1-43F9-8999-1A79FCB0B546}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EC2A840-C4F1-43F9-8999-1A79FCB0B546}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4AC2770-8D5E-4EE0-911C-DFD310952A47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4AC2770-8D5E-4EE0-911C-DFD310952A47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4AC2770-8D5E-4EE0-911C-DFD310952A47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4AC2770-8D5E-4EE0-911C-DFD310952A47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5EC2A840-C4F1-43F9-8999-1A79FCB0B546} = {D37AB794-270C-43C1-A9BE-7B848D48C1B0}
+		{C4AC2770-8D5E-4EE0-911C-DFD310952A47} = {D37AB794-270C-43C1-A9BE-7B848D48C1B0}
+		{0B2E3D95-F6C0-47CC-9A2E-FB31B7609DA0} = {7C0A75D5-F379-44F1-868A-CFE4A3D5C0FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C2A4F689-F1B1-47C4-B20F-6DCC8047D91C}

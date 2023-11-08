@@ -1,15 +1,14 @@
-﻿using Priqraph.Builder;
-using Priqraph.Builder.Database;
+﻿using Priqraph.Builder.Database;
 using Priqraph.Contract;
 using Priqraph.Query;
-using Priqraph.Setup;
 
 namespace Priqraph.Manager;
 
 internal class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResult> where TObject : IQueryableObject where TResult : IQueryResult
 {
-    private readonly ICacheInfoCollection _cacheInfoCollection;
-    private readonly QueryProvider _provider;
+
+    private readonly IQuery<TObject, TResult> _query;
+
 
     protected IQueryObject<TObject>? QueryObject
     {
@@ -17,28 +16,27 @@ internal class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResu
         set;
     }
 
-    public QueryOperation(ICacheInfoCollection cacheInfoCollection, QueryProvider provider)
+
+    public QueryOperation(IQuery<TObject, TResult> query)
     {
-        _cacheInfoCollection = cacheInfoCollection;
-        _provider = provider;
+        _query = query;
     }
 
     public void Init(IQueryObject<TObject> queryObject) => QueryObject = queryObject;
 
-    private Task<bool> ValidateAsync() => Task.FromResult(true);
+    private bool Validate() => true;
 
-    public virtual async Task<TResult> RunAsync()
+    public virtual TResult RunAsync()
     {
         if (QueryObject is null)
             throw new ArgumentNullException(nameof(QueryObject), $"{nameof(QueryObject)} can not be null.");
 
         QueryObject = QueryObjectReducer<TObject>.Init(QueryObject).Reduce().Return();
 
-        var validateQuery = await ValidateAsync();
+        var validateQuery = Validate();
         if (validateQuery)
         {
-            var query = await QueryBuilder<TObject, TResult>.Init(_cacheInfoCollection, _provider).BuildAsync();
-            return await query.Build(QueryObject);
+            return _query.Build(QueryObject);
         }
 
         throw new System.Exception("database query is not valid"); //ToDo

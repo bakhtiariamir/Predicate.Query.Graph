@@ -6,12 +6,12 @@ namespace Priqraph.Query.Predicates
 {
     public class PagePredicate
     {
-        public PagePredicate(Expression<Func<Page>> predicate)
+        public PagePredicate(Expression<Func<PageClause>> predicate)
         {
             Predicate = predicate;
         }
 
-        public Expression<Func<Page>> Predicate
+        public Expression<Func<PageClause>> Predicate
         {
             get;
         }

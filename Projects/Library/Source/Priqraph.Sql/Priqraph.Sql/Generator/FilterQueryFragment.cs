@@ -1,48 +1,34 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
-using Priqraph.Helper;
+using Priqraph.Generator.Database;
 using Priqraph.Query.Builders;
 using Priqraph.Setup;
+using Priqraph.Sql.Extensions;
 using System.Data;
 using System.Data.SqlClient;
 using static Priqraph.Query.Builders.ReturnType;
 
-namespace Priqraph.Generator.Database;
-
-public class FilterQueryFragment : QueryFragment<FilterClause>
+namespace Priqraph.Sql.Generator;
+public class FilterQueryFragment : DatabaseFilterQueryFragment
 {
-    private string? _text;
-
-    public QuerySetting? QuerySetting
-    {
-        get;
-        private set;
-    }
-
-    public override string? Text
-    {
-        get => _text;
-        set => _text = value;
-    }
-
-    private FilterQueryFragment(FilterClause? parameter)
+    private FilterQueryFragment(FilterProperty? parameter)
     {
         Parameter = parameter;
     }
 
-    public static FilterQueryFragment Create(FilterClause? property = null) => new(property);
+    public static FilterQueryFragment Create(FilterProperty? property = null) => new(property);
 
-    public void SetText(ReturnType returnType = None, FilterClause? returnClause = null) =>
-        _text = returnType switch
+    public void SetText(ReturnType returnType = None, FilterProperty? returnClause = null) =>
+        Text = returnType switch
         {
             Record => ReturnResultRecordWhereClause(returnClause ?? throw new ArgumentNullException($"object prameter key can not be null.")),
             _ or None => SetWhereClauseText(Parameter)
         };
 
-    private static string ReturnResultRecordWhereClause(FilterClause returnClause) => $"{returnClause.ColumnPropertyInfo?.GetSelector()}.[{returnClause.ColumnPropertyInfo?.ColumnName}] = @ResultId";
+    private static string ReturnResultRecordWhereClause(FilterProperty returnProperty) => $"{returnProperty.ColumnPropertyInfo?.GetSelector()}.[{returnProperty.ColumnPropertyInfo?.ColumnName}] = @ResultId";
 
-    public static ICollection<IColumnPropertyInfo> GetColumnProperties(FilterClause parameter)
+    public static ICollection<IColumnPropertyInfo> GetColumnProperties(FilterProperty parameter)
     {
         var columnProperties = new List<IColumnPropertyInfo>();
         switch (parameter)
@@ -59,9 +45,9 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
         return columnProperties;
     }
 
-    public static ICollection<FilterClause> GetHavingClause(FilterClause parameter)
+    public static ICollection<FilterProperty> GetHavingClause(FilterProperty parameter)
     {
-        var columnProperties = new List<FilterClause>();
+        var columnProperties = new List<FilterProperty>();
         if (parameter.Left == null || parameter.Right == null) return columnProperties;
 
         var left = parameter.Left ?? throw new System.Exception("asd");
@@ -96,7 +82,7 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
         return columnProperties;
     }
 
-    public static IEnumerable<SqlParameter>? GetParameters(FilterClause? parameter, QuerySetting setting)
+    public static IEnumerable<SqlParameter>? GetParameters(FilterProperty? parameter, QuerySetting setting)
     {
         if (parameter == null) yield break;
 
@@ -264,7 +250,7 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
         }
     }
 
-    private string? SetWhereClauseText(FilterClause? parameter)
+    private string? SetWhereClauseText(FilterProperty? parameter)
     {
         if (parameter == null) return null;
 
@@ -371,7 +357,7 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
         return null;
     }
 
-    private static FilterClause? ReduceWhereClause(FilterClause? parameter)
+    private static FilterProperty? ReduceWhereClause(FilterProperty? parameter)
     {
         if (parameter == null) return null;
         switch (parameter.PartType)
@@ -390,13 +376,13 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
                 var rightParameter = ReduceWhereClause(parameter.Right);
 
                 if (leftParameter != null && rightParameter == null && leftParameter.PartType != PartType.ParameterInfo)
-                    return new FilterClause(leftParameter, null, ConditionOperatorType.None, parameter.ClauseType);
+                    return new FilterProperty(leftParameter, null, ConditionOperatorType.None, parameter.ClauseType);
 
                 if (rightParameter != null && leftParameter == null && rightParameter.PartType != PartType.ParameterInfo)
-                    return new FilterClause(rightParameter, null, ConditionOperatorType.None, parameter.ClauseType);
+                    return new FilterProperty(rightParameter, null, ConditionOperatorType.None, parameter.ClauseType);
 
                 if (leftParameter != null && rightParameter != null)
-                    return new FilterClause(leftParameter, rightParameter, parameter.Operator, parameter.ClauseType);
+                    return new FilterProperty(leftParameter, rightParameter, parameter.Operator, parameter.ClauseType);
                 return null;
         }
 
@@ -434,9 +420,9 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
     //ToDo : add these methods in helper for use by all QueryPart
     private static string SetColumnName(IColumnPropertyInfo item) => $"{item.GetSelector()}.[{item.ColumnName}]";
 
-    private static string SetParameterName(FilterClause item, bool isArray = false) => item.ParameterName + (isArray ? "s" : "") + (item.Index > 0 ? $"_{item.Index}" : "");
+    private static string SetParameterName(FilterProperty item, bool isArray = false) => item.ParameterName + (isArray ? "s" : "") + (item.Index > 0 ? $"_{item.Index}" : "");
 
-    public void ReduceParameter(FilterClause? parameter = null, Dictionary<string, int>? parameterIndex = null)
+    public void ReduceParameter(FilterProperty? parameter = null, Dictionary<string, int>? parameterIndex = null)
     {
         parameterIndex ??= new Dictionary<string, int>();
         parameter ??= Parameter;
@@ -476,7 +462,7 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
     }
 
     public void SetQuerySetting(QuerySetting setting) => QuerySetting = setting;
-    private static void SetParameterIndex(FilterClause parameter, Dictionary<string, int> parameterIndex)
+    private static void SetParameterIndex(FilterProperty parameter, Dictionary<string, int> parameterIndex)
     {
         if (parameterIndex.ContainsKey(parameter?.ParameterName!))
         {
@@ -495,139 +481,5 @@ public class FilterQueryFragment : QueryFragment<FilterClause>
             table.Rows.Add(intValue);
         }
         return table;
-    }
-}
-
-public class FilterClause
-{
-    public FilterClause? Left
-    {
-        get;
-    }
-
-    public FilterClause? Right
-    {
-        get;
-    }
-
-    public ConditionOperatorType Operator
-    {
-        get;
-        private set;
-    }
-
-    public IColumnPropertyInfo? ColumnPropertyInfo
-    {
-        get;
-        private set;
-    }
-
-    public object? Value
-    {
-        get;
-        private set;
-    }
-
-    public Type? ValueType
-    {
-        get;
-    }
-
-    public ClauseType ClauseType
-    {
-        get;
-    }
-
-    public PartType PartType
-    {
-        get;
-    }
-
-    public int Index
-    {
-        get;
-        private set;
-    } = 0;
-
-    public string? ParameterName
-    {
-        get;
-    }
-
-    public FilterClause(FilterClause left, FilterClause? right, ConditionOperatorType @operator, ClauseType clauseType = ClauseType.Where, string? parameterName = null)
-    {
-        Left = left;
-        Right = right;
-        Operator = @operator;
-        ParameterName = parameterName;
-        ClauseType = clauseType;
-        PartType = PartType.WhereClause;
-    }
-
-    public FilterClause(IColumnPropertyInfo columnPropertyInfo, object? value = null, ConditionOperatorType condition = ConditionOperatorType.None, PartType partType = PartType.ColumnInfo, ClauseType clauseType = ClauseType.Where, string? parameterName = null, Type? valueType = null)
-    {
-        ColumnPropertyInfo = columnPropertyInfo;
-        ValueType = valueType;
-        ParameterName = parameterName;
-        ClauseType = clauseType;
-        Operator = condition;
-        Value = value;
-        PartType = partType;
-    }
-
-    public FilterClause(object? value = null, Type? valueType = null, string? parameterName = null)
-    {
-        ValueType = valueType;
-        ParameterName = parameterName;
-        ClauseType = ClauseType.None;
-        Value = value;
-        PartType = PartType.ParameterInfo;
-    }
-
-    public static FilterClause CreateWhereClause(FilterClause left, FilterClause? right, ConditionOperatorType @operator, ClauseType clauseType = ClauseType.Where) => new(left, right, @operator, clauseType);
-
-    public static FilterClause CreateParameterClause(object? value, Type? valueType, string? parameterName) => new(value, valueType, parameterName);
-
-    public void SetOperator(ConditionOperatorType operatorType) => Operator = operatorType;
-
-    public void SetValue(object? value) => Value = value;
-
-    public void SetIndex(int index) => Index = index;
-
-    public void SetParameterColumnInfo(IColumnPropertyInfo columnPropertyInfo) => ColumnPropertyInfo = columnPropertyInfo;
-}
-
-public enum ClauseType
-{
-    None = 0,
-    Where = 1,
-    Having = 2,
-}
-
-public enum PartType
-{
-    ColumnInfo = 1,
-    WhereClause = 2,
-    ParameterInfo = 3
-}
-
-public class ValueDetail
-{
-    public Type? Type
-    {
-        get;
-        set;
-    }
-
-    public bool IsGeneric
-    {
-        get;
-        set;
-    }
-
-    public bool IsArray
-    {
-        get;
-        set;
     }
 }

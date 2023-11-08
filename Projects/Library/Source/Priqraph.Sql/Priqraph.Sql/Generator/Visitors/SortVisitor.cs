@@ -1,13 +1,14 @@
 ﻿using Priqraph.Contract;
 using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
+using Priqraph.Generator.Database;
 using System.Linq.Expressions;
 
-namespace Priqraph.Generator.Database.Visitors;
+namespace Priqraph.Sql.Generator.Visitors;
 
 public class SortVisitor : DatabaseVisitor<SortQueryFragment>
 {
-    public SortVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public SortVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

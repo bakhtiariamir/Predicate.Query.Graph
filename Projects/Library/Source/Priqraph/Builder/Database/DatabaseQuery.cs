@@ -3,7 +3,7 @@ using Priqraph.DataType;
 
 namespace Priqraph.Builder.Database;
 
-internal abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryResult> where TObject : IQueryableObject
+public abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryResult> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -20,59 +20,59 @@ internal abstract class DatabaseQuery<TObject> : Query<TObject, DatabaseQueryRes
         get;
     }
 
-    protected DatabaseQuery(IQueryContext context)
+    protected DatabaseQuery(ICacheInfoCollection cacheInfoCollection)
     {
         QueryResult = new();
-        Context = (DatabaseQueryContext)context;
+        Context = new DatabaseQueryContext(cacheInfoCollection);
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<DatabaseQueryResult> Build(IQueryObject<TObject> query)
+    public override DatabaseQueryResult Build(IQueryObject<TObject> query)
     {
         switch (query.QueryOperationType)
         {
             case QueryOperationType.GetData:
-                await GenerateColumnAsync(query);
-                await GenerateWhereAsync(query);
-                await GenerateOrderByAsync(query);
-                await GenerateJoinAsync(query);
-                await GeneratePagingAsync(query);
-                await GenerateFunctionByClause();
+                GenerateColumn(query);
+                GenerateWhere(query);
+                GenerateOrderBy(query);
+                GenerateJoin(query);
+                GeneratePaging(query);
+                GenerateFunctionByClause();
                 break;
             case QueryOperationType.GetCount:
-                await GenerateColumnAsync(query, true);
-                await GenerateWhereAsync(query);
-                await GenerateJoinAsync(query);
+                GenerateColumn(query, true);
+                GenerateWhere(query);
+                GenerateJoin(query);
                 break;
             case QueryOperationType.Add:
-                await GenerateInsertAsync(query);
+                GenerateInsert(query);
                 break;
             case QueryOperationType.Edit:
-                await GenerateUpdateAsync(query);
+                GenerateUpdate(query);
                 break;
             case QueryOperationType.Remove:
-                await GenerateDeleteAsync(query);
+                GenerateDelete(query);
                 break;
         }
 
         return QueryResult;
     }
 
-    protected abstract Task GenerateInsertAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateInsert(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateUpdateAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateUpdate(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateDeleteAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateDelete(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateColumnAsync(IQueryObject<TObject> query, bool getCount = false);
+    protected abstract void GenerateColumn(IQueryObject<TObject> query, bool getCount = false);
 
-    protected abstract Task GenerateWhereAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateWhere(IQueryObject<TObject> query);
 
-    protected abstract Task GeneratePagingAsync(IQueryObject<TObject> query);
+    protected abstract void GeneratePaging(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateOrderByAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateOrderBy(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateJoinAsync(IQueryObject<TObject> query);
+    protected abstract void GenerateJoin(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateFunctionByClause();
+    protected abstract void GenerateFunctionByClause();
 }

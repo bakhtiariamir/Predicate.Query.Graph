@@ -7,12 +7,12 @@ using Priqraph.Helper;
 using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 using System.Reflection;
+using Priqraph.Generator.Database;
 
-namespace Priqraph.Generator.Database.Visitors;
-
+namespace Priqraph.Sql.Generator.Visitors;
 public class CommandVisitor : DatabaseVisitor<CommandQueryFragment>
 {
-    public CommandVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public CommandVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 

@@ -1,9 +1,8 @@
 ﻿namespace Priqraph.Contract;
 
-public interface IQueryOperation<TObject, TResult> where TObject : IQueryableObject
+public interface IQueryOperation<TObject, out TResult> where TObject : IQueryableObject
 {
-    //ToDo : Change QueryObject to IQueryObject
-    Task<TResult> RunAsync();
+    TResult RunAsync();
 
     void Init(IQueryObject<TObject> queryObject);
 }

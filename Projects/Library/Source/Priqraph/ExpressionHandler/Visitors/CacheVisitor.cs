@@ -8,26 +8,20 @@ using System.Linq.Expressions;
 
 namespace Priqraph.ExpressionHandler.Visitors;
 
-public abstract class CacheVisitor<TResult> : Visitor<TResult, IObjectInfo<IPropertyInfo>, ICacheInfoCollection, IPropertyInfo> where TResult : ICacheQueryPart
+public abstract class CacheVisitor<TResult> : Visitor<TResult> where TResult : ICacheQueryPart
 {
-    protected CacheVisitor(ICacheInfoCollection cacheObjectCollection, IObjectInfo<IPropertyInfo> objectInfo, ParameterExpression? parameterExpression)
+    protected CacheVisitor(ICacheInfoCollection cacheObjectCollection, IObjectInfo<IPropertyInfo> objectInfo, ParameterExpression parameterExpression) : base(parameterExpression)
     {
         CacheObjectCollection = cacheObjectCollection;
         ObjectInfo = objectInfo;
-        ParameterExpression = parameterExpression;
     }
 
-    protected override ICacheInfoCollection CacheObjectCollection
+    protected ICacheInfoCollection CacheObjectCollection
     {
         get;
     }
 
-    protected override IObjectInfo<IPropertyInfo> ObjectInfo
-    {
-        get;
-    }
-
-    protected override ParameterExpression ParameterExpression
+    protected IObjectInfo<IPropertyInfo> ObjectInfo
     {
         get;
     }
