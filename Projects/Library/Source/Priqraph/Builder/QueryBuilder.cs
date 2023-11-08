@@ -29,7 +29,7 @@ internal class QueryBuilder<TObject, TResult> : IQueryBuilder<TObject, TResult> 
             throw new System.Exception("asdas"); //ToDo
 
         _query = _provider switch {
-            QueryProvider.SqlServer => (IQuery<TObject, TResult>)new SqlServerQuery<TObject>(_queryContext),
+
             QueryProvider.InMemoryCache => (IQuery<TObject, TResult>)new MemoryCacheQuery<TObject>(_queryContext),
             QueryProvider.Neo4J or
             QueryProvider.RestApi or

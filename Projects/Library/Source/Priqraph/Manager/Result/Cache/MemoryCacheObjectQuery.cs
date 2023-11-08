@@ -63,7 +63,7 @@ public class CacheGetDataQueryObject
         set;
     }
 
-    public Page? Page
+    public PageClause? Page
     {
         get;
         set;

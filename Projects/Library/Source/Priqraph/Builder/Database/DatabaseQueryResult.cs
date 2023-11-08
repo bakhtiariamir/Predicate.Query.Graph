@@ -11,43 +11,43 @@ public class DatabaseQueryResult : IQueryResult
         set;
     }
 
-    public CommandQueryFragment? Command
+    public DatabaseCommandQueryFragment? CommandFragment
     {
         get;
         set;
     }
 
-    public ColumnQueryFragment? Columns
+    public DatabaseColumnQueryFragment? ColumnFragment
     {
         get;
         set;
     }
 
-    public FilterQueryFragment? WhereClause
+    public DatabaseFilterQueryFragment? FilterFragment
     {
         get;
         set;
     }
 
-    public SortQueryFragment? OrderByClause
+    public DatabaseSortQueryFragment? SortFragment
     {
         get;
         set;
     }
 
-    public JoinQueryFragment? JoinClause
+    public DatabaseJoinQueryFragment? JoinFragment
     {
         get;
         set;
     }
 
-    public PageQueryFragment? Paging
+    public DatabasePageQueryFragment? PageFragment
     {
         get;
         set;
     }
 
-    public GroupByQueryFragment? GroupByClause
+    public DatabaseGroupByQueryFragment? GroupByFragment
     {
         get;
         set;

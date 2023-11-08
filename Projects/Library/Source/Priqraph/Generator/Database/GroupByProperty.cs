@@ -10,12 +10,12 @@ namespace Priqraph.Generator.Database
             get;
         }
 
-        public IEnumerable<FilterClause>? GroupingHaving
+        public IEnumerable<FilterProperty>? GroupingHaving
         {
             get;
         }
 
-        public GroupByProperty(IEnumerable<IColumnPropertyInfo> groupingColumns, IEnumerable<FilterClause>? groupingHaving)
+        public GroupByProperty(IEnumerable<IColumnPropertyInfo> groupingColumns, IEnumerable<FilterProperty>? groupingHaving)
         {
             GroupingColumns = groupingColumns;
             GroupingHaving = groupingHaving;

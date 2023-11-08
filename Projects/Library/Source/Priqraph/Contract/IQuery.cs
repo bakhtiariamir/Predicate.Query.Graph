@@ -1,6 +1,18 @@
-﻿namespace Priqraph.Contract;
+﻿using Priqraph.Builder.Database;
 
-public interface IQuery<TObject, TQueryResult> where TObject : IQueryableObject
+namespace Priqraph.Contract;
+
+public interface IQuery<TObject, out TQueryResult> where TObject : IQueryableObject
 {
-    Task<TQueryResult> Build(IQueryObject<TObject> query);
+    TQueryResult Build(IQueryObject<TObject> query);
+}
+
+public interface ISqlServerQuery<TObject> : IQuery<TObject, DatabaseQueryResult> where TObject : IQueryableObject
+{
+
+}
+
+public interface ISqlServerQueryBuilder<TObject> where TObject : IQueryableObject
+{
+    ISqlServerQuery<TObject> Build();
 }

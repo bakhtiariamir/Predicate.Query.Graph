@@ -12,8 +12,8 @@ public class PagingVisitor : CacheVisitor<CachePagingClauseQueryPart>
     {
     }
 
-    protected override CachePagingClauseQueryPart VisitMember(MemberExpression expression) => CachePagingClauseQueryPart.Create(new Page(10, 1));
+    protected override CachePagingClauseQueryPart VisitMember(MemberExpression expression) => CachePagingClauseQueryPart.Create(new PageClause(10, 1));
 
-    protected override CachePagingClauseQueryPart VisitNew(NewExpression expression) => CachePagingClauseQueryPart.Create(ActivatorHelper.CreateInstance<Page>(expression));
+    protected override CachePagingClauseQueryPart VisitNew(NewExpression expression) => CachePagingClauseQueryPart.Create(ActivatorHelper.CreateInstance<PageClause>(expression));
 }
 

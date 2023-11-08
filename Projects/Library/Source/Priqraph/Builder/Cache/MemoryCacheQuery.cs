@@ -18,7 +18,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override Task GenerateAddAsync(IQueryObject<TObject> query)
+    protected override Task GenerateAdd(IQueryObject<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -26,7 +26,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateUpdateAsync(IQueryObject<TObject> query)
+    protected override Task GenerateUpdate(IQueryObject<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -34,7 +34,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateRemoveAsync(IQueryObject<TObject> query)
+    protected override Task GenerateRemove(IQueryObject<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -42,7 +42,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateWhereAsync(IQueryObject<TObject> query)
+    protected override Task GenerateWhere(IQueryObject<TObject> query)
     {
         var expression = query.FilterPredicates?.Expression;
         if (expression == null)
@@ -60,7 +60,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GeneratePagingAsync(IQueryObject<TObject> query)
+    protected override Task GeneratePaging(IQueryObject<TObject> query)
     {
         var expression = query.PagePredicate?.Predicate;
         if (expression == null)
@@ -78,7 +78,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateOrderByAsync(IQueryObject<TObject> query)
+    protected override Task GenerateOrderBy(IQueryObject<TObject> query)
     {
         var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)

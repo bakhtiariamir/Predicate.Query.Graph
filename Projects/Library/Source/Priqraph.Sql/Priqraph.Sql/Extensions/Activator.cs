@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Priqraph.ExpressionHandler;
+namespace Priqraph.Sql.Extensions;
 internal static class Activator
 {
     public static T? CreateInstance<T>(NewExpression newExpression)

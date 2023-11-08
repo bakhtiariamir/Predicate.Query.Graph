@@ -5,14 +5,14 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using System.Linq.Expressions;
 using System.Reflection;
+using Priqraph.Generator.Database;
 
-namespace Priqraph.Generator.Database.Visitors;
-
+namespace Priqraph.Sql.Generator.Visitors;
 public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
 {
     private int _constantIndex = 0;
 
-    public FilterVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression? parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
+    public FilterVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
     {
     }
 
@@ -42,7 +42,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
     protected override FilterQueryFragment VisitNot(UnaryExpression expression)
     {
         var left = Visit(expression.Operand);
-        var right = FilterQueryFragment.Create(FilterClause.CreateParameterClause(null, null, null));
+        var right = FilterQueryFragment.Create(FilterProperty.CreateParameterClause(null, null, null));
         if (right.Parameter?.PartType == PartType.ParameterInfo && left.Parameter?.ColumnPropertyInfo != null && right.Parameter.ColumnPropertyInfo != null)
             right.Parameter.ColumnPropertyInfo.SetParameterData(left.Parameter.ColumnPropertyInfo.Schema, left.Parameter.ColumnPropertyInfo.DataSet, left.Parameter.ColumnPropertyInfo.Name, left.Parameter.ColumnPropertyInfo.ColumnName, left.Parameter.ColumnPropertyInfo.DataType);
 
@@ -52,7 +52,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
         if (left.Parameter is { ColumnPropertyInfo: not null, ClauseType: ClauseType.Where or ClauseType.None } || right.Parameter?.ClauseType is ClauseType.Where or ClauseType.None)
             clauseType = ClauseType.Where;
 
-        return FilterQueryFragment.Create(FilterClause.CreateWhereClause(left.Parameter!, right.Parameter, ConditionOperatorType.Not, clauseType));
+        return FilterQueryFragment.Create(FilterProperty.CreateWhereClause(left.Parameter!, right.Parameter, ConditionOperatorType.Not, clauseType));
     }
 
     protected override FilterQueryFragment VisitGreaterThan(BinaryExpression expression)
@@ -132,7 +132,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
         var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(expression.ToString(), expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
         var field = fields.FirstOrDefault() ?? throw new NotFound(expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        return FilterQueryFragment.Create(new FilterClause(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
+        return FilterQueryFragment.Create(new FilterProperty(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }
 
     protected override FilterQueryFragment VisitMember(MemberExpression expression)
@@ -149,7 +149,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
 
         var field = fields.FirstOrDefault() ?? throw new NotFound(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        return FilterQueryFragment.Create(new FilterClause(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
+        return FilterQueryFragment.Create(new FilterProperty(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }
 
     protected override FilterQueryFragment VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
@@ -157,7 +157,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
         memberName ??= "param";
         var value = GetValue(expression, memberExpression);
 
-        return FilterQueryFragment.Create(FilterClause.CreateParameterClause(value, GetValueType(value), memberName));
+        return FilterQueryFragment.Create(FilterProperty.CreateParameterClause(value, GetValueType(value), memberName));
     }
 
     private static object? GetValue(ConstantExpression expression, MemberExpression? memberExpression)
@@ -265,7 +265,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
             case ConditionOperatorType.Equal:
                 if (IsNull(expression.Right))
                 {
-                    right = FilterQueryFragment.Create(FilterClause.CreateParameterClause(null, null, null));
+                    right = FilterQueryFragment.Create(FilterProperty.CreateParameterClause(null, null, null));
                     operatorType = ConditionOperatorType.IsNull;
                 }
                 else
@@ -279,7 +279,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
             case ConditionOperatorType.NotEqual:
                 if (IsNull(expression.Right))
                 {
-                    right = FilterQueryFragment.Create(FilterClause.CreateParameterClause(null, null, null));
+                    right = FilterQueryFragment.Create(FilterProperty.CreateParameterClause(null, null, null));
                     operatorType = ConditionOperatorType.IsNotNull;
                 }
                 else
@@ -316,7 +316,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
         if (left.Parameter.ClauseType is ClauseType.Where or ClauseType.None || right.Parameter is { ClauseType: ClauseType.Where or ClauseType.None })
             clauseType = ClauseType.Where;
 
-        return FilterQueryFragment.Create(FilterClause.CreateWhereClause(left.Parameter, right.Parameter, operatorType, clauseType));
+        return FilterQueryFragment.Create(FilterProperty.CreateWhereClause(left.Parameter, right.Parameter, operatorType, clauseType));
     }
 
     private static Expression ReduceParentalExpression(Expression expression, MemberExpression? mainMember = null)

@@ -27,45 +27,45 @@ internal abstract class CacheQuery<TObject> : Query<TObject, CacheQueryResult> w
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override async Task<CacheQueryResult> Build(IQueryObject<TObject> query)
+    public override CacheQueryResult Build(IQueryObject<TObject> query)
     {
         switch (query.QueryOperationType)
         {
             case QueryOperationType.GetData:
-                await GenerateWhereAsync(query);
-                await GenerateOrderByAsync(query);
+                GenerateWhere(query);
+                GenerateOrderBy(query);
                 //await GenerateJoinAsync();
-                await GeneratePagingAsync(query);
+                GeneratePaging(query);
                 break;
             case QueryOperationType.GetCount:
-                await GenerateWhereAsync(query);
+                GenerateWhere(query);
                 //await GenerateJoinAsync();
                 break;
             case QueryOperationType.Add:
-                await GenerateAddAsync(query);
+                GenerateAdd(query);
                 break;
             case QueryOperationType.Edit:
-                await GenerateUpdateAsync(query);
+                GenerateUpdate(query);
                 break;
             case QueryOperationType.Remove:
-                await GenerateRemoveAsync(query);
+                GenerateRemove(query);
                 break;
         }
 
         return QueryResult;
     }
 
-    protected abstract Task GenerateAddAsync(IQueryObject<TObject> query);
+    protected abstract Task GenerateAdd(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateUpdateAsync(IQueryObject<TObject> query);
+    protected abstract Task GenerateUpdate(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateRemoveAsync(IQueryObject<TObject> query);
+    protected abstract Task GenerateRemove(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateWhereAsync(IQueryObject<TObject> query);
+    protected abstract Task GenerateWhere(IQueryObject<TObject> query);
 
-    protected abstract Task GeneratePagingAsync(IQueryObject<TObject> query);
+    protected abstract Task GeneratePaging(IQueryObject<TObject> query);
 
-    protected abstract Task GenerateOrderByAsync(IQueryObject<TObject> query);
+    protected abstract Task GenerateOrderBy(IQueryObject<TObject> query);
 
     //protected abstract Task GenerateJoinAsync();
 

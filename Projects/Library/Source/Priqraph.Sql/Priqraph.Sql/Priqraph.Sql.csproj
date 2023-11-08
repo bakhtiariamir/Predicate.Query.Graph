@@ -6,4 +6,18 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Info\**" />
+    <EmbeddedResource Remove="Info\**" />
+    <None Remove="Info\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="7.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Priqraph\Priqraph.csproj" />
+  </ItemGroup>
+
 </Project>

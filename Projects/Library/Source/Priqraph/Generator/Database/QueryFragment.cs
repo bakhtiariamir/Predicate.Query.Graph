@@ -4,10 +4,10 @@ namespace Priqraph.Generator.Database;
 
 public abstract class QueryFragment<TParameter> : IQueryFragment<TParameter> where TParameter : class
 {
-    public abstract string? Text
+    public string? Text
     {
         get;
-        set;
+        protected set;
     }
 
     public TParameter? Parameter
