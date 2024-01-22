@@ -78,9 +78,10 @@ public class QueryObject<TObject> : IQueryObject<TObject> where TObject : IQuery
     {
         QueryProvider = queryProvider;
         QueryOperationType = queryOperationType;
-        ObjectTypeStructures = objectTypeStructures?.ToArray() ?? Array.Empty<Type>();
-        if (objectTypeStructures is not null && !objectTypeStructures.Contains(typeof(Type)))
-            ObjectTypeStructures.Add(typeof(Type));
+        ObjectTypeStructures = objectTypeStructures?.ToList() ?? new List<Type>();
+        //FIXME - What is this
+        // if (objectTypeStructures is not null && !objectTypeStructures.Contains(typeof(Type)))
+        //     ObjectTypeStructures.Add(typeof(Type));
     }
 
     public static QueryObject<TObject> Init(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => new(queryOperationType, queryProvider, objectTypeStructures);

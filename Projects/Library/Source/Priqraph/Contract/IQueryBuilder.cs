@@ -1,6 +1,6 @@
 ﻿namespace Priqraph.Contract;
 
-public interface IQueryBuilder<TObject, TResult> where TObject : IQueryableObject
+public interface IQueryBuilder<TObject, out TResult> where TObject : IQueryableObject
 {
-    Task<IQuery<TObject, TResult>> BuildAsync();
+    IQuery<TObject, TResult> Build();
 }

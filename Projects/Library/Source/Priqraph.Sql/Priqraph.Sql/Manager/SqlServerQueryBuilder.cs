@@ -1,4 +1,5 @@
-﻿using Priqraph.Contract;
+﻿using Priqraph.Builder.Database;
+using Priqraph.Contract;
 
 namespace Priqraph.Sql.Manager;
 
@@ -11,5 +12,5 @@ public class SqlServerQueryBuilder<TObject> : ISqlServerQueryBuilder<TObject> wh
         _cacheInfoCollection = cacheInfoCollection;
     }
 
-    public ISqlServerQuery<TObject> Build() => new SqlServerQuery<TObject>(_cacheInfoCollection);
+    public IQuery<TObject, DatabaseQueryResult> Build() => new SqlServerQuery<TObject>(_cacheInfoCollection);
 }

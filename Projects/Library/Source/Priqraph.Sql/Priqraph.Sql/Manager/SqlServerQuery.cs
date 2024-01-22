@@ -18,7 +18,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 {
     private IDatabaseObjectInfo _objectInfo;
 
-    public SqlServerQuery(ICacheInfoCollection cacheInfoCollection): base(cacheInfoCollection)
+    public SqlServerQuery(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryResult.DatabaseObjectInfo = _objectInfo;
@@ -67,7 +67,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Remove);
-        
+
     }
 
     protected override void GenerateColumn(IQueryObject<TObject> query, bool getCount = false)
@@ -112,7 +112,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
             QueryResult.ColumnFragment = ColumnQueryFragment.CreateCount();
         }
 
-        
+
     }
 
     protected override void GenerateWhere(IQueryObject<TObject> query)
@@ -142,9 +142,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         }
 
         var expression = query.FilterPredicates?.Expression;
-        if (expression == null)
-            
-
+        if (expression != null)
         {
             if (expression.NodeType != ExpressionType.Lambda)
                 throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
@@ -162,25 +160,23 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
             JoinColumns.AddRange(joinColumns);
         }
 
-        
+
     }
 
     protected override void GeneratePaging(IQueryObject<TObject> query)
     {
         var expression = query.PagePredicate?.Predicate;
-        if (expression == null)
-            
+        if (expression != null)
+        {
+            if (expression!.NodeType != ExpressionType.Lambda)
+                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        if (expression.NodeType != ExpressionType.Lambda)
-            throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+            var lambdaExpression = (LambdaExpression)expression;
+            var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        var lambdaExpression = (LambdaExpression)expression;
-        var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-
-        var pagingVisitor = new PageVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        QueryResult.PageFragment = pagingVisitor.Generate(body);
-
-        
+            var pagingVisitor = new PageVisitor(Context.CacheInfoCollection, _objectInfo, default);
+            QueryResult.PageFragment = pagingVisitor.Generate(body);
+        }
     }
 
     protected override void GenerateOrderBy(IQueryObject<TObject> query)
@@ -226,16 +222,16 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
                 if (parameter.FieldType == DatabaseFieldType.Related)
                     continue;
-                
+
                 joins.Add(new Tuple<IColumnPropertyInfo, int>(parameter.Parent, level));
-                getJoins?.Invoke(new[] {parameter.Parent}, ++level);
+                getJoins?.Invoke(new[] { parameter.Parent }, ++level);
             }
         };
 
-        getJoins(JoinColumns.Where(item => item.Parent is not null && item.Parent.Name != _objectInfo.DataSet).DistinctBy(item => new {item.Schema, item.DataSet, item.ColumnName, item.Name}).ToList(), 0);
+        getJoins(JoinColumns.Where(item => item.Parent is not null && item.Parent.Name != _objectInfo.DataSet).DistinctBy(item => new { item.Schema, item.DataSet, item.ColumnName, item.Name }).ToList(), 0);
         var queryObjectJoining = JoinPredicateBuilder.Init();
 
-        joins.OrderBy(item => item.Item2).Select(item => item).GroupBy(item => new {item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name}).ToList().ForEach(item =>
+        joins.OrderBy(item => item.Item2).Select(item => item).GroupBy(item => new { item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name }).ToList().ForEach(item =>
         {
             var index = 0;
             foreach (var joinPredicate in item.Select(item => item))
@@ -260,7 +256,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
                 var indexer = index > 0 ? $"_{index}" : "";
                 var joinType = @join.Required ? JoinType.Inner : JoinType.Left;
-                var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType,  joinType, query.ObjectTypeStructures.ToArray(), indexer);
+                var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType, joinType, query.ObjectTypeStructures.ToArray(), indexer);
                 queryObjectJoining.Add(expression, joinType, order);
 
                 index++;
@@ -278,7 +274,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
         QueryResult.JoinFragment = JoinQueryFragment.Merged(databaseJoinClauses);
 
-        
+
     }
 
     protected override void GenerateFunctionByClause()
@@ -294,7 +290,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
             grouping = havingClauses.Count > 0;
         }
 
-        if (!grouping)
+        if (grouping)
         {
             IEnumerable<IColumnPropertyInfo> groupingColumns = columnQueryPart.Parameter?.Where(item => item.AggregateFunctionType == AggregateFunctionType.None) ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
 

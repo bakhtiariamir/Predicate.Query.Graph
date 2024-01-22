@@ -27,25 +27,4 @@ public class Setup
     }
 
     public static void RegisterSetting(ContainerBuilder builder) => builder.RegisterType<CacheInfoCollection>().As<ICacheInfoCollection>().SingleInstance();
-
-    public static void CacheObjectInfo(ICacheInfoCollection cacheInfoCollection)
-    {
-        //DataSetInfoAttribute
-        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes()).Where(p => typeof(IQueryableObject).IsAssignableFrom(p));
-        foreach (var type in types.Where(item => item.Name == "IDomain"))
-        {
-            var objectAttribute = type.GetCustomAttributes(true);
-
-            if (objectAttribute.Length == 0)
-                cacheInfoCollection.LastObjectInfo(type);
-            else
-            {
-                foreach (var attribute in objectAttribute)
-                {
-                    if (attribute is DataSetInfoAttribute infoAttribute)
-                        cacheInfoCollection.LastDatabaseObjectInfo(type);
-                }
-            }
-        }
-    }
 }

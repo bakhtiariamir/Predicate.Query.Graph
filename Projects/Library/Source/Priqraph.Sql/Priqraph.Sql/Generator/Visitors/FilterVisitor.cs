@@ -300,7 +300,7 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
 
     private static FilterQueryFragment CreateFilterClause(ConditionOperatorType operatorType, FilterQueryFragment right, FilterQueryFragment left)
     {
-        if (left.Parameter?.ColumnPropertyInfo is null)
+        if (left.Parameter is { PartType: PartType.ColumnInfo, ColumnPropertyInfo: null })
             throw new ArgumentNullException("Expression.Left.ColumnPropertyInfo");
 
         if (right.Parameter is { ParameterName: not null, ColumnPropertyInfo: null, PartType: PartType.ParameterInfo })

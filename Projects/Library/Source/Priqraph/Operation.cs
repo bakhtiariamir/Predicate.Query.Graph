@@ -7,9 +7,9 @@ using Priqraph.Setup;
 namespace Priqraph;
 public static class Operation
 {
-    public static IQueryOperation<TObject, TResult> SetupOperation<TObject, TResult>(this IQuery<TObject, TResult> query) where TObject : IQueryableObject
+    public static IQueryOperation<TObject, TResult> SetupOperation<TObject, TResult>() where TObject : IQueryableObject
         where TResult : IQueryResult =>
-        new QueryOperation<TObject, TResult>(query);
+        new QueryOperation<TObject, TResult>();
 
     //provider switch
     //{

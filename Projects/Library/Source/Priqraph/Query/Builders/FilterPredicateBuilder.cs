@@ -2,6 +2,7 @@
 using Priqraph.DataType;
 using Priqraph.Helper;
 using Priqraph.Query.Predicates;
+using System;
 using System.Linq.Expressions;
 
 namespace Priqraph.Query.Builders;
@@ -20,9 +21,16 @@ public class FilterPredicateBuilder<TObject> : IQueryObjectPart<FilterPredicateB
         _filterPredicate = new FilterPredicate<TObject>(expression);
     }
 
+    private FilterPredicateBuilder(Expression<Func<TObject, bool>> expression, ReturnType returnType = ReturnType.Record)
+    {
+        _filterPredicate = new FilterPredicate<TObject>(expression,  returnType);
+    }
+
     public static FilterPredicateBuilder<TObject> Init(ReturnType returnType) => new(returnType);
 
     public static FilterPredicateBuilder<TObject> Init(Expression<Func<TObject, bool>> expression) => new(expression);
+
+    public static FilterPredicateBuilder<TObject> Init(Expression<Func<TObject, bool>> expression, ReturnType returnType) => new(expression, returnType);
 
     public static FilterPredicateBuilder<TObject> Init(IEnumerable<Expression<Func<TObject, bool>>> expressions)
     {
