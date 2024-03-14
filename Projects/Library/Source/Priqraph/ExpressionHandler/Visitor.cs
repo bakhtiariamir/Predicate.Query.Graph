@@ -67,7 +67,8 @@ public abstract class Visitor<TResult>
                 return VisitNew((NewExpression)expression);
 
             case ExpressionType.Call:
-                return ((MethodCallExpression)expression).Method.Name switch {
+                return ((MethodCallExpression)expression).Method.Name switch
+                {
                     "LeftContains" => VisitStartsWith((MethodCallExpression)expression),
                     "RightContains" => VisitEndsWith((MethodCallExpression)expression),
                     "Contains" => VisitContains((MethodCallExpression)expression),
@@ -77,6 +78,13 @@ public abstract class Visitor<TResult>
                     "Equals" => VisitEqual((MethodCallExpression)expression),
                     "IsNull" => VisitCheckValue((MethodCallExpression)expression, false),
                     "IsNotNull" => VisitCheckValue((MethodCallExpression)expression, true),
+                    "Where" => VisitWhere((MethodCallExpression)expression),
+                    "Select" => VisitSelect((MethodCallExpression)expression),
+                    "OrderBy" => VisitOrderBy((MethodCallExpression)expression),
+                    "OrderByDescending" => VisitOrderByDescending((MethodCallExpression)expression),
+                    "Max" => VisitMax((MethodCallExpression)expression),
+                    "Take" => VisitTake((MethodCallExpression)expression),
+                    "Skip" => VisitSkip((MethodCallExpression)expression),
                     _ => VisitCall((MethodCallExpression)expression)
                 };
             case ExpressionType.Lambda:
@@ -149,4 +157,13 @@ public abstract class Visitor<TResult>
     protected virtual TResult VisitParameter(ParameterExpression expression) => throw new NotImplementedException();
 
     protected virtual TResult VisitNewArray(NewArrayExpression expression) => throw new NotImplementedException();
+
+
+    protected virtual TResult VisitSelect(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitWhere(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitSkip(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitTake(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitOrderBy(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitOrderByDescending(MethodCallExpression expression) => throw new NotImplementedException();
+    protected virtual TResult VisitMax(MethodCallExpression expression) => throw new NotImplementedException();
 }

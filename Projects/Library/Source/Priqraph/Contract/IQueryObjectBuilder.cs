@@ -16,5 +16,7 @@ public interface IQueryObjectBuilder<TObject> where TObject : IQueryableObject
     IQueryObjectBuilder<TObject> SetSort(SortPredicateBuilder<TObject> objectSorting);
     IQueryObjectBuilder<TObject> SetSorts(ICollection<SortPredicate<TObject>> sortPredicates);
     IQueryObjectBuilder<TObject> SetPaging(PagePredicateBuilder paging);
+
+    IQueryObjectBuilder<TObject> SetQuery(IQueryable query);
     IQueryObject<TObject> Generate();
 }

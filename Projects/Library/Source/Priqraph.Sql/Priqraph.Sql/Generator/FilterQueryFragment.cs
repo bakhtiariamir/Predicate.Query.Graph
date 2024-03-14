@@ -53,7 +53,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
         var left = parameter.Left ?? throw new System.Exception("asd");
         var right = parameter.Right ?? throw new System.Exception("asd");
 
-        if (left.PartType == PartType.ColumnInfo && left.ColumnPropertyInfo != null)
+        if (left is { PartType: PartType.ColumnInfo, ColumnPropertyInfo: not null })
         {
             if (left.ClauseType == ClauseType.Having && left.ColumnPropertyInfo.WindowPartitionColumns?.Length == 0)
             {

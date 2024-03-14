@@ -2,5 +2,5 @@
 
 public interface IQueryBuilder<TObject, out TResult> where TObject : IQueryableObject
 {
-    IQuery<TObject, TResult> Build();
+    IQuery<TObject, TResult> Build(bool isObjectQuery = true);
 }

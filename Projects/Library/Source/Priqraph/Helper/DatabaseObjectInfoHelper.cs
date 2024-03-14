@@ -115,7 +115,7 @@ public static class DatabaseObjectInfoHelper
 
             if (!info.NotMapped)
             {
-                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.Key, info.Identity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, info.Required, info.Title, info.ErrorMessage, info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject, info.MaxLength, info.MinLength, info.UniqueFieldGroup));
+                properties.Add(new ColumnPropertyInfo(schema, dataSet, info.ColumnName, info.Name, info.Key, info.Identity, info.DataType, info.Type, property.PropertyType, info.IsUnique, info.ReadOnly, info.NotMapped, info.FunctionName, info.AggregateFunctionType, info.RankingFunctionType, info.Required, info.Title,  info.WindowPartitionColumns, info.WindowOrderColumns, info.DefaultValue, isObject, info.MaxLength, info.MinLength, info.UniqueFieldGroup, info.RegexValidator, info.RegexError));
             }
         }
         else

@@ -1,31 +1,38 @@
-﻿using Priqraph.Contract;
+using Dynamitey.DynamicObjects;
+using Priqraph.Builder.Database;
+using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
+using Priqraph.Generator.Database;
 using Priqraph.Helper;
 using Priqraph.Info.Database;
 using System.Linq.Expressions;
 
 namespace Priqraph.ExpressionHandler.Visitors;
-
-public abstract class DatabaseVisitor<TResult> : Visitor<TResult> where TResult : IQueryFragment
+public class DatabaseQueryableVisitor : Visitor<DatabaseQueryResult>
 {
-    protected DatabaseVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(parameterExpression)
-    {
-        CacheObjectCollection = cacheObjectCollection;
-        ObjectInfo = objectInfo;
-    }
-
     protected ICacheInfoCollection CacheObjectCollection
     {
         get;
     }
-
     protected IDatabaseObjectInfo ObjectInfo
     {
         get;
     }
 
-    protected override TResult VisitConvert(UnaryExpression expression, string? memberName = null) => Visit(expression.Operand, memberName);
+    public DatabaseQueryableVisitor(ParameterExpression parameterExpression, ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo) : base(parameterExpression)
+    {
+        CacheObjectCollection = cacheObjectCollection;
+        ObjectInfo = objectInfo;
+    }
+
+    protected Expression VisitQuote(Expression expression)
+    {
+        var operand = ((UnaryExpression)expression).Operand;
+        return operand;
+    }
+
+    protected override DatabaseQueryResult VisitConvert(UnaryExpression expression, string? memberName = null) => Visit(expression.Operand, memberName);
 
     protected bool IsNull(Expression expression)
     {
@@ -54,7 +61,7 @@ public abstract class DatabaseVisitor<TResult> : Visitor<TResult> where TResult 
         foreach (var property in properties)
             if (!isCondition)
             {
-                if (property.TryExpandProperty(cacheObjectCollection, out var childProperties) && childProperties is { Count: > 0 })
+                if (property.DataType == ColumnDataType.Object &&  property.TryExpandProperty(cacheObjectCollection, out var childProperties) && childProperties is { Count: > 0 })
                 {
                     foreach (var childProperty in childProperties)
                         yield return childProperty;

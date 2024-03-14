@@ -1,0 +1,29 @@
+= Priqraph 
+:doctype: book
+:sectnums:
+:icons: font
+
+== Priqraph Structure
+
+== Object Information
+=== Database Information Structure
+
+== Query Structure
+=== QueryObject
+=== QueryObjectBuilder
+
+== Builder
+=== Query
+=== Query Builder
+
+== Expression Handler
+=== Visitor
+=== Database Visitors
+==== IQueryable Visitors
+
+
+[appendix]
+=== Exceptions
+
+[glossary]
+== Terminology

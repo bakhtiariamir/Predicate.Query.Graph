@@ -9,13 +9,13 @@ namespace Priqraph.Query.Builders;
 // => https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/how-to-use-expression-trees-to-build-dynamic-queries
 public class ColumnPredicateBuilder<TObject> : IQueryObjectPart<ColumnPredicateBuilder<TObject>, ICollection<ColumnPredicate<TObject>>> where TObject : IQueryableObject
 {
-    private ICollection<ColumnPredicate<TObject>> _columnPredicates;
+    private ICollection<ColumnPredicate<TObject>> _columnPredicates = new List<ColumnPredicate<TObject>>();
 
     private Dictionary<string, string> _queryOptions = new();
 
     private ColumnPredicateBuilder()
     {
-        _columnPredicates = new List<ColumnPredicate<TObject>> { new(item => item) };
+
     }
 
     public static ColumnPredicateBuilder<TObject> Init() => new();

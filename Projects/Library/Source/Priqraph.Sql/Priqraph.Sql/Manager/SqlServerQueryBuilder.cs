@@ -12,5 +12,8 @@ public class SqlServerQueryBuilder<TObject> : ISqlServerQueryBuilder<TObject> wh
         _cacheInfoCollection = cacheInfoCollection;
     }
 
-    public IQuery<TObject, DatabaseQueryResult> Build() => new SqlServerQuery<TObject>(_cacheInfoCollection);
+    public IQuery<TObject, DatabaseQueryResult> Build(bool isObjectQuery = true)
+    {
+	    return isObjectQuery  ? new SqlServerQuery<TObject>(_cacheInfoCollection) : new SqlServerQueryableQuery<TObject>(_cacheInfoCollection);
+    }
 }

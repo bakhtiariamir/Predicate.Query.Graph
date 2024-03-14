@@ -70,17 +70,22 @@ public interface IPropertyInfo
         get;
     }
 
-    IDictionary<string, string>? ErrorMessage
-    {
-        get;
-    }
-
     Type Type
     {
         get;
     }
 
     bool IsObject
+    {
+        get;
+    }
+
+    string? RegexValidator
+    {
+        get;
+    }
+
+    string? RegexError
     {
         get;
     }

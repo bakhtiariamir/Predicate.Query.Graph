@@ -8,6 +8,7 @@ public static class DatabaseInfoExpressionHelper
 {
     public static bool TryExpandProperty(this IColumnPropertyInfo parent, ICacheInfoCollection cacheInfoCollection, out ICollection<IColumnPropertyInfo>? expandedProperties)
     {
+        //ToDo : نباید System.Type  را بیاورد
         expandedProperties = null;
         if (!cacheInfoCollection.TryGetLastDatabaseObjectInfo(parent.Type, out var objectInfo))
             return false;

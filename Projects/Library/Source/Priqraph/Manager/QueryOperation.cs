@@ -8,6 +8,8 @@ internal class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResu
 {
     private bool Validate() => true;
 
+    private bool ValidateQuery() => true;
+
     public virtual TResult Run(IQueryObject<TObject> queryObject, IQuery<TObject, TResult> query)
     {
         if (queryObject is null)
@@ -22,7 +24,19 @@ internal class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResu
         }
 
         throw new System.Exception("database query is not valid"); //ToDo
+    }
 
+    public virtual TResult RunQuery(IQueryObject<TObject> queryObject, IQuery<TObject, TResult> query)
+    {
+        if (queryObject is null)
+            throw new ArgumentNullException(nameof(queryObject), $"{nameof(queryObject)} can not be null.");
 
+        var validateQuery = ValidateQuery();
+        if (validateQuery)
+        {
+            return query.Build(queryObject);
+        }
+
+        throw new System.Exception("database query is not valid"); //ToDo
     }
 }

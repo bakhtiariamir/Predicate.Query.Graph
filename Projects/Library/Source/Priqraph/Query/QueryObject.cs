@@ -55,6 +55,11 @@ public class QueryObject<TObject> : IQueryObject<TObject> where TObject : IQuery
         set;
     }
 
+    public IQueryable? Query
+    {
+        get;
+        set;
+    }
 
     public Dictionary<string, string> QueryOptions
     {

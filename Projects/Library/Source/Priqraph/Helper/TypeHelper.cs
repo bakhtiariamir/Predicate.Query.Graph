@@ -18,6 +18,7 @@ public static class TypeHelper
         not null when type == typeof(byte) || type == typeof(byte?) => DataType.ColumnDataType.Byte,
         not null when type == typeof(uint) || type == typeof(uint?) => DataType.ColumnDataType.UInt,
         not null when type == typeof(DateTime) || type == typeof(DateTime?)  => DataType.ColumnDataType.DateTime,
+        not null when type == typeof(Guid) || type == typeof(Guid?)  => DataType.ColumnDataType.Guid,
         not null when type.IsAssignableTo(typeof(IQueryableObject)) || type == typeof(IQueryableObject) => DataType.ColumnDataType.Object,
         _ => throw new NotImplementedException(),
     };

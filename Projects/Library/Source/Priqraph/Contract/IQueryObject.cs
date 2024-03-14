@@ -30,7 +30,7 @@ namespace Priqraph.Contract
             set;
         }
 
-        Query.Predicates.FilterPredicate<TObject>? FilterPredicates
+        FilterPredicate<TObject>? FilterPredicates
         {
             get;
             set;
@@ -55,6 +55,12 @@ namespace Priqraph.Contract
         }
 
         ICollection<Type> ObjectTypeStructures
+        {
+            get;
+            set;
+        }
+
+        IQueryable? Query
         {
             get;
             set;

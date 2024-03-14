@@ -94,7 +94,7 @@ namespace Priqraph.Helper
 
         public static string KeyName(Type type, ICacheInfoCollection infoCollection)
         {
-            var objectInfo = infoCollection.LastObjectInfo(type) ?? throw new ArgumentNullException(nameof(type), $"Objectinfo cannot be null for {type.Name}.");
+            var objectInfo = infoCollection.LastObjectInfo(type) ?? throw new ArgumentNullException(nameof(type), $"Object Info cannot be null for {type.Name}.");
             var key = objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException(nameof(IPropertyInfo.Key), $"key not found for {type.Name}.");
             return key.Name;
         }
@@ -106,13 +106,13 @@ namespace Priqraph.Helper
             var info = property.PropertyAttribute<BasePropertyAttribute>();
             if (info != null)
             {
-                properties.Add(new Info.PropertyInfo(info.Key, info.Name, info.IsUnique, info.ReadOnly, info.NotMapped, info.DataType, property.PropertyType, info.Required, info.Title, info.ErrorMessage, info.DefaultValue, isObject, info.MaxLength == 0 ? null : info.MaxLength, info.MinLength == 0 ? null : info.MinLength, info.UniqueFieldGroup));
+                properties.Add(new Info.PropertyInfo(info.Key, info.Name, info.IsUnique, info.ReadOnly, info.NotMapped, info.DataType, property.PropertyType, info.Required, info.Title, info.DefaultValue, isObject, info.MaxLength == 0 ? null : info.MaxLength, info.MinLength == 0 ? null : info.MinLength, info.UniqueFieldGroup, info.RegexValidator, info.RegexError));
             }
             else
             {
                 var required = property.PropertyAttribute<RequiredAttribute>() != null || property.PropertyType.IsNullable();
                 var columnDataType = property.PropertyType.ColumnDataType();
-                properties.Add(new Info.PropertyInfo(property.Name == "Id", property.Name, false, false, false, columnDataType, property.PropertyType, required, property.Name, null, null, isObject));
+                properties.Add(new Info.PropertyInfo(property.Name == "Id", property.Name, false, false, false, columnDataType, property.PropertyType, required, property.Name, null, isObject));
             }
         }
     }

@@ -9,7 +9,7 @@ public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> wh
     {
     }
 
-    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, errorMessage, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup)
+    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError)
     {
     }
 
@@ -84,13 +84,19 @@ public class PropertyInfo : IPropertyInfo
         set;
     }
 
-    public IDictionary<string, string>? ErrorMessage
+    public object? DefaultValue
     {
         get;
         set;
     }
 
-    public object? DefaultValue
+    public string? RegexValidator
+    {
+        get;
+        set;
+    }
+
+    public string? RegexError
     {
         get;
         set;
@@ -111,7 +117,7 @@ public class PropertyInfo : IPropertyInfo
     {
     }
 
-    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, IDictionary<string, string>? errorMessage = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFields = null)
+    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null)
     {
         Key = key;
         Name = name;
@@ -121,14 +127,15 @@ public class PropertyInfo : IPropertyInfo
         Title = title ?? Name;
         DataType = dataType;
         Required = required;
-        ErrorMessage = errorMessage;
         DefaultValue = defaultValue;
         Type = type;
         IsObject = isObject;
         MaxLength = maxLength;
         MinLength = minLength;
-        UniqueFieldGroup = uniqueFields;
+        UniqueFieldGroup = uniqueFieldGroup;
+        RegexValidator = regexValidator;
+        RegexError = regexError;
     }
 
-    public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, ErrorMessage, DefaultValue, IsObject, MaxLength, MinLength);
+    public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, DefaultValue, IsObject, MaxLength, MinLength, UniqueFieldGroup, RegexValidator, RegexError);
 }

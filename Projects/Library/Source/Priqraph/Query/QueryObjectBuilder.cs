@@ -23,6 +23,13 @@ public class QueryObjectBuilder<TObject> : IQueryObjectBuilder<TObject> where TO
 
     public void Init(QueryOperationType operationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => _queryObject = QueryObject<TObject>.Init(operationType, queryProvider, objectTypeStructures);
 
+    public IQueryObjectBuilder<TObject> SetQuery(IQueryable query)
+    {
+        if (_queryObject == null) throw new ArgumentNullException(); //todo
+        _queryObject.Query = query;
+        return this;
+    }
+
     public IQueryObjectBuilder<TObject> SetCommand(CommandPredicateBuilder<TObject> objectCommandPredicateBuilder)
     {
         if (_queryObject == null) throw new ArgumentNullException(); //todo

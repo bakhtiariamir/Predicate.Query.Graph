@@ -12,6 +12,11 @@ public interface ISqlServerQuery<TObject> : IQuery<TObject, DatabaseQueryResult>
 
 }
 
+public interface ISqlServerQueryableQuery<TObject> : IQuery<TObject, DatabaseQueryResult> where TObject : IQueryableObject
+{
+
+}
+
 public interface ISqlServerQueryBuilder<TObject> : IQueryBuilder<TObject, DatabaseQueryResult> where TObject : IQueryableObject
 {
 }

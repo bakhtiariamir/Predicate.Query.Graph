@@ -43,13 +43,7 @@ public abstract class BasePropertyAttribute : Attribute
     {
         get;
     }
-
-
-    public Dictionary<string, string>? ErrorMessage
-    {
-        get;
-    }
-
+    
     public object? DefaultValue
     {
         get;
@@ -70,7 +64,19 @@ public abstract class BasePropertyAttribute : Attribute
         get;
     }
 
-    protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, string? uniqueFieldGroup = null, params string[]? errorMessage)
+    public string? RegexValidator
+    {
+        get;
+        set;
+    }
+
+    public string? RegexError
+    {
+        get;
+        set;
+    }
+
+    protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, params string[]? errorMessage)
     {
         Key = key;
         Name = name;
@@ -85,9 +91,7 @@ public abstract class BasePropertyAttribute : Attribute
         MaxLength = maxLength;
         MinLength = minLength;
         if (errorMessage == null) return;
-        
-        ErrorMessage = new Dictionary<string, string>();
-        for (var i = 0; i < errorMessage.Length; i += 2)
-            ErrorMessage.Add(errorMessage[i], errorMessage[i + 1]);
+        RegexValidator = regexValidator;
+        RegexError = regexError;
     }
 }
