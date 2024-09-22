@@ -27,6 +27,9 @@
     <None Remove="Manager\Result\Database\**" />
     <None Remove="Parser\**" />
     <None Remove="Query\NewStructure\**" />
+    <Compile Remove="Priqraph.Test\**" />
+    <EmbeddedResource Remove="Priqraph.Test\**" />
+    <None Remove="Priqraph.Test\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,11 +13,11 @@ using Priqraph.Sql.Generator.Visitors;
 
 namespace Priqraph.Sql.Manager;
 
-internal class SqlServerQueryableQuery<TObject> : DatabaseQueryableQuery<TObject>, ISqlServerQuery<TObject> where TObject : IQueryableObject
+internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryObject<TObject>, ISqlServerQueryObject<TObject> where TObject : IQueryableObject
 {
     private IDatabaseObjectInfo _objectInfo;
 
-    public SqlServerQueryableQuery(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
+    public SqlServerQueryableQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryResult.DatabaseObjectInfo = _objectInfo;
@@ -69,9 +69,9 @@ internal class SqlServerQueryableQuery<TObject> : DatabaseQueryableQuery<TObject
 
     //}
 
-    protected override void GenerateSelect(IQueryObject<TObject> query)
+    protected override void GenerateSelect(IQuery<TObject> query)
     {
-	    var expression = query.Query?.Expression ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+	    var expression = query.Queryable?.Expression ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
 	    var parameter = Expression.Parameter(typeof(TObject));
 	    var visitor = new QueryableVisitor<TObject>(parameter, Context.CacheInfoCollection, _objectInfo);
 	    visitor.Generate(expression);

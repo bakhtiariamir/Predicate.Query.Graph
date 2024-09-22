@@ -1,22 +1,69 @@
-﻿using Priqraph.Builder.Database;
+﻿using Priqraph.DataType;
+using Priqraph.Query.Predicates;
 
-namespace Priqraph.Contract;
-
-public interface IQuery<TObject, out TQueryResult> where TObject : IQueryableObject
+namespace Priqraph.Contract
 {
-    TQueryResult Build(IQueryObject<TObject> query);
-}
+    public interface IQuery<TObject> where TObject : IQueryableObject
+    {
+        QueryOperationType QueryOperationType
+        {
+            get;
+            set;
+        }
 
-public interface ISqlServerQuery<TObject> : IQuery<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
 
-}
+        CommandPredicate<TObject>? CommandPredicates
+        {
+            get;
+            set;
+        }
 
-public interface ISqlServerQueryableQuery<TObject> : IQuery<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
+        ICollection<ColumnPredicate<TObject>>? ColumnPredicates
+        {
+            get;
+            set;
+        }
 
-}
+        ICollection<JoinPredicate>? JoinPredicates
+        {
+            get;
+            set;
+        }
 
-public interface ISqlServerQueryBuilder<TObject> : IQueryBuilder<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
+        FilterPredicate<TObject>? FilterPredicates
+        {
+            get;
+            set;
+        }
+
+        ICollection<SortPredicate<TObject>>? SortPredicates
+        {
+            get;
+            set;
+        }
+
+        PagePredicate? PagePredicate
+        {
+            get;
+            set;
+        }
+
+        Dictionary<string, string> QueryOptions
+        {
+            get;
+            set;
+        }
+
+        ICollection<Type> ObjectTypeStructures
+        {
+            get;
+            set;
+        }
+
+        IQueryable? Queryable
+        {
+            get;
+            set;
+        }
+    }
 }

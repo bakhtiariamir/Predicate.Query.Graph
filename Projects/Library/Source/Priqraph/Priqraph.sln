@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Priqraph.Console", "..\Priq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Priqraph.Sql", "..\Priqraph.Sql\Priqraph.Sql\Priqraph.Sql.csproj", "{1F3333D3-CC47-4663-9718-76FFA5D7A616}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Priqraph.Test", "Priqraph.Test\Priqraph.Test.csproj", "{3D47659F-7E01-4B93-BE23-D1737E86A4D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{1F3333D3-CC47-4663-9718-76FFA5D7A616}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F3333D3-CC47-4663-9718-76FFA5D7A616}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F3333D3-CC47-4663-9718-76FFA5D7A616}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D47659F-7E01-4B93-BE23-D1737E86A4D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D47659F-7E01-4B93-BE23-D1737E86A4D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D47659F-7E01-4B93-BE23-D1737E86A4D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D47659F-7E01-4B93-BE23-D1737E86A4D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{0C5486F3-AC8B-4D2B-8831-F9F515FEF768} = {16B4BE4B-9039-4A0A-84E3-5F9249542969}
 		{AB302B30-43B2-40C4-A605-0C5AF0B6AC65} = {3EE933BF-FF50-46CE-BBE4-E5BC0429F44E}
 		{1F3333D3-CC47-4663-9718-76FFA5D7A616} = {16B4BE4B-9039-4A0A-84E3-5F9249542969}
+		{3D47659F-7E01-4B93-BE23-D1737E86A4D4} = {3EE933BF-FF50-46CE-BBE4-E5BC0429F44E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {597761F2-C1F2-476A-A47E-0690E990D6C6}

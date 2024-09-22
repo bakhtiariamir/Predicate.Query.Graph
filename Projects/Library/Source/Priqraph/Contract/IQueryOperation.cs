@@ -2,5 +2,5 @@
 
 public interface IQueryOperation<TObject, TResult> where TObject : IQueryableObject
 {
-    TResult Run(IQueryObject<TObject> queryObject, IQuery<TObject, TResult> query);
+    TResult Run(IQuery<TObject> query, IQueryObject<TObject, TResult> queryObject);
 }

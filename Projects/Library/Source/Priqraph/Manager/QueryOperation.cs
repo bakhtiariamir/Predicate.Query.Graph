@@ -10,31 +10,31 @@ internal class QueryOperation<TObject, TResult> : IQueryOperation<TObject, TResu
 
     private bool ValidateQuery() => true;
 
-    public virtual TResult Run(IQueryObject<TObject> queryObject, IQuery<TObject, TResult> query)
+    public virtual TResult Run(IQuery<TObject> query, IQueryObject<TObject, TResult> queryObject)
     {
-        if (queryObject is null)
-            throw new ArgumentNullException(nameof(queryObject), $"{nameof(queryObject)} can not be null.");
+        if (query is null)
+            throw new ArgumentNullException(nameof(query), $"{nameof(query)} can not be null.");
 
-        queryObject = QueryObjectReducer<TObject>.Init(queryObject).Reduce().Return();
+        query = QueryReducer<TObject>.Init(query).Reduce().Return();
 
         var validateQuery = Validate();
         if (validateQuery)
         {
-            return query.Build(queryObject);
+            return queryObject.Build(query);
         }
 
         throw new System.Exception("database query is not valid"); //ToDo
     }
 
-    public virtual TResult RunQuery(IQueryObject<TObject> queryObject, IQuery<TObject, TResult> query)
+    public virtual TResult RunQuery(IQuery<TObject> query, IQueryObject<TObject, TResult> queryObject)
     {
-        if (queryObject is null)
-            throw new ArgumentNullException(nameof(queryObject), $"{nameof(queryObject)} can not be null.");
+        if (query is null)
+            throw new ArgumentNullException(nameof(query), $"{nameof(query)} can not be null.");
 
         var validateQuery = ValidateQuery();
         if (validateQuery)
         {
-            return query.Build(queryObject);
+            return queryObject.Build(query);
         }
 
         throw new System.Exception("database query is not valid"); //ToDo

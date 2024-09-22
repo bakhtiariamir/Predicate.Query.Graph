@@ -6,7 +6,7 @@ public interface IBuilder<TObject, out TMiddleware> where TObject : IQueryableOb
         get;
     }
 
-    IQueryObject<TObject> Build();
+    IQuery<TObject> Build();
 }
 
 //public interface ICommandBuilder<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject

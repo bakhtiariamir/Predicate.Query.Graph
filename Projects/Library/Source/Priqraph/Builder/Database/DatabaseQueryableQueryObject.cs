@@ -3,7 +3,7 @@ using Priqraph.DataType;
 
 namespace Priqraph.Builder.Database;
 
-public abstract class DatabaseQueryableQuery<TObject> : Query<TObject, DatabaseQueryResult> where TObject : IQueryableObject
+public abstract class DatabaseQueryableQueryObject<TObject> : QueryObject<TObject, DatabaseQueryResult> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -20,14 +20,14 @@ public abstract class DatabaseQueryableQuery<TObject> : Query<TObject, DatabaseQ
         get;
     }
 
-    protected DatabaseQueryableQuery(ICacheInfoCollection cacheInfoCollection)
+    protected DatabaseQueryableQueryObject(ICacheInfoCollection cacheInfoCollection)
     {
         QueryResult = new();
         Context = new DatabaseQueryContext(cacheInfoCollection);
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override DatabaseQueryResult Build(IQueryObject<TObject> query)
+    public override DatabaseQueryResult Build(IQuery<TObject> query)
     {
         switch (query.QueryOperationType)
         {
@@ -57,7 +57,7 @@ public abstract class DatabaseQueryableQuery<TObject> : Query<TObject, DatabaseQ
 
     //protected abstract void GenerateDelete(IQueryObject<TObject> query);
 
-    protected abstract void GenerateSelect(IQueryObject<TObject> query);
+    protected abstract void GenerateSelect(IQuery<TObject> query);
 
 //    protected abstract void GenerateCount(IQueryObject<TObject> query);
 }

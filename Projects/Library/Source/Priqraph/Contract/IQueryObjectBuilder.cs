@@ -18,5 +18,5 @@ public interface IQueryObjectBuilder<TObject> where TObject : IQueryableObject
     IQueryObjectBuilder<TObject> SetPaging(PagePredicateBuilder paging);
 
     IQueryObjectBuilder<TObject> SetQuery(IQueryable query);
-    IQueryObject<TObject> Generate();
+    IQuery<TObject> Generate();
 }

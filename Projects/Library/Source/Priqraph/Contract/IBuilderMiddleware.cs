@@ -8,7 +8,7 @@ public interface IBuilderMiddleware<TObject> where TObject : IQueryableObject
 
     IBuilderMiddleware<TObject> RegisterHandler<THandler>(Func<THandler> handlerFunc) where THandler : IQueryHandler<TObject>;
 
-    IQueryObject<TObject> Build();
+    IQuery<TObject> Build();
 }
 
 public interface IAddMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject

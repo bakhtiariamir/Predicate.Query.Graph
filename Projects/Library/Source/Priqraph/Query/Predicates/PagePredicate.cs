@@ -4,16 +4,11 @@ using System.Linq.Expressions;
 
 namespace Priqraph.Query.Predicates
 {
-    public class PagePredicate
+    public class PagePredicate(Expression<Func<PageClause>> predicate)
     {
-        public PagePredicate(Expression<Func<PageClause>> predicate)
-        {
-            Predicate = predicate;
-        }
-
         public Expression<Func<PageClause>> Predicate
         {
             get;
-        }
+        } = predicate;
     }
 }

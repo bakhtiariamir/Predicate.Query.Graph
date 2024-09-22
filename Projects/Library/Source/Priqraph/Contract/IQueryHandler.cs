@@ -23,7 +23,7 @@ public interface IQueryHandler<TObject> where TObject : IQueryableObject
         set;
     }
 
-    void Handle(IQueryObject<TObject> queryObject);
+    void Handle(IQuery<TObject> query);
 
     IQueryHandler<TObject> SetNext(Func<IQueryHandler<TObject>> nextFunc);
 }

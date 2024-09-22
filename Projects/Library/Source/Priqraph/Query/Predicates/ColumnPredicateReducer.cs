@@ -4,24 +4,24 @@ using System.Linq.Expressions;
 
 namespace Priqraph.Query.Predicates;
 
-public class ColumnPredicateReducer<TObject> : PredicateReducer<TObject> where TObject : IQueryableObject
+internal class ColumnPredicateReducer<TObject> : PredicateReducer<TObject> where TObject : IQueryableObject
 {
-    public override IQueryObject<TObject> Reduce(IQueryObject<TObject> query, ReduceType type)
+    public override IQuery<TObject> Reduce(IQuery<TObject> query, ReduceType type)
     {
         return base.Visit(query, type);
     }
 
-    protected override IQueryObject<TObject> Generate(IQueryObject<TObject> query)
+    protected override IQuery<TObject> Generate(IQuery<TObject> query)
     {
         return query;
     }
 
-    protected override IQueryObject<TObject> Decrease(IQueryObject<TObject> query)
+    protected override IQuery<TObject> Decrease(IQuery<TObject> query)
     {
         return query;
     }
 
-    protected override IQueryObject<TObject> Merge(IQueryObject<TObject> query)
+    protected override IQuery<TObject> Merge(IQuery<TObject> query)
     {
         if (query.ColumnPredicates == null || query.ColumnPredicates.Count == 1) return query;
         var expressionParameters = query.ColumnPredicates.SelectMany(item => item.Expression?.Parameters ?? Enumerable.Empty<ParameterExpression>()).FirstOrDefault() ?? Expression.Parameter(typeof(TObject));

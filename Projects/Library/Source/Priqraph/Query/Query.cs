@@ -5,7 +5,7 @@ using Priqraph.Setup;
 
 namespace Priqraph.Query;
 
-public class QueryObject<TObject> : IQueryObject<TObject> where TObject : IQueryableObject
+internal class Query<TObject> : IQuery<TObject> where TObject : IQueryableObject
 {
     public QueryOperationType QueryOperationType
     {
@@ -55,7 +55,7 @@ public class QueryObject<TObject> : IQueryObject<TObject> where TObject : IQuery
         set;
     }
 
-    public IQueryable? Query
+    public IQueryable? Queryable
     {
         get;
         set;
@@ -73,21 +73,21 @@ public class QueryObject<TObject> : IQueryObject<TObject> where TObject : IQuery
         set;
     } = new List<Type>();
 
-    private QueryObject(QueryOperationType queryOperationType)
+    private Query(QueryOperationType queryOperationType)
     {
         QueryOperationType = queryOperationType;
         ObjectTypeStructures.Add(typeof(Type));
     }
 
-    private QueryObject(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null)
+    private Query(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null)
     {
         QueryProvider = queryProvider;
         QueryOperationType = queryOperationType;
         ObjectTypeStructures = objectTypeStructures?.ToList() ?? new List<Type>();
         //FIXME - What is this
-        // if (objectTypeStructures is not null && !objectTypeStructures.Contains(typeof(Type)))
-        //     ObjectTypeStructures.Add(typeof(Type));
+        if (objectTypeStructures is not null && !objectTypeStructures.Contains(typeof(Type)))
+            ObjectTypeStructures.Add(typeof(Type));
     }
 
-    public static QueryObject<TObject> Init(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => new(queryOperationType, queryProvider, objectTypeStructures);
+    public static Query<TObject> Init(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => new(queryOperationType, queryProvider, objectTypeStructures);
 }

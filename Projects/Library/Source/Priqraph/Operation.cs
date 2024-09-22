@@ -12,14 +12,14 @@ public static class Operation
         where TResult : IQueryResult =>
         new QueryOperation<TObject, TResult>();
 
-    public static IQueryObjectBuilder<TObject> SetupQueryBuilder<TObject>(this QueryProvider provider, ICacheInfoCollection cacheInfoCollection) where TObject : IQueryableObject => new QueryObjectBuilder<TObject>(provider);
+    private static IQueryObjectBuilder<TObject> SetupQueryBuilder<TObject>() where TObject : IQueryableObject => new QueryBuilder<TObject>();
 
-    public static TResult Build<TObject, TResult>(this IQueryable query, QueryProvider provider, ICacheInfoCollection cacheInfoCollection, IQuery<TObject, TResult> queryProvider) where TObject : IQueryableObject
+    public static TResult Build<TObject, TResult>(this IQueryable query, QueryProvider provider, ICacheInfoCollection cacheInfoCollection, IQueryObject<TObject, TResult> queryObjectProvider) where TObject : IQueryableObject
         where TResult : IQueryResult
     {
-        var queryBuilder = provider.SetupQueryBuilder<TObject>(cacheInfoCollection);
-        queryBuilder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, null);
+        var queryBuilder = SetupQueryBuilder<TObject>();
+        queryBuilder.Init(QueryOperationType.GetData, provider, null);
         queryBuilder.SetQuery(query);
-        return new QueryOperation<TObject, TResult>().RunQuery(queryBuilder.Generate(), queryProvider);
+        return new QueryOperation<TObject, TResult>().RunQuery(queryBuilder.Generate(), queryObjectProvider);
     }
 }

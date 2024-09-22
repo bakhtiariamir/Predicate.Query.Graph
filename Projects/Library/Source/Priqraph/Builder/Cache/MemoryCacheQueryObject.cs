@@ -9,16 +9,16 @@ using System.Linq.Expressions;
 
 namespace Priqraph.Builder.Cache;
 
-internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : IQueryableObject
+internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where TObject : IQueryableObject
 {
     private IObjectInfo<IPropertyInfo> _objectInfo;
-    public MemoryCacheQuery(IQueryContext context) : base(context)
+    public MemoryCacheQueryObject(IQueryContext context) : base(context)
     {
         _objectInfo = Context.CacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo); //todo
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override Task GenerateAdd(IQueryObject<TObject> query)
+    protected override Task GenerateAdd(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -26,7 +26,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateUpdate(IQueryObject<TObject> query)
+    protected override Task GenerateUpdate(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -34,7 +34,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateRemove(IQueryObject<TObject> query)
+    protected override Task GenerateRemove(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -42,7 +42,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateWhere(IQueryObject<TObject> query)
+    protected override Task GenerateWhere(IQuery<TObject> query)
     {
         var expression = query.FilterPredicates?.Expression;
         if (expression == null)
@@ -60,7 +60,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GeneratePaging(IQueryObject<TObject> query)
+    protected override Task GeneratePaging(IQuery<TObject> query)
     {
         var expression = query.PagePredicate?.Predicate;
         if (expression == null)
@@ -78,7 +78,7 @@ internal class MemoryCacheQuery<TObject> : CacheQuery<TObject> where TObject : I
         return Task.CompletedTask;
     }
 
-    protected override Task GenerateOrderBy(IQueryObject<TObject> query)
+    protected override Task GenerateOrderBy(IQuery<TObject> query)
     {
         var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)

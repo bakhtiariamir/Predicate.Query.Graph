@@ -4,22 +4,22 @@ using Priqraph.Query.Predicates;
 
 namespace Priqraph.Query
 {
-    public class QueryObjectReducer<TObject> where TObject : IQueryableObject
+    internal  class QueryReducer<TObject> where TObject : IQueryableObject
     {
-        private ColumnPredicateReducer<TObject> _objectSelecting;
-        private FilterPredicateReducer<TObject> _objectFiltering;
-        private IQueryObject<TObject> _query;
+        private readonly ColumnPredicateReducer<TObject> _objectSelecting;
+        private readonly FilterPredicateReducer<TObject> _objectFiltering;
+        private IQuery<TObject> _query;
 
-        private QueryObjectReducer(IQueryObject<TObject> query)
+        private QueryReducer(IQuery<TObject> query)
         {
             _objectSelecting = new ColumnPredicateReducer<TObject>();
             _objectFiltering = new FilterPredicateReducer<TObject>();
             _query = query;
         }
 
-        public static QueryObjectReducer<TObject> Init(IQueryObject<TObject> query) => new(query);
+        public static QueryReducer<TObject> Init(IQuery<TObject> query) => new(query);
 
-        public QueryObjectReducer<TObject> Reduce()
+        public QueryReducer<TObject> Reduce()
         {
             Enum.GetValues(typeof(ReduceType)).Cast<ReduceType>().ToList().ForEach(type =>
             {
@@ -29,6 +29,6 @@ namespace Priqraph.Query
             return this;
         }
 
-        public IQueryObject<TObject> Return() => _query;
+        public IQuery<TObject> Return() => _query;
     }
 }

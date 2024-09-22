@@ -3,7 +3,7 @@ using Priqraph.DataType;
 
 namespace Priqraph.Builder.Cache;
 
-internal abstract class CacheQuery<TObject> : Query<TObject, CacheQueryResult> where TObject : IQueryableObject
+internal abstract class CacheQueryObject<TObject> : QueryObject<TObject, CacheQueryResult> where TObject : IQueryableObject
 {
     protected List<IColumnPropertyInfo> JoinColumns
     {
@@ -20,14 +20,14 @@ internal abstract class CacheQuery<TObject> : Query<TObject, CacheQueryResult> w
         get;
     }
 
-    protected CacheQuery(IQueryContext context)
+    protected CacheQueryObject(IQueryContext context)
     {
         QueryResult = new();
         Context = (CacheQueryContext)context;
         JoinColumns = new List<IColumnPropertyInfo>();
     }
 
-    public override CacheQueryResult Build(IQueryObject<TObject> query)
+    public override CacheQueryResult Build(IQuery<TObject> query)
     {
         switch (query.QueryOperationType)
         {
@@ -55,17 +55,17 @@ internal abstract class CacheQuery<TObject> : Query<TObject, CacheQueryResult> w
         return QueryResult;
     }
 
-    protected abstract Task GenerateAdd(IQueryObject<TObject> query);
+    protected abstract Task GenerateAdd(IQuery<TObject> query);
 
-    protected abstract Task GenerateUpdate(IQueryObject<TObject> query);
+    protected abstract Task GenerateUpdate(IQuery<TObject> query);
 
-    protected abstract Task GenerateRemove(IQueryObject<TObject> query);
+    protected abstract Task GenerateRemove(IQuery<TObject> query);
 
-    protected abstract Task GenerateWhere(IQueryObject<TObject> query);
+    protected abstract Task GenerateWhere(IQuery<TObject> query);
 
-    protected abstract Task GeneratePaging(IQueryObject<TObject> query);
+    protected abstract Task GeneratePaging(IQuery<TObject> query);
 
-    protected abstract Task GenerateOrderBy(IQueryObject<TObject> query);
+    protected abstract Task GenerateOrderBy(IQuery<TObject> query);
 
     //protected abstract Task GenerateJoinAsync();
 

@@ -3,25 +3,13 @@ using Priqraph.DataType;
 
 namespace Priqraph.Query.Predicates;
 
-public class FilterPredicateReducer<TObject> : PredicateReducer<TObject> where TObject : IQueryableObject
+internal class FilterPredicateReducer<TObject> : PredicateReducer<TObject> where TObject : IQueryableObject
 {
-    public override IQueryObject<TObject> Reduce(IQueryObject<TObject> query, ReduceType type)
-    {
-        return base.Visit(query, type);
-    }
+    public override IQuery<TObject> Reduce(IQuery<TObject> query, ReduceType type) => base.Visit(query, type);
 
-    protected override IQueryObject<TObject> Generate(IQueryObject<TObject> query)
-    {
-        return query;
-    }
+    protected override IQuery<TObject> Generate(IQuery<TObject> query) => query;
 
-    protected override IQueryObject<TObject> Decrease(IQueryObject<TObject> query)
-    {
-        return query;
-    }
+    protected override IQuery<TObject> Decrease(IQuery<TObject> query) => query;
 
-    protected override IQueryObject<TObject> Merge(IQueryObject<TObject> query)
-    {
-        return query;
-    }
+    protected override IQuery<TObject> Merge(IQuery<TObject> query) => query;
 }

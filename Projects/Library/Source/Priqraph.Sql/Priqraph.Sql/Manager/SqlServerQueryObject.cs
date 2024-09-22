@@ -14,17 +14,17 @@ using Priqraph.Sql.Generator.Visitors;
 
 namespace Priqraph.Sql.Manager;
 
-internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery<TObject> where TObject : IQueryableObject
+internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISqlServerQueryObject<TObject> where TObject : IQueryableObject
 {
     private IDatabaseObjectInfo _objectInfo;
 
-    public SqlServerQuery(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
+    public SqlServerQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override void GenerateInsert(IQueryObject<TObject> query)
+    protected override void GenerateInsert(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -35,8 +35,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
             if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for insert query in return record mode for {typeof(TObject).Name} can not be null.");
 
-            var builder = new QueryObjectBuilder<TObject>(QueryProvider.SqlServer);
-            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            var builder = new QueryBuilder<TObject>();
             builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
             var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = Build(selectQuery);
@@ -44,7 +43,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         }
     }
 
-    protected override void GenerateUpdate(IQueryObject<TObject> query)
+    protected override void GenerateUpdate(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -54,7 +53,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
             if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for update query in return record mode for {typeof(TObject).Name} can not be null.");
 
-            var builder = new QueryObjectBuilder<TObject>(QueryProvider.SqlServer);
+            var builder = new QueryBuilder<TObject>();
             builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
             var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = Build(selectQuery);
@@ -62,7 +61,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         }
     }
 
-    protected override void GenerateDelete(IQueryObject<TObject> query)
+    protected override void GenerateDelete(IQuery<TObject> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupported("a");
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
@@ -70,7 +69,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
     }
 
-    protected override void GenerateColumn(IQueryObject<TObject> query, bool getCount = false)
+    protected override void GenerateColumn(IQuery<TObject> query, bool getCount = false)
     {
         if (!getCount)
         {
@@ -115,7 +114,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
     }
 
-    protected override void GenerateWhere(IQueryObject<TObject> query)
+    protected override void GenerateWhere(IQuery<TObject> query)
     {
         if (query.FilterPredicates?.ReturnType != ReturnType.None)
         {
@@ -163,7 +162,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
 
     }
 
-    protected override void GeneratePaging(IQueryObject<TObject> query)
+    protected override void GeneratePaging(IQuery<TObject> query)
     {
         var expression = query.PagePredicate?.Predicate;
         if (expression != null)
@@ -179,7 +178,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         }
     }
 
-    protected override void GenerateOrderBy(IQueryObject<TObject> query)
+    protected override void GenerateOrderBy(IQuery<TObject> query)
     {
         var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)
@@ -203,7 +202,7 @@ internal class SqlServerQuery<TObject> : DatabaseQuery<TObject>, ISqlServerQuery
         }
     }
 
-    protected override void GenerateJoin(IQueryObject<TObject> query)
+    protected override void GenerateJoin(IQuery<TObject> query)
     {
         var joins = new List<Tuple<IColumnPropertyInfo, int>>();
 
