@@ -29,7 +29,7 @@ public class ColumnQueryFragment : DatabaseColumnQueryFragment
         {
             case { WindowPartitionColumns: { Length: > 0 } strings }:
                 {
-                    var partitionKeys = strings.Select(partitionColumn => SetColumnSelector(Parameter!.FirstOrDefault(item => item.ColumnName == partitionColumn) ?? throw new NotFound(partitionColumn, ExceptionCode.DatabaseQueryGroupByGenerator)));
+                    var partitionKeys = strings.Select(partitionColumn => SetColumnSelector(Parameter!.FirstOrDefault(item => item.ColumnName == partitionColumn) ?? throw new NotFoundException(partitionColumn, ExceptionCode.DatabaseQueryGroupByGenerator)));
                     return $"OVER({string.Join(", ", partitionKeys)})";
                 }
             default:

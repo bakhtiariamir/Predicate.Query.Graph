@@ -20,7 +20,7 @@ public class JoinQueryFragment : DatabaseJoinQueryFragment
             JoinType.Left => "LEFT JOIN",
             JoinType.Right => "RIGHT JOIN",
             JoinType.Outer => "OUTER JOIN",
-            _ => throw new NotSupported(joinProperty.JoinType.ToString(), ExceptionCode.DatabaseQueryJoiningGenerator)
+            _ => throw new NotSupportedOperationException(joinProperty.JoinType.ToString(), ExceptionCode.DatabaseQueryJoiningGenerator)
         };
         //ToDo : Need PersonObjectInfo For Get id
         var joinItem = joinProperty.JoinObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("JoinProperty");

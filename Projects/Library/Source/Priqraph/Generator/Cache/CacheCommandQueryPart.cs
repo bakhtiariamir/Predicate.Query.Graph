@@ -67,7 +67,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         //}
 
         if (cacheCommandPart == null)
-            throw new NotSupported("asd"); //todo
+            throw new NotSupportedOperationException("asd"); //todo
 
         if (operationType.HasValue)
             cacheCommandPart.SetOptions(operationType.Value);
@@ -91,7 +91,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
                 SetDeleteQuery();
                 break;
             case QueryOperationType.GetData:
-            default: throw new NotSupported(""); // todo
+            default: throw new NotSupportedOperationException(""); // todo
         }
     }
 

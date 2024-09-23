@@ -9,7 +9,7 @@ public static class DatabaseQueryPartHelper
 {
     public static IEnumerable<SqlParameter> SelectParameters(this DatabaseQueryResult queryParts)
     {
-        if (queryParts == null) throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
+        if (queryParts == null) throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryGenerator);
 
         var sqlParameters = FilterQueryFragment.GetParameters(queryParts.FilterFragment?.Parameter, queryParts.FilterFragment?.QuerySetting).ToArray();
 

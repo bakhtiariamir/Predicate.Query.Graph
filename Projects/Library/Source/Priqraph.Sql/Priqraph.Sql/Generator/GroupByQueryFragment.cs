@@ -20,7 +20,7 @@ public class GroupByQueryFragment : DatabaseGroupByQueryFragment
     private string GetHavingText(FilterProperty property)
 
     {
-        if (property.ColumnPropertyInfo == null) throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
+        if (property.ColumnPropertyInfo == null) throw new NotFoundException(ExceptionCode.DatabaseQueryGroupByGenerator);
         return property.Operator switch
         {
             ConditionOperatorType.NotEqual => $"{GetHavingColumn(property.ColumnPropertyInfo)} <> {SetParameterName(property.ColumnPropertyInfo, property.Index)}",
@@ -30,7 +30,7 @@ public class GroupByQueryFragment : DatabaseGroupByQueryFragment
             ConditionOperatorType.LessThanEqual => $"{GetHavingColumn(property.ColumnPropertyInfo)} <= {SetParameterName(property.ColumnPropertyInfo, property.Index)}",
             //I think we should define parameter name in this item
             ConditionOperatorType.Set => $"",
-            ConditionOperatorType.Between or _ => throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator)
+            ConditionOperatorType.Between or _ => throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryFilteringGenerator)
         };
     }
 

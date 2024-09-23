@@ -22,4 +22,9 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Priqraph.Sql\Priqraph.Sql\Priqraph.Sql.csproj" />
+      <ProjectReference Include="..\Priqraph.csproj" />
+    </ItemGroup>
+
 </Project>

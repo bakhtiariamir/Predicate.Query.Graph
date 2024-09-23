@@ -4,12 +4,12 @@ using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 
 namespace Priqraph.Sql.Generator.Visitors;
-public class PageVisitor : DatabaseVisitor<PageQueryFragment>
+public class PageVisitor(
+    ICacheInfoCollection cacheObjectCollection,
+    IDatabaseObjectInfo objectInfo,
+    ParameterExpression? parameterExpression)
+    : DatabaseVisitor<PageQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
 {
-    public PageVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
-    {
-    }
-
     protected override PageQueryFragment VisitMember(MemberExpression expression) => PageQueryFragment.Create(new PageClause(0, 10));
 
     protected override PageQueryFragment VisitNew(NewExpression expression)

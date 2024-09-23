@@ -9,9 +9,3 @@ public enum AggregateFunctionType
     Max = 4,
     Min = 5
 }
-
-public enum RankingFunctionType
-{
-    None = 0,
-    RowNumber = 1,
-}

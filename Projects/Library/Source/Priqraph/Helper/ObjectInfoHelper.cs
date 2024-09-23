@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Priqraph.Helper
 {
-    public static class ObjectInfoHelper
+    internal static class ObjectInfoHelper
     {
-        public static IObjectInfo<IPropertyInfo>? LastObjectInfo(this ICacheInfoCollection cacheInfoCollection, Type type)
+        private static IObjectInfo<IPropertyInfo>? LastObjectInfo(this ICacheInfoCollection cacheInfoCollection, Type type)
         {
             if (!cacheInfoCollection.TryGetFirst(type.Name, out var objectInfo))
             {
@@ -31,7 +31,7 @@ namespace Priqraph.Helper
             return objectInfo != null;
         }
 
-        public static IObjectInfo<IPropertyInfo>? LastObjectInfo<TObject>(this ICacheInfoCollection cacheInfoCollection) where TObject : IQueryableObject
+        private static IObjectInfo<IPropertyInfo>? LastObjectInfo<TObject>(this ICacheInfoCollection cacheInfoCollection) where TObject : IQueryableObject
         {
             var type = typeof(TObject);
             if (!cacheInfoCollection.TryGetFirst(type.Name, out var objectInfo))
@@ -50,13 +50,7 @@ namespace Priqraph.Helper
             return default;
         }
 
-        public static bool TryGetLastObjectInfo<TObject>(this ICacheInfoCollection cacheInfoCollection, out IObjectInfo<IPropertyInfo>? objectInfo) where TObject : IQueryableObject
-        {
-            objectInfo = cacheInfoCollection.LastObjectInfo<TObject>();
-            return objectInfo != null;
-        }
-
-        public static IObjectInfo<IPropertyInfo> ObjectInfo(this Type type)
+        private static IObjectInfo<IPropertyInfo> ObjectInfo(this Type type)
         {
             var properties = new List<IPropertyInfo>();
             type.GetProperties().ToList().ForEach(property =>
@@ -75,13 +69,13 @@ namespace Priqraph.Helper
             return new ObjectInfo<IPropertyInfo>(properties, ObjectInfoType.Unknown, type);
         }
 
-        public static IEnumerable<IPropertyInfo> ObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type)
+        private static IEnumerable<IPropertyInfo> ObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type)
         {
             var objectInfo = cacheInfoCollection.LastObjectInfo(type) ?? throw new ArgumentNullException($"Object information is null for {type.Name}.");
             return objectInfo.PropertyInfos;
         }
 
-        public static IEnumerable<IPropertyInfo> ObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type, Func<IPropertyInfo, bool> predicate)
+        private static IEnumerable<IPropertyInfo> ObjectPropertiesInfo(this ICacheInfoCollection cacheInfoCollection, Type type, Func<IPropertyInfo, bool> predicate)
         {
             var objectInfo = cacheInfoCollection.LastObjectInfo(type) ?? throw new ArgumentNullException($"Object information is null for {type.Name}.");
             return objectInfo.PropertyInfos.Where(predicate);

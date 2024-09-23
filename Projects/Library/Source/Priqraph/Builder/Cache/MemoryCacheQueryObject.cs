@@ -14,13 +14,13 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
     private IObjectInfo<IPropertyInfo> _objectInfo;
     public MemoryCacheQueryObject(IQueryContext context) : base(context)
     {
-        _objectInfo = Context.CacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo); //todo
+        _objectInfo = Context.CacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFoundException(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo); //todo
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
     protected override Task GenerateAdd(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Add);
         return Task.CompletedTask;
@@ -28,7 +28,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
 
     protected override Task GenerateUpdate(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Edit);
         return Task.CompletedTask;
@@ -36,7 +36,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
 
     protected override Task GenerateRemove(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Remove);
         return Task.CompletedTask;
@@ -50,7 +50,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
 
         {
             if (expression.NodeType != ExpressionType.Lambda)
-                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                throw new NotSupportedOperationException(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var lambdaExpression = (LambdaExpression)expression;
             var whereClause = CacheWhereClauseQueryPart.Create(lambdaExpression);
@@ -67,10 +67,10 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
             return Task.CompletedTask;
 
         if (expression.NodeType != ExpressionType.Lambda)
-            throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+            throw new NotSupportedOperationException(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
         var lambdaExpression = (LambdaExpression)expression;
-        var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var body = lambdaExpression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
         var pagingVisitor = new PagingVisitor(Context.CacheInfoCollection, _objectInfo, null);
         QueryResult.Paging = pagingVisitor.Generate(body);
@@ -83,7 +83,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
         var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression != null)
         {
-            var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+            var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var sortingGenerator = new SortingVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             var columnSortPredicates = new List<CacheSortPredicate>();
@@ -92,11 +92,11 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
                 Expression? expression = null;
                 if (sortPredicate.Expression != null)
                 {
-                    expression = sortPredicate.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+                    expression = sortPredicate.Expression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
                 }
 
                 if (expression == null)
-                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 columnSortPredicates.Add(new CacheSortPredicate(sortPredicate.Expression, sortPredicate.DirectionType));
             });
@@ -119,7 +119,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
 
                 break;
             default:
-                throw new NotSupported(ExceptionCode.ApiQueryBuilder); //Too
+                throw new NotSupportedOperationException(ExceptionCode.ApiQueryBuilder); //Too
         }
         commandSqlVisitor.AddOption("returnRecord", commandPredicate.ReturnType);
         var commandObject = CacheCommandQueryPart.Merge(operationType, commandQueries.ToArray());
@@ -128,14 +128,14 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
 
     private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CacheCommandQueryPart> commandQueries, QueryOperationType operationType)
     {
-        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFound("as"); //todo
+        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFoundException("as"); //todo
 
         if (commandPredicate.ObjectPredicate != null)
         {
             foreach (var objectPredicate in commandPredicate.ObjectPredicate)
             {
                 if (objectPredicate.NodeType != ExpressionType.Lambda)
-                    throw new NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupportedOperationException(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectPredicate is LambdaExpression expression)
                 {
@@ -146,7 +146,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
                     commandQueries.Add(queryCommand);
                 }
                 else
-                    throw new NotSupported("asd"); //todo
+                    throw new NotSupportedOperationException("asd"); //todo
             }
         }
 
@@ -155,7 +155,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
             foreach (var objectsPredicate in commandPredicate.ObjectsPredicate)
             {
                 if (objectsPredicate.NodeType != ExpressionType.Lambda)
-                    throw new NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupportedOperationException(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectsPredicate is LambdaExpression expression)
                 {
@@ -163,7 +163,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
                     commandQueries.Add(queryCommand);
                 }
                 else
-                    throw new NotSupported("asd"); //todo
+                    throw new NotSupportedOperationException("asd"); //todo
             }
         }
     }

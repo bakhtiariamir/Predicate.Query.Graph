@@ -50,13 +50,7 @@ public static class DatabaseObjectInfoHelper
         return default;
     }
 
-    public static bool TryGetLastDatabaseObjectInfo<TObject>(this ICacheInfoCollection cacheInfoCollection, out IDatabaseObjectInfo? objectInfo) where TObject : IQueryableObject
-    {
-        objectInfo = cacheInfoCollection.LastDatabaseObjectInfo<TObject>();
-        return objectInfo != null;
-    }
-
-    public static IDatabaseObjectInfo DatabaseObjectInfo(this Type type)
+    private static IDatabaseObjectInfo DatabaseObjectInfo(this Type type)
     {
         var dataSetInfo = type.ClassAttribute<DataSetInfoAttribute>();
         var dataSet = "";
@@ -111,7 +105,7 @@ public static class DatabaseObjectInfoHelper
         var info = property.PropertyAttribute<ColumnInfoAttribute>();
         if (info != null)
         {
-            if (info.RankingFunctionType != RankingFunctionType.None && info.AggregateFunctionType != AggregateFunctionType.None) throw new NotSupported(dataSet, info.Name, ExceptionCode.DataSetInfoAttribute, "Property can not become aggregateWindowFunction and rankingWindowFunction");
+            if (info.RankingFunctionType != RankingFunctionType.None && info.AggregateFunctionType != AggregateFunctionType.None) throw new NotSupportedOperationException(dataSet, info.Name, ExceptionCode.DataSetInfoAttribute, "Property can not become aggregateWindowFunction and rankingWindowFunction");
 
             if (!info.NotMapped)
             {

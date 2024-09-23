@@ -28,19 +28,19 @@ public class SortVisitor : DatabaseVisitor<SortQueryFragment>
             return Visit(expression.Expression, expression.Member.Name);
         }
 
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         return SortQueryFragment.Create(fields.Select(item => new SortProperty(item)).ToArray());
     }
 
     protected override SortQueryFragment VisitParameter(ParameterExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         return SortQueryFragment.Create(fields.Select(item => new SortProperty(item)).ToArray());
     }
 
     protected override SortQueryFragment VisitNewArray(NewArrayExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         return SortQueryFragment.Create(fields.Select(item => new SortProperty(item)).ToArray());
     }
 }

@@ -9,6 +9,7 @@ using Priqraph.Query.Predicates;
 using Priqraph.Setup;
 using System.Linq.Expressions;
 using Priqraph.Builder.Database;
+using Priqraph.Info;
 using Priqraph.Sql.Generator;
 using Priqraph.Sql.Generator.Visitors;
 
@@ -16,18 +17,20 @@ namespace Priqraph.Sql.Manager;
 
 internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISqlServerQueryObject<TObject> where TObject : IQueryableObject
 {
-    private IDatabaseObjectInfo _objectInfo;
+    private readonly IDatabaseObjectInfo _objectInfo;
 
     public SqlServerQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
-        _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
+        _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ??
+                      throw new NotFoundException(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
+        
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
     protected override void GenerateInsert(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
-        var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
+        var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, default);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Add);
 
         if (QueryResult.CommandFragment != null && command.ReturnType == ReturnType.Record && QueryResult.CommandFragment.CommandParts.ContainsKey("result"))
@@ -45,7 +48,9 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     protected override void GenerateUpdate(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ??
+                      throw new ArgumentNullException(nameof(query.CommandPredicates), "Command Predicate cannot null");
+        
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Edit);
         if (QueryResult.CommandFragment != null && command.ReturnType == ReturnType.Record && QueryResult.CommandFragment.CommandParts.ContainsKey("result"))
@@ -63,7 +68,9 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     protected override void GenerateDelete(IQuery<TObject> query)
     {
-        var command = query.CommandPredicates ?? throw new NotSupported("a");
+        var command = query.CommandPredicates ??
+                      throw new ArgumentNullException(nameof(query.CommandPredicates), "Command Predicate cannot null");
+        
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
         GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Remove);
 
@@ -75,28 +82,34 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         {
             var fieldsExpression = query.ColumnPredicates?.ToList();
             ParameterExpression? parameterExpression = null;
-            if (fieldsExpression[0]?.Expression != null)
+            if (fieldsExpression?[0].Expression != null)
             {
-                parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+                parameterExpression = fieldsExpression[0].Expression?.Parameters[0] ??
+                                      throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter",
+                                          ExceptionCode.DatabaseQueryFilteringGenerator);
             }
-            else if (fieldsExpression[0]?.Expressions != null)
+            else if (fieldsExpression?[0].Expressions != null)
             {
-                parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+                parameterExpression = fieldsExpression[0].Expressions?.Parameters[0] ??
+                                      throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter",
+                                          ExceptionCode.DatabaseQueryFilteringGenerator);
             }
 
             var selectingGenerator = new ColumnVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             var columns = new List<ColumnQueryFragment>();
-            fieldsExpression.ToList().ForEach(field =>
+            fieldsExpression?.ToList().ForEach(field =>
             {
                 Expression? expression = null;
                 if (field.Expression != null)
-                    expression = field.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+                    expression = field.Expression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body",
+                        ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (field.Expressions != null)
-                    expression = field.Expressions.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+                    expression = field.Expressions.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body",
+                        ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (expression == null)
-                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 var property = selectingGenerator.Generate(expression);
                 columns.Add(property);
@@ -104,7 +117,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
             var queryColumns = ColumnQueryFragment.Merged(columns.Select(item => item));
             QueryResult.ColumnFragment = queryColumns;
-            JoinColumns.AddRange(queryColumns.Parameter);
+            JoinColumns.AddRange(queryColumns.Parameter ?? new List<IColumnPropertyInfo>());
         }
         else
         {
@@ -118,7 +131,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
     {
         if (query.FilterPredicates?.ReturnType != ReturnType.None)
         {
-            var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException("Primary key can not be null.");
+            var key = _objectInfo.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new ArgumentNullException(nameof(PropertyInfo.Key), "Primary key can not be null.");
             var clause = new FilterProperty(key, null, ConditionOperatorType.Equal);
             switch (query.FilterPredicates?.ReturnType)
             {
@@ -141,13 +154,14 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         }
 
         var expression = query.FilterPredicates?.Expression;
-        if (expression != null)
+        if (expression == null) return;
+        
         {
             if (expression.NodeType != ExpressionType.Lambda)
-                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                throw new NotSupportedOperationException(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
             var lambdaExpression = (LambdaExpression)expression;
-            var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+            var body = lambdaExpression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
             var parameterExpression = lambdaExpression.Parameters[0];
             var whereGenerator = new FilterVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
             var whereClause = whereGenerator.Generate(body);
@@ -155,8 +169,11 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
             whereClause.ReduceParameter();
             whereClause.SetText();
             QueryResult.FilterFragment = whereClause;
-            var joinColumns = FilterQueryFragment.GetColumnProperties(whereClause.Parameter);
-            JoinColumns.AddRange(joinColumns);
+            if (whereClause.Parameter != null)
+            {
+                var joinColumns = FilterQueryFragment.GetColumnProperties(whereClause.Parameter);
+                JoinColumns.AddRange(joinColumns);
+            }
         }
 
 
@@ -165,48 +182,46 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
     protected override void GeneratePaging(IQuery<TObject> query)
     {
         var expression = query.PagePredicate?.Predicate;
-        if (expression != null)
-        {
-            if (expression!.NodeType != ExpressionType.Lambda)
-                throw new NotSupported(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+        if (expression == null) return;
+        
+        if (expression.NodeType != ExpressionType.Lambda)
+            throw new NotSupportedOperationException(typeof(TObject).Name, expression.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
-            var lambdaExpression = (LambdaExpression)expression;
-            var body = lambdaExpression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var lambdaExpression = (LambdaExpression)expression;
+        var body = lambdaExpression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
-            var pagingVisitor = new PageVisitor(Context.CacheInfoCollection, _objectInfo, default);
-            QueryResult.PageFragment = pagingVisitor.Generate(body);
-        }
+        var pagingVisitor = new PageVisitor(Context.CacheInfoCollection, _objectInfo, default);
+        QueryResult.PageFragment = pagingVisitor.Generate(body);
     }
 
     protected override void GenerateOrderBy(IQuery<TObject> query)
     {
         var sortExpression = query.SortPredicates?.ToList();
-        if (sortExpression != null)
+        if (sortExpression == null) return;
+        
+        var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var sortingGenerator = new SortVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
+        sortExpression.ToList().ForEach(sortPredicate =>
         {
-            var parameterExpression = sortExpression[0].Expression?.Parameters[0] ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
-            var sortingGenerator = new SortVisitor(Context.CacheInfoCollection, _objectInfo, parameterExpression);
-            sortExpression.ToList().ForEach(sortPredicate =>
+            Expression? expression = default;
+            if (sortPredicate.Expression != null)
             {
-                Expression? expression = null;
-                if (sortPredicate.Expression != null)
-                {
-                    expression = sortPredicate.Expression.Body ?? throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
-                }
+                expression = sortPredicate.Expression.Body ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+            }
 
-                if (expression == null)
-                    throw new NotFound(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
+            if (expression == null)
+                throw new NotFoundException(typeof(TObject).Name, "Expression.Body", ExceptionCode.DatabaseQueryFilteringGenerator);
 
-                var orderByProperty = sortingGenerator.Generate(expression);
-                QueryResult.SortFragment = QueryResult.SortFragment == null ? orderByProperty : SortQueryFragment.Merged(new[] { (SortQueryFragment)QueryResult.SortFragment, orderByProperty });
-            });
-        }
+            var orderByProperty = sortingGenerator.Generate(expression);
+            QueryResult.SortFragment = QueryResult.SortFragment == null ? orderByProperty : SortQueryFragment.Merged(new[] { (SortQueryFragment)QueryResult.SortFragment, orderByProperty });
+        });
     }
 
     protected override void GenerateJoin(IQuery<TObject> query)
     {
         var joins = new List<Tuple<IColumnPropertyInfo, int>>();
 
-        var joinGenerator = new JoinVisitor(Context.CacheInfoCollection, _objectInfo, null);
+        var joinGenerator = new JoinVisitor(Context.CacheInfoCollection, _objectInfo, default);
 
         Action<ICollection<IColumnPropertyInfo>, int>? getJoins = null;
         getJoins = (parameters, level) =>
@@ -233,28 +248,29 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         joins.OrderBy(item => item.Item2).Select(item => item).GroupBy(item => new { item.Item1.Schema, item.Item1.DataSet, item.Item1.ColumnName, item.Item1.Name }).ToList().ForEach(item =>
         {
             var index = 0;
-            foreach (var joinPredicate in item.Select(item => item))
+            foreach (var (join, order) in item.Select(joinItem => joinItem))
             {
-                var join = joinPredicate.Item1;
-                var order = joinPredicate.Item2;
+                if (join.Parent is null)
+                    continue;
+                
                 if (!Context.CacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Parent.Type, out var propertyObjectInfo))
-                    throw new NotFound(@join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
+                    throw new NotFoundException(join.DataSet, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (propertyObjectInfo == null)
-                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                    throw new NotFoundException(join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (!Context.CacheInfoCollection.TryGetLastDatabaseObjectInfo(join.Type, out var relatedObjectInfo))
-                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                    throw new NotFoundException(join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
                 if (relatedObjectInfo == null)
-                    throw new NotFound(@join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
+                    throw new NotFoundException(join.Name, ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(item => item.Key)?.Clone() ?? throw new NotFound(@join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator);
+                var joinColumnPropertyInfo = relatedObjectInfo.PropertyInfos.FirstOrDefault(relatedObject => relatedObject.Key)?.Clone() ?? throw new NotFoundException(join.Name, "Primary_Key", ExceptionCode.DatabaseQueryJoiningGenerator);
 
-                joinColumnPropertyInfo.Parent = @join;
+                joinColumnPropertyInfo.Parent = join;
 
                 var indexer = index > 0 ? $"_{index}" : "";
-                var joinType = @join.Required ? JoinType.Inner : JoinType.Left;
+                var joinType = join.Required ? JoinType.Inner : JoinType.Left;
                 var expression = joinColumnPropertyInfo.GenerateJoinExpression(propertyObjectInfo.ObjectType, joinType, query.ObjectTypeStructures.ToArray(), indexer);
                 queryObjectJoining.Add(expression, joinType, order);
 
@@ -278,12 +294,12 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     protected override void GenerateFunctionByClause()
     {
-        var columnQueryPart = QueryResult.ColumnFragment ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
+        var columnQueryPart = QueryResult.ColumnFragment ?? throw new NotFoundException(ExceptionCode.DatabaseQueryGroupByGenerator);
         var whereQueryPart = QueryResult.FilterFragment;
 
         var grouping = false;
         ICollection<FilterProperty>? havingClauses = null;
-        if (whereQueryPart != null)
+        if (whereQueryPart is {Parameter: not null})
         {
             havingClauses = FilterQueryFragment.GetHavingClause(whereQueryPart.Parameter);
             grouping = havingClauses.Count > 0;
@@ -291,7 +307,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
         if (grouping)
         {
-            IEnumerable<IColumnPropertyInfo> groupingColumns = columnQueryPart.Parameter?.Where(item => item.AggregateFunctionType == AggregateFunctionType.None) ?? throw new NotFound(ExceptionCode.DatabaseQueryGroupByGenerator);
+            IEnumerable<IColumnPropertyInfo> groupingColumns = columnQueryPart.Parameter?.Where(item => item.AggregateFunctionType == AggregateFunctionType.None) ?? throw new NotFoundException(ExceptionCode.DatabaseQueryGroupByGenerator);
 
             var groupClauses = GroupByQueryFragment.Create(new GroupByProperty(groupingColumns, havingClauses));
 
@@ -316,7 +332,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
                 break;
             default:
-                throw new NotSupported(ExceptionCode.ApiQueryBuilder); //Too
+                throw new NotSupportedOperationException(ExceptionCode.ApiQueryBuilder); //Too
         }
         commandSqlVisitor.AddOption("returnRecord", commandPredicate.ReturnType);
         var commandObject = CommandQueryFragment.Merge(operationType, commandPredicate.ReturnType, commandQueries.ToArray());
@@ -325,14 +341,15 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CommandQueryFragment> commandQueries, QueryOperationType operationType)
     {
-        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFound("as"); //todo
+        if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null)
+            throw new ArgumentNullException(nameof(commandPredicate.ObjectPredicate));
 
         if (commandPredicate.ObjectPredicate != null)
         {
             foreach (var objectPredicate in commandPredicate.ObjectPredicate)
             {
                 if (objectPredicate.NodeType != ExpressionType.Lambda)
-                    throw new NotSupported(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupportedOperationException(typeof(TObject).Name, objectPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectPredicate is LambdaExpression expression)
                 {
@@ -343,7 +360,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
                     commandQueries.Add(queryCommand);
                 }
                 else
-                    throw new NotSupported("asd"); //todo
+                    throw new NotSupportedOperationException(ExceptionCode.SqlServerQueryCreator);
             }
         }
 
@@ -352,7 +369,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
             foreach (var objectsPredicate in commandPredicate.ObjectsPredicate)
             {
                 if (objectsPredicate.NodeType != ExpressionType.Lambda)
-                    throw new NotSupported(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotSupportedOperationException(typeof(TObject).Name, objectsPredicate.NodeType.ToString(), ExceptionCode.DatabaseQueryFilteringGenerator);
 
                 if (objectsPredicate is LambdaExpression expression)
                 {
@@ -360,7 +377,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
                     commandQueries.Add(queryCommand);
                 }
                 else
-                    throw new NotSupported("asd"); //todo
+                    throw new NotSupportedOperationException("asd"); //todo
             }
         }
     }

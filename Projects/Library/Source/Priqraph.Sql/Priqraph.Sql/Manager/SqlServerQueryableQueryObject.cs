@@ -19,7 +19,7 @@ internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryOb
 
     public SqlServerQueryableQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
-        _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFound(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
+        _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFoundException(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
@@ -71,7 +71,7 @@ internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryOb
 
     protected override void GenerateSelect(IQuery<TObject> query)
     {
-	    var expression = query.Queryable?.Expression ?? throw new NotFound(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+	    var expression = query.Queryable?.Expression ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
 	    var parameter = Expression.Parameter(typeof(TObject));
 	    var visitor = new QueryableVisitor<TObject>(parameter, Context.CacheInfoCollection, _objectInfo);
 	    visitor.Generate(expression);

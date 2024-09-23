@@ -129,8 +129,8 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
 
     protected override FilterQueryFragment VisitParameter(ParameterExpression expression)
     {
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(expression.ToString(), expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
-        var field = fields.FirstOrDefault() ?? throw new NotFound(expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(expression.ToString(), expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var field = fields.FirstOrDefault() ?? throw new NotFoundException(expression.Name ?? "Expression.Name", ExceptionCode.DatabaseQueryFilteringGenerator);
 
         return FilterQueryFragment.Create(new FilterProperty(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }
@@ -145,9 +145,9 @@ public class FilterVisitor : DatabaseVisitor<FilterQueryFragment>
             return Visit(expression.Expression, expression.Member.Name);
         }
 
-        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFound(expression.ToString(), expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
+        var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(expression.ToString(), expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
-        var field = fields.FirstOrDefault() ?? throw new NotFound(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
+        var field = fields.FirstOrDefault() ?? throw new NotFoundException(expression.Member.Name, ExceptionCode.DatabaseQueryFilteringGenerator);
 
         return FilterQueryFragment.Create(new FilterProperty(field, clauseType: field.AggregateFunctionType != AggregateFunctionType.None ? ClauseType.Having : ClauseType.Where));
     }

@@ -39,7 +39,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
     public static CommandQueryFragment Merge(QueryOperationType? operationType, ReturnType returnType = ReturnType.None, params CommandQueryFragment[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
-            throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
+            throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
 
         var commandType = commandParts.Select(item => item.CommandValueType).First();
         var commandPredicates = new List<ColumnPropertyCollection>();
@@ -60,7 +60,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
         }
 
         if (databaseCommandPart == null)
-            throw new NotSupported("asd"); //todo
+            throw new NotSupportedOperationException("asd"); //todo
 
         if (operationType.HasValue)
             databaseCommandPart.SetOptions(operationType.Value, commandType);
@@ -87,7 +87,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                 SetMergeQuery(returnType);
                 break;
             case QueryOperationType.GetData:
-            default: throw new NotSupported(""); // todo
+            default: throw new NotSupportedOperationException(""); // todo
         }
     }
 
@@ -97,7 +97,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
         {
             case CommandValueType.Record:
                 if (Parameter?.ColumnPropertyCollections is null)
-                    throw new NotSupported("asdasd"); //todo
+                    throw new NotSupportedOperationException("asdasd"); //todo
 
                 var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
                 if (columnPropertyInfos == null)
@@ -177,13 +177,13 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
         {
             case CommandValueType.Record:
                 if (Parameter?.ColumnPropertyCollections is null)
-                    throw new NotSupported("asdasd"); //todo
+                    throw new NotSupportedOperationException("asdasd"); //todo
 
                 var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
                 if (columnPropertyInfos == null)
                     return;
 
-                var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupported("asd"); //todo
+                var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupportedOperationException("asd"); //todo
                 CommandParts.Add("Selector", selector);
 
                 var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
@@ -276,20 +276,20 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
         {
             case CommandValueType.Record:
                 if (Parameter?.ColumnPropertyCollections is null)
-                    throw new NotSupported("asdasd"); //todo
+                    throw new NotSupportedOperationException("asdasd"); //todo
 
                 var columnPropertyInfos = Parameter.ColumnPropertyCollections?.First()?.ColumnProperties?.Select(item => item.ColumnPropertyInfo);
                 if (columnPropertyInfos == null)
                     return;
 
-                var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupported("asd"); //todo
+                var selector = columnPropertyInfos.First()?.GetSelector() ?? throw new NotSupportedOperationException("asd"); //todo
                 CommandParts.Add("Selector", selector);
 
                 var columnProperties = Parameter.ColumnPropertyCollections?.SelectMany(item => item.ColumnProperties ?? Enumerable.Empty<ColumnProperty>()).ToArray() ?? throw new System.Exception(); //todo
 
-                var primaryKey = columnProperties.FirstOrDefault(item => item.ColumnPropertyInfo?.Key ?? false) ?? throw new NotSupported("asd"); //todo
+                var primaryKey = columnProperties.FirstOrDefault(item => item.ColumnPropertyInfo?.Key ?? false) ?? throw new NotSupportedOperationException("asd"); //todo
 
-                var primaryKeyColumn = primaryKey?.ColumnPropertyInfo ?? throw new NotSupported("asd"); //todo
+                var primaryKeyColumn = primaryKey?.ColumnPropertyInfo ?? throw new NotSupportedOperationException("asd"); //todo
                 var parameterName = BaseSetParameterName(primaryKeyColumn);
 
                 var records = Parameter.ColumnPropertyCollections?.SelectMany(item => item.Records ?? Enumerable.Empty<object>()).ToArray();

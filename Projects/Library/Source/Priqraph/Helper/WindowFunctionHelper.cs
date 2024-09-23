@@ -2,7 +2,7 @@
 
 namespace Priqraph.Helper;
 
-public static class WindowFunctionHelper
+internal static class WindowFunctionHelper
 {
     public static void AddRelatedType<TMain, TRelated>(this TMain main, TRelated related) where TMain : Enum
         where TRelated : Enum => RelatedTypeCollection<TMain, TRelated>.Add(main, related);

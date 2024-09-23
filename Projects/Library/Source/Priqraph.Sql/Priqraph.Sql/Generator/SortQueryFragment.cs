@@ -33,6 +33,6 @@ public class SortQueryFragment : DatabaseSortQueryFragment
     {
         DirectionType.Asc => "asc",
         DirectionType.Desc => "desc",
-        _ => throw new NotSupported("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
+        _ => throw new NotSupportedOperationException("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
     };
 }

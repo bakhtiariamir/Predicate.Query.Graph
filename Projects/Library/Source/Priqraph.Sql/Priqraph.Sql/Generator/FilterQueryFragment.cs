@@ -270,7 +270,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
                         var isString = false;
                         var isArray = false;
                         if (wherePart.Right is null && wherePart.Operator != ConditionOperatorType.None)
-                            throw new NotFound(whereClause.ToString()!, whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                            throw new NotFoundException(nameof(whereClause), whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
 
                         if (wherePart.Operator is ConditionOperatorType.IsNull or ConditionOperatorType.IsNotNull)
                         {
@@ -286,7 +286,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
                         return GenerateClausePhrase(left, wherePart.Operator, right, isString, isArray);
                     }
                     else
-                        throw new NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                        throw new NotFoundException(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
                 case PartType.ParameterInfo:
 
                     if (whereClause.ValueType?.IsArray ?? false)
@@ -350,7 +350,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
                     return $"@{SetParameterName(whereClause)}";
 
                 default:
-                    throw new NotFound(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
+                    throw new NotFoundException(whereClause.ToString() ?? "Unknown", whereClause.PartType, ExceptionCode.DatabaseQueryFilteringGenerator);
             }
         }
 
@@ -405,7 +405,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
             ConditionOperatorType.LessThan => $"{left} < {right}",
             ConditionOperatorType.LessThanEqual => $"{left} <= {right}",
             ConditionOperatorType.In => $"{left} IN ({right})",
-            ConditionOperatorType.Contains => isArray ? $"{left} IN ({right})" : isString ? $"{left} LIKE {right}" : throw new NotSupported(left, ExceptionCode.DatabaseQueryFilteringGenerator),
+            ConditionOperatorType.Contains => isArray ? $"{left} IN ({right})" : isString ? $"{left} LIKE {right}" : throw new NotSupportedOperationException(left, ExceptionCode.DatabaseQueryFilteringGenerator),
             ConditionOperatorType.NotIn => $"{left} NOT IN ({right})",
             ConditionOperatorType.IsNull => $"{left} IS NULL",
             ConditionOperatorType.IsNotNull => $"{left} IS NOT NULL",
@@ -414,7 +414,7 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
             ConditionOperatorType.None => $"({left})",
             //I think we should define parameter name in this item
             ConditionOperatorType.Set => $"",
-            ConditionOperatorType.Between or _ => throw new NotSupported(left, ExceptionCode.DatabaseQueryFilteringGenerator)
+            ConditionOperatorType.Between or _ => throw new NotSupportedOperationException(left, ExceptionCode.DatabaseQueryFilteringGenerator)
         };
 
     //ToDo : add these methods in helper for use by all QueryPart

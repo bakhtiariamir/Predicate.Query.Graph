@@ -2,7 +2,7 @@
 
 namespace Priqraph.Helper;
 
-public static class ExpressionExtensionMethodHelper
+internal static class ExpressionExtensionMethodHelper
 {
     public static bool LeftContains(this string input, string phrase) => input.Trim().ToLower()[..Math.Min(input.Length, phrase.Length)].Equals(phrase.ToLower().Trim());
 

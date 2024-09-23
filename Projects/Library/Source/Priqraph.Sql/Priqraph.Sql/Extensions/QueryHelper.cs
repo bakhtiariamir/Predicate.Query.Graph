@@ -11,7 +11,7 @@ internal static class QueryHelper
 {
     public static string Select(this DatabaseQueryResult queryParts, out ICollection<SqlParameter>? parameters)
     {
-        if (queryParts.ColumnFragment == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (queryParts.ColumnFragment == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.SelectParameters().ToArray();
 
         var select = new StringBuilder();
@@ -28,11 +28,11 @@ internal static class QueryHelper
 
     public static string Command(this DatabaseQueryResult queryParts, out ICollection<SqlParameter> parameters)
     {
-        if (queryParts.CommandFragment == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (queryParts.CommandFragment == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.CommandFragment.SqlParameters;
 
         if (parameters != null && !parameters.Any())
-            throw new NotSupported(ExceptionCode.DatabaseQueryGenerator);
+            throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryGenerator);
 
         return queryParts.CommandFragment.OperationType switch
         {
@@ -40,7 +40,7 @@ internal static class QueryHelper
             QueryOperationType.Remove => queryParts.CommandFragment.Delete(),
             QueryOperationType.Edit => queryParts.CommandFragment.Update(queryParts),
             QueryOperationType.Merge => queryParts.CommandFragment.Merge(),
-            QueryOperationType.GetData or _ => throw new NotSupported(ExceptionCode.QueryGenerator)
+            QueryOperationType.GetData or _ => throw new NotSupportedOperationException(ExceptionCode.QueryGenerator)
         };
     }
 
@@ -61,7 +61,7 @@ internal static class QueryHelper
                     value = commandParts["Values"].ToString();
 
                 if (value == null)
-                    throw new NotSupported(ExceptionCode.DatabaseObjectInfo); //todo
+                    throw new NotSupportedOperationException(ExceptionCode.DatabaseObjectInfo); //todo
 
                 insert.Append($"VALUES {value};");
                 if (command.CommandParts.ContainsKey("result") && queryParts.ResultQuery != null)
@@ -100,7 +100,7 @@ internal static class QueryHelper
                     {
                         var recordsValue = valueList as ICollection<Tuple<int, string>>;
                         if (recordsValue == null && recordsValue!.Count == 0)
-                            throw new NotSupported("asd"); // todo
+                            throw new NotSupportedOperationException("asd"); // todo
 
                         if (commandParts.TryGetValue("RecordsWhere", out var whereList))
                         {
@@ -110,14 +110,14 @@ internal static class QueryHelper
                                 {
                                     update.Append($"UPDATE {selector} ");
                                     update.Append($"SET {columns} ");
-                                    var where = recordsWhere.FirstOrDefault(item => item.Item1 == index)?.Item2 ?? throw new NotSupported("asd"); // todo
+                                    var where = recordsWhere.FirstOrDefault(item => item.Item1 == index)?.Item2 ?? throw new NotSupportedOperationException("asd"); // todo
 
                                     update.Append($"WHERE {where}; ");
                                 }
                             }
                         }
                         else
-                            throw new NotSupported(""); // todo
+                            throw new NotSupportedOperationException(""); // todo
                     }
                     else if (commandParts.TryGetValue("Values", out var values))
                     {
@@ -142,7 +142,7 @@ internal static class QueryHelper
                         }
                     }
                     else
-                        throw new NotSupported(""); // todo
+                        throw new NotSupportedOperationException(""); // todo
 
                     break;
                 }

@@ -3,20 +3,14 @@ using System.Linq.Expressions;
 
 namespace Priqraph.ExpressionHandler;
 
-public abstract class Visitor<TResult>
+public abstract class Visitor<TResult>(ParameterExpression? parameterExpression)
 {
-    protected ParameterExpression ParameterExpression
+    protected ParameterExpression? ParameterExpression
     {
         get;
-    }
+    } = parameterExpression;
 
-    private IDictionary<string, object> _options;
-
-    protected Visitor(ParameterExpression parameterExpression)
-    {
-        ParameterExpression = parameterExpression;
-        _options = new Dictionary<string, object>();
-    }
+    private readonly IDictionary<string, object> _options = new Dictionary<string, object>();
 
     public void AddOption(string key, object value) => _options.Add(key, value);
 

@@ -79,7 +79,7 @@ public class DatabaseQueryableVisitor : Visitor<DatabaseQueryResult>
         if (expr is MemberExpression memberExpression)
         {
             if (memberExpression.Expression == null)
-                throw new NotFound(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                throw new NotFoundException(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
             var memberInfo = memberExpression.Member;
             if (!cacheInfoCollection.TryGetLastDatabaseObjectInfo(memberExpression.Expression.Type, out var parentObjectInfo))
@@ -95,9 +95,9 @@ public class DatabaseQueryableVisitor : Visitor<DatabaseQueryResult>
             }
 
             if (parentObjectInfo == null)
-                throw new NotFound(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
+                throw new NotFoundException(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
 
-            property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFound(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+            property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.Clone() ?? throw new NotFoundException(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
             if (memberExpression.Expression is MemberExpression || memberExpression.Expression is ParameterExpression)
                 property.SetRelationalObject(GetMemberColumnProperty(memberExpression.Expression, databaseObjectInfo, cacheInfoCollection)!);
@@ -128,7 +128,7 @@ public class DatabaseQueryableVisitor : Visitor<DatabaseQueryResult>
                 };
             }
         else
-            throw new NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
+            throw new NotSupportedOperationException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
         if (property?.FieldType != DatabaseFieldType.Related)
             return property;
@@ -158,7 +158,7 @@ public class DatabaseQueryableVisitor : Visitor<DatabaseQueryResult>
         }
         else
         {
-            throw new NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
+            throw new NotSupportedOperationException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);
         }
 
         return properties;

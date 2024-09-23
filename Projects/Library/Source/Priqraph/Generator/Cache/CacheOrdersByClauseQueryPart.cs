@@ -28,7 +28,7 @@ public class CacheOrdersByClauseQueryPart : CacheQueryPart<ICollection<CacheSort
     private string SetDirection(DirectionType directionType) => directionType switch {
         DirectionType.Asc => "asc",
         DirectionType.Desc => "desc",
-        _ => throw new NotSupported("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
+        _ => throw new NotSupportedOperationException("DirectionType", directionType.ToString(), ExceptionCode.DatabaseQuerySortingGenerator)
     };
 }
 

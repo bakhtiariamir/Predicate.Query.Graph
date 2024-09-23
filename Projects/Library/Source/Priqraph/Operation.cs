@@ -14,7 +14,7 @@ public static class Operation
 
     private static IQueryObjectBuilder<TObject> SetupQueryBuilder<TObject>() where TObject : IQueryableObject => new QueryBuilder<TObject>();
 
-    public static TResult Build<TObject, TResult>(this IQueryable query, QueryProvider provider, ICacheInfoCollection cacheInfoCollection, IQueryObject<TObject, TResult> queryObjectProvider) where TObject : IQueryableObject
+    public static TResult Build<TObject, TResult>(this IQueryable query, QueryProvider provider, IQueryObject<TObject, TResult> queryObjectProvider) where TObject : IQueryableObject
         where TResult : IQueryResult
     {
         var queryBuilder = SetupQueryBuilder<TObject>();

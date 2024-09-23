@@ -7,11 +7,11 @@ using Priqraph.Manager.Result.Cache;
 namespace Priqraph.Helper;
 
 
-public static class CacheQueryHelper
+internal static class CacheQueryHelper
 {
     public static CacheQueryObject GenerateSelect(this CacheQueryResult queryParts)
     {
-        if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (queryParts.Command == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
 
         var getData = new CacheGetDataQueryObject();
         if (queryParts.WhereClause != null)
@@ -32,14 +32,14 @@ public static class CacheQueryHelper
 
     public static CacheQueryObject GenerateCommandQuery(this CacheQueryResult queryParts)
     {
-        if (queryParts.Command == null) throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+        if (queryParts.Command == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
 
         return queryParts.Command.OperationType switch
         {
             QueryOperationType.Add => queryParts.Command.GenerateAddQuery(),
             QueryOperationType.Remove => queryParts.Command.GenerateDeleteQuery(),
             QueryOperationType.Edit => queryParts.Command.GenerateUpdateQuery(),
-            _ => throw new NotSupported(ExceptionCode.QueryGenerator)
+            _ => throw new NotSupportedOperationException(ExceptionCode.QueryGenerator)
         };
     }
 

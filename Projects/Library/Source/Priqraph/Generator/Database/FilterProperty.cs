@@ -81,7 +81,7 @@ public class FilterProperty
         PartType = partType;
     }
 
-    public FilterProperty(object? value = null, Type? valueType = null, string? parameterName = null)
+    private FilterProperty(object? value = null, Type? valueType = null, string? parameterName = null)
     {
         ValueType = valueType;
         ParameterName = parameterName;
@@ -101,39 +101,4 @@ public class FilterProperty
     public void SetIndex(int index) => Index = index;
 
     public void SetParameterColumnInfo(IColumnPropertyInfo columnPropertyInfo) => ColumnPropertyInfo = columnPropertyInfo;
-}
-
-public enum ClauseType
-{
-    None = 0,
-    Where = 1,
-    Having = 2,
-}
-
-public enum PartType
-{
-    ColumnInfo = 1,
-    WhereClause = 2,
-    ParameterInfo = 3
-}
-
-public class ValueDetail
-{
-    public Type? Type
-    {
-        get;
-        set;
-    }
-
-    public bool IsGeneric
-    {
-        get;
-        set;
-    }
-
-    public bool IsArray
-    {
-        get;
-        set;
-    }
 }

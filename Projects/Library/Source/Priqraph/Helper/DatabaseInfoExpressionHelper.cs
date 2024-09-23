@@ -4,7 +4,7 @@ using Priqraph.Exception;
 
 namespace Priqraph.Helper;
 
-public static class DatabaseInfoExpressionHelper
+internal static class DatabaseInfoExpressionHelper
 {
     public static bool TryExpandProperty(this IColumnPropertyInfo parent, ICacheInfoCollection cacheInfoCollection, out ICollection<IColumnPropertyInfo>? expandedProperties)
     {
@@ -15,7 +15,7 @@ public static class DatabaseInfoExpressionHelper
 
 
         if (objectInfo == null)
-            throw new NotFound("ObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+            throw new NotFoundException("ObjectInfo", parent.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
         var properties = objectInfo.PropertyInfos.Where(item => item.FieldType != DatabaseFieldType.Related).ToArray();
         expandedProperties = properties.Properties(parent, !(parent.Parent == null && objectInfo.DataSet == parent.Name)).ToList();

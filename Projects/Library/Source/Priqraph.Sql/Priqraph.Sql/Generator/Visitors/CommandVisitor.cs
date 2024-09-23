@@ -10,26 +10,26 @@ using System.Reflection;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Sql.Generator.Visitors;
-public class CommandVisitor : DatabaseVisitor<CommandQueryFragment>
+public class CommandVisitor(
+    ICacheInfoCollection cacheObjectCollection,
+    IDatabaseObjectInfo objectInfo,
+    ParameterExpression? parameterExpression)
+    : DatabaseVisitor<CommandQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
 {
-    public CommandVisitor(ICacheInfoCollection cacheObjectCollection, IDatabaseObjectInfo objectInfo, ParameterExpression parameterExpression) : base(cacheObjectCollection, objectInfo, parameterExpression)
-    {
-    }
-
     protected override CommandQueryFragment VisitMember(MemberExpression expression)
     {
         if (expression.Expression == null)
-            throw new NotSupported(ExceptionCode.ObjectInfo); //ToDo
+            throw new NotSupportedOperationException(ExceptionCode.ObjectInfo); //ToDo
 
         var columnProperties = ObjectInfo.PropertyInfos.Select(item => new ColumnProperty(item)).Where(item => item.ColumnPropertyInfo?.FieldType != DatabaseFieldType.Related).ToArray();
         var columnCommandQueryPart = CommandQueryFragment.Create(columnProperties);
 
         var valueQueryPart = Visit(expression.Expression);
 
-        var columnValue = valueQueryPart.Parameter?.ColumnPropertyCollections?.FirstOrDefault() ?? throw new NotFound("asd"); //todo
+        var columnValue = valueQueryPart.Parameter?.ColumnPropertyCollections?.FirstOrDefault() ?? throw new NotFoundException("asd"); //todo
 
         if (columnValue.Records == null)
-            throw new NotSupported(ExceptionCode.ApiQueryBuilder); //todo
+            throw new NotSupportedOperationException(ExceptionCode.ApiQueryBuilder); //todo
 
         if (columnValue.Records is not null)
         {
@@ -39,8 +39,8 @@ public class CommandVisitor : DatabaseVisitor<CommandQueryFragment>
             var value = member switch {
                 FieldInfo field => field.GetValue(objectValue),
                 PropertyInfo info => info.GetValue(objectValue, null),
-                _ => throw new NotSupported("asd")
-            } ?? throw new NotFound("asd");
+                _ => throw new NotSupportedOperationException("asd")
+            } ?? throw new NotFoundException("asd");
 
             if (value.GetType().IsArray)
                 return CommandQueryFragment.Merge(null, ReturnType.Record, columnCommandQueryPart, CommandQueryFragment.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
@@ -89,7 +89,7 @@ public class CommandVisitor : DatabaseVisitor<CommandQueryFragment>
 
     protected override CommandQueryFragment VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
-        var value = expression.ObjectValue() ?? throw new NotSupported("easd"); //todo
+        var value = expression.ObjectValue() ?? throw new NotSupportedOperationException("easd"); //todo
 
         return CommandQueryFragment.Create(new ColumnPropertyCollection(new[] {value}));
     }

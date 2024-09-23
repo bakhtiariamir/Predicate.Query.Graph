@@ -3,7 +3,7 @@ using Priqraph.Contract;
 using Priqraph.DataType;
 
 namespace Priqraph.Helper;
-public static class TypeHelper
+internal static class TypeHelper
 {
     public static ColumnDataType ColumnDataType(this Type type) => type switch
     {

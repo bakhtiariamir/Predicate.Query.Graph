@@ -2,13 +2,8 @@
 
 namespace Priqraph.Manager.Result;
 
-public abstract class ObjectQuery<TParameter> : IObjectQuery<TParameter>
+public abstract class ObjectQuery<TParameter>(ICollection<TParameter>? parameters) : IObjectQuery<TParameter>
 {
-    protected ObjectQuery(ICollection<TParameter>? parameters)
-    {
-        Parameters = parameters;
-    }
-
     public string? Action
     {
         get;
@@ -18,7 +13,7 @@ public abstract class ObjectQuery<TParameter> : IObjectQuery<TParameter>
     public ICollection<TParameter>? Parameters
     {
         get;
-    }
+    } = parameters;
 
     public abstract void UpdateParameter(string type, params ParameterValue[] parameters);
 }

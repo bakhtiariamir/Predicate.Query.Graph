@@ -17,7 +17,7 @@ namespace Priqraph.Sql.Generator.Visitors
 
 		protected override DatabaseQueryResult VisitMember(MemberExpression expression)
 		{
-			var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFound(ExceptionCode.DatabaseQuerySelectingGenerator);
+			var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
 			//return ColumnQueryFragment.Create(fields);
 			return base.VisitMember(expression);
 		}

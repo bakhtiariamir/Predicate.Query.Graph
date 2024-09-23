@@ -4,7 +4,7 @@ namespace Priqraph.Exception;
 
 public abstract class BaseException : System.Exception
 {
-    private string CodeName
+    public string CodeName
     {
         get;
     }

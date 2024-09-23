@@ -67,7 +67,7 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult> where TResult : I
             if (expr is MemberExpression memberExpression)
             {
                 if (memberExpression.Expression == null)
-                    throw new NotFound(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
+                    throw new NotFoundException(memberExpression.Type.Name, memberExpression.Member.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty);
 
                 var memberInfo = memberExpression.Member;
                 if (!fullCacheInfoCollection.TryGetLastObjectInfo(memberExpression.Expression.Type, out var parentObjectInfo))
@@ -82,9 +82,9 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult> where TResult : I
                 }
 
                 if (parentObjectInfo == null)
-                    throw new NotFound(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
+                    throw new NotFoundException(memberExpression.Expression.Type.Name, ExceptionCode.CachedObjectInfo);
 
-                property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.ClonePropertyInfo() ?? throw new NotFound(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty); //Todo
+                property = parentObjectInfo.PropertyInfos.FirstOrDefault(item => item.Name == memberInfo.Name)?.ClonePropertyInfo() ?? throw new NotFoundException(memberExpression.Expression.Type.Name, memberInfo.Name, ExceptionCode.DatabaseQueryGeneratorGetProperty); //Todo
                 //چون فقط یک سطخ هست ئدذ نمیخواد
                 //if (memberExpression.Expression is MemberExpression || memberExpression.Expression is ParameterExpression)
                 //    property.SetRelationalObject(getMemberExpression?.Invoke(memberExpression.Expression, databaseObjectInfo, databaseCacheInfoCollection, false)!);
@@ -122,7 +122,7 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult> where TResult : I
             }
             else
             {
-                throw new NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);//Todo
+                throw new NotSupportedOperationException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty);//Todo
             }
 
             return property;
@@ -143,7 +143,7 @@ public abstract class CacheVisitor<TResult> : Visitor<TResult> where TResult : I
             }
             else
             {
-                throw new NotSupported(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty); //Todo
+                throw new NotSupportedOperationException(expr.Type.Name, expr.NodeType.ToString(), ExceptionCode.DatabaseQueryGeneratorGetProperty); //Todo
             }
 
             return properties;
