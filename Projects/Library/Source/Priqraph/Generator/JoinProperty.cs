@@ -2,7 +2,7 @@
 using Priqraph.DataType;
 using System;
 
-namespace Priqraph.Generator.Database
+namespace Priqraph.Generator
 {
     public class JoinProperty
     {

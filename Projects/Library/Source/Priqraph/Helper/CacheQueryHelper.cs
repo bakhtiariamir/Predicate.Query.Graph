@@ -36,9 +36,9 @@ internal static class CacheQueryHelper
 
         return queryParts.Command.OperationType switch
         {
-            QueryOperationType.Add => queryParts.Command.GenerateAddQuery(),
-            QueryOperationType.Remove => queryParts.Command.GenerateDeleteQuery(),
-            QueryOperationType.Edit => queryParts.Command.GenerateUpdateQuery(),
+            DatabaseQueryOperationType.Add => queryParts.Command.GenerateAddQuery(),
+            DatabaseQueryOperationType.Remove => queryParts.Command.GenerateDeleteQuery(),
+            DatabaseQueryOperationType.Edit => queryParts.Command.GenerateUpdateQuery(),
             _ => throw new NotSupportedOperationException(ExceptionCode.QueryGenerator)
         };
     }

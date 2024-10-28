@@ -1,6 +1,6 @@
 ﻿using Priqraph.Contract;
 
-namespace Priqraph.Generator.Database;
+namespace Priqraph.Generator;
 
 public abstract class QueryFragment<TParameter> : IQueryFragment<TParameter> where TParameter : class
 {

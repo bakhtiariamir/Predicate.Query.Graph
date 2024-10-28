@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Priqraph.Contract;
+using Priqraph.Sql.Builder;
 using Priqraph.Sql.Manager;
 
 namespace Priqraph.Sql;

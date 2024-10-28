@@ -1,13 +1,11 @@
 ﻿using Priqraph.Setup;
 
-namespace Priqraph.Generator.Database
+namespace Priqraph.Generator.Database;
+public class DatabaseFilterQueryFragment : QueryFragment<FilterProperty>
 {
-    public class DatabaseFilterQueryFragment : QueryFragment<FilterProperty>
+    public QuerySetting? QuerySetting
     {
-        public QuerySetting? QuerySetting
-        {
-            get;
-            protected set;
-        }
+        get;
+        protected set;
     }
 }

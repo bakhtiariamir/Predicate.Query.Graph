@@ -3,9 +3,12 @@ using Priqraph.DataType;
 
 namespace Priqraph.Query;
 
-internal abstract class PredicateReducer<TObject> where TObject : IQueryableObject
+internal abstract class PredicateReducer<TObject, TQueryObject, TEnum> 
+    where TObject : IQueryableObject
+    where TQueryObject : IQuery<TObject, TEnum>
+    where TEnum : struct, IConvertible  
 {
-    protected virtual IQuery<TObject> Visit(IQuery<TObject> query, ReduceType type) =>
+    protected virtual TQueryObject Visit(TQueryObject query, ReduceType type) =>
         type switch {
             ReduceType.Generate => Generate(query),
             ReduceType.Decrease => Decrease(query),
@@ -13,11 +16,11 @@ internal abstract class PredicateReducer<TObject> where TObject : IQueryableObje
             _ => throw new NotImplementedException() //ToDo
         };
 
-    public abstract IQuery<TObject> Reduce(IQuery<TObject> query, ReduceType type);
+    public abstract TQueryObject Reduce(TQueryObject query, ReduceType type);
 
-    protected abstract IQuery<TObject> Generate(IQuery<TObject> query);
+    protected abstract TQueryObject Generate(TQueryObject query);
 
-    protected abstract IQuery<TObject> Decrease(IQuery<TObject> query);
+    protected abstract TQueryObject Decrease(TQueryObject query);
 
-    protected abstract IQuery<TObject> Merge(IQuery<TObject> query);
+    protected abstract TQueryObject Merge(TQueryObject query);
 }

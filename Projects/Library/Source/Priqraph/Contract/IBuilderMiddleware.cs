@@ -2,46 +2,62 @@
 
 namespace Priqraph.Contract;
 
-public interface IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IBuilderMiddleware<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum : struct, IConvertible
 {
     object Init(QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null);
 
-    IBuilderMiddleware<TObject> RegisterHandler<THandler>(Func<THandler> handlerFunc) where THandler : IQueryHandler<TObject>;
+    IBuilderMiddleware<TObject, TEnum> RegisterHandler<THandler>(Func<THandler> handlerFunc) where THandler : IQueryHandler<TObject, TEnum>;
 
-    IQuery<TObject> Build();
+    IQuery<TObject, TEnum> Build();
 }
 
-public interface IAddMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IAddMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum>
+    where TObject : IQueryableObject
+    where TEnum : struct, IConvertible
 {
 
 }
 
-public interface IEditMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IEditMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum>
+    where TObject : IQueryableObject
+    where TEnum : struct,IConvertible
 {
 
 }
 
-public interface IDeleteMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IDeleteMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum : struct,IConvertible
 {
 
 }
 
-public interface IMergeMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IMergeMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum : struct,IConvertible
 {
 
 }
 
-public interface IGetMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IGetMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum :struct, IConvertible
 {
 
 }
 
-public interface ICountMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface ICountMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum>
+    where TObject : IQueryableObject
+    where TEnum : struct,IConvertible
 {
 
 }
 
-public interface IReturnMiddleware<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject
+public interface IReturnMiddleware<TObject, TEnum> : IBuilderMiddleware<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum : struct, IConvertible
 {
 
 }

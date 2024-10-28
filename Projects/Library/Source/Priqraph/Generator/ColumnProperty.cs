@@ -1,7 +1,7 @@
 ﻿using Priqraph.Contract;
 using System;
 
-namespace Priqraph.Generator.Database
+namespace Priqraph.Generator
 {
     public class ColumnProperty
     {

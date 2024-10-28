@@ -8,20 +8,44 @@ using Priqraph.Query.Builders;
 using Priqraph.Setup;
 using System.Linq.Expressions;
 using Priqraph.Builder.Database;
+using Priqraph.Sql.Builder;
 using Priqraph.Sql.Generator;
 using Priqraph.Sql.Generator.Visitors;
 
 namespace Priqraph.Sql.Manager;
 
-internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryObject<TObject>, ISqlServerQueryObject<TObject> where TObject : IQueryableObject
+internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryObject<TObject,ISqlQuery<TObject, DatabaseQueryOperationType>, DatabaseQueryResult, DatabaseQueryOperationType>, ISqlServerQueryObject<TObject, DatabaseQueryOperationType> where TObject : IQueryableObject
 {
-    private IDatabaseObjectInfo _objectInfo;
+    private readonly IDatabaseObjectInfo _objectInfo;
+    public override ISqlQuery<TObject, DatabaseQueryOperationType> Query { get; }
 
     public SqlServerQueryableQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
+        QueryResult = new();
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ?? throw new NotFoundException(typeof(TObject).Name, "", ExceptionCode.DatabaseObjectInfo);
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
+    
+    public override DatabaseQueryResult Build(ISqlQuery<TObject, DatabaseQueryOperationType> query)
+    {
+        switch (query.DatabaseQueryOperationType)
+        {
+            case DatabaseQueryOperationType.GetData:
+                GenerateSelect(query);
+                break;
+        }
+        return QueryResult;
+    }
+    
+    protected void GenerateSelect(ISqlQuery<TObject, DatabaseQueryOperationType> query)
+    {
+        var expression = query.Queryable?.Expression ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
+        var parameter = Expression.Parameter(typeof(TObject));
+        var visitor = new QueryableVisitor<TObject>(parameter, Context.CacheInfoCollection, _objectInfo);
+        visitor.Generate(expression);
+    }
+
+
 
     //protected override void GenerateInsert(IQueryObject<TObject> query)
     //{
@@ -69,13 +93,7 @@ internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryOb
 
     //}
 
-    protected override void GenerateSelect(IQuery<TObject> query)
-    {
-	    var expression = query.Queryable?.Expression ?? throw new NotFoundException(typeof(TObject).Name, "Expression.Parameter", ExceptionCode.DatabaseQueryFilteringGenerator);
-	    var parameter = Expression.Parameter(typeof(TObject));
-	    var visitor = new QueryableVisitor<TObject>(parameter, Context.CacheInfoCollection, _objectInfo);
-	    visitor.Generate(expression);
-    }
+
 
     //protected override void GenerateCount(IQueryObject<TObject> query)
     //{
@@ -288,6 +306,4 @@ internal class SqlServerQueryableQueryObject<TObject> : DatabaseQueryableQueryOb
 
 
     //}
-
-
 }

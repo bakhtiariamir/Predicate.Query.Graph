@@ -2,16 +2,11 @@
 
 namespace Priqraph.Generator.Database
 {
-    public class CommandProperty
+    public class CommandProperty(ICollection<ColumnPropertyCollection> columnPropertyCollections)
     {
         public ICollection<ColumnPropertyCollection>? ColumnPropertyCollections
         {
             get;
-        }
-
-        public CommandProperty(ICollection<ColumnPropertyCollection> columnPropertyCollections)
-        {
-            ColumnPropertyCollections = columnPropertyCollections;
-        }
+        } = columnPropertyCollections;
     }
 }

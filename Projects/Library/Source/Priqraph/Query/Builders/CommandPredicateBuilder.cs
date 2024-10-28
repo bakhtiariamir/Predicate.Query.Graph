@@ -45,10 +45,3 @@ public class CommandPredicateBuilder<TObject> : IQueryObjectPart<CommandPredicat
     public Dictionary<string, string> GetQueryOptions() => new();
 }
 
-public enum ReturnType
-{
-    None,
-    Key,
-    Record,
-    RowAffected
-}

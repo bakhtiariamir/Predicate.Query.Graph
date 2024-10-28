@@ -22,7 +22,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
     {
         var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Add);
+        GenerateRecordCommand(command, cacheCommandVisitor, DatabaseQueryOperationType.Add);
         return Task.CompletedTask;
     }
 
@@ -30,7 +30,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
     {
         var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Edit);
+        GenerateRecordCommand(command, cacheCommandVisitor, DatabaseQueryOperationType.Edit);
         return Task.CompletedTask;
     }
 
@@ -38,7 +38,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
     {
         var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var cacheCommandVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, cacheCommandVisitor, QueryOperationType.Remove);
+        GenerateRecordCommand(command, cacheCommandVisitor, DatabaseQueryOperationType.Remove);
         return Task.CompletedTask;
     }
 
@@ -106,7 +106,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
         return Task.CompletedTask;
     }
 
-    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, QueryOperationType operationType)
+    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, DatabaseQueryOperationType operationType)
     {
         var commandQueries = new List<CacheCommandQueryPart>();
         switch (commandPredicate.CommandValueType)
@@ -126,7 +126,7 @@ internal class MemoryCacheQueryObject<TObject> : CacheQueryObject<TObject> where
         QueryResult.Command = commandObject;
     }
 
-    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CacheCommandQueryPart> commandQueries, QueryOperationType operationType)
+    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CacheCommandQueryPart> commandQueries, DatabaseQueryOperationType operationType)
     {
         if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null) throw new NotFoundException("as"); //todo
 

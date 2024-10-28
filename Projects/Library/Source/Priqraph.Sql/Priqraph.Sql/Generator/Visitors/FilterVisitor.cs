@@ -5,6 +5,7 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using System.Linq.Expressions;
 using System.Reflection;
+using Priqraph.Generator;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Sql.Generator.Visitors;

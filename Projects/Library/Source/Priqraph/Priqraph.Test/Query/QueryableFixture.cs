@@ -1,4 +1,5 @@
-﻿using Priqraph.DataType;
+﻿using Priqraph.Contract;
+using Priqraph.DataType;
 using Priqraph.Query;
 using Priqraph.Setup;
 
@@ -6,7 +7,7 @@ namespace Priqraph.Test.Query
 {
     public class QueryableFixture : IDisposable
     {
-        public QueryBuilder<Person> QueryBuilder
+        public QueryBuilder<Person, ISqlQuery<Person>> QueryBuilder
         {
             get;
             set;
@@ -22,7 +23,7 @@ namespace Priqraph.Test.Query
         {
         }
 
-        public void InitQuery() => QueryBuilder.Init(QueryOperationType.Add, QueryProvider.SqlServer, default);
+        public void InitQuery() => QueryBuilder.Init(DatabaseQueryOperationType.Add, QueryProvider.SqlServer, default);
 
         public void SetQuery() => QueryBuilder.SetQuery((from x in _persons select x).AsQueryable());
 

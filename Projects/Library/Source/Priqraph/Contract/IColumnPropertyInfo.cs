@@ -60,6 +60,12 @@ public interface IColumnPropertyInfo : IPropertyInfo<IColumnPropertyInfo>
         set;
     }
 
+    bool IsLabel
+    {
+        get;
+        set;
+    }
+
     void SetRelationalObject(IColumnPropertyInfo propertyInfo);
 
     string GetSelector();

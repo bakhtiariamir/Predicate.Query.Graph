@@ -1,0 +1,97 @@
+﻿using Dynamitey;
+using Priqraph.Contract;
+using Priqraph.DataType;
+using Priqraph.Exception;
+using Priqraph.ExpressionHandler.Visitors;
+using Priqraph.Helper;
+using Priqraph.Query.Builders;
+using System.Linq.Expressions;
+using System.Reflection;
+using Priqraph.Generator;
+using Priqraph.Generator.Database;
+
+namespace Priqraph.Neo4j.Generator.Visitors;
+public class CommandVisitor(
+    ICacheInfoCollection cacheObjectCollection,
+    IDatabaseObjectInfo objectInfo,
+    ParameterExpression? parameterExpression)
+    : DatabaseVisitor<Neo4jCommandQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
+{
+    protected override Neo4jCommandQueryFragment VisitMember(MemberExpression expression)
+    {
+        if (expression.Expression == null)
+            throw new NotSupportedOperationException(ExceptionCode.ObjectInfo); //ToDo
+
+        var columnProperties = ObjectInfo.PropertyInfos.Select(item => new ColumnProperty(item)).Where(item => item.ColumnPropertyInfo?.FieldType != DatabaseFieldType.Related).ToArray();
+        var columnCommandQueryPart = Neo4jCommandQueryFragment.Create(columnProperties);
+
+        var valueQueryPart = Visit(expression.Expression);
+
+        var columnValue = valueQueryPart.Parameter?.ColumnPropertyCollections?.FirstOrDefault() ?? throw new NotFoundException("asd"); //todo
+
+        if (columnValue.Records == null)
+            throw new NotSupportedOperationException(ExceptionCode.ApiQueryBuilder); //todo
+
+        if (columnValue.Records is not null)
+        {
+            var objectValue = columnValue.Records.FirstOrDefault();
+
+            var member = expression.Member;
+            var value = member switch {
+                FieldInfo field => field.GetValue(objectValue),
+                PropertyInfo info => info.GetValue(objectValue, null),
+                _ => throw new NotSupportedOperationException("asd")
+            } ?? throw new NotFoundException("asd");
+
+            if (value.GetType().IsArray)
+                return Neo4jCommandQueryFragment.Merge(null, ReturnType.Record, columnCommandQueryPart, Neo4jCommandQueryFragment.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
+
+            foreach (var column in columnProperties)
+            {
+                var isDefault = false;
+                var dynamicValue = Dynamic.InvokeGet(value, column.ColumnPropertyInfo?.Name);
+                if (dynamicValue == null)
+                {
+                    var columnDefaultValue = column.ColumnPropertyInfo?.DefaultValue;
+                    if (column.ColumnPropertyInfo?.DefaultValue != null)
+                    {
+                        isDefault = true;
+                        dynamicValue = columnDefaultValue;
+                    }
+                }
+                GetOption("Command", out var command);
+                 if (command is null || (command.ToString() != "Edit" && (column.ColumnPropertyInfo?.Required ?? false) && dynamicValue is null && column.ColumnPropertyInfo.DefaultValue is null))
+                    throw new ArgumentNullException($"Value of Property:{column.ColumnPropertyInfo?.Name} can not be null.");
+
+                if (dynamicValue == null)
+                {
+                    column.SetValue(null);
+                    continue;
+                }
+
+                if (column.ColumnPropertyInfo?.Type.GetInterface(nameof(IQueryableObject)) != null)
+                {
+                    var cacheObject = CacheObjectCollection.LastDatabaseObjectInfo(column.ColumnPropertyInfo?.Type!) ?? throw new System.Exception(); //todo
+                    var key = cacheObject?.PropertyInfos.FirstOrDefault(item => item.Key) ?? throw new System.Exception(); //todo
+                    object? objectColumnValue = isDefault ? dynamicValue : Dynamic.InvokeGet(dynamicValue, key.Name);
+                    column.SetValue(objectColumnValue);
+                }
+                else
+                {
+                    column.SetValue(dynamicValue);
+                }
+            }
+
+            return Neo4jCommandQueryFragment.Create(columnProperties);
+        }
+
+        throw new System.Exception(); //todo
+    }
+
+    protected override Neo4jCommandQueryFragment VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
+    {
+        var value = expression.ObjectValue() ?? throw new NotSupportedOperationException("easd"); //todo
+
+        return Neo4jCommandQueryFragment.Create(new ColumnPropertyCollection(new[] {value}));
+    }
+}

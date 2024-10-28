@@ -6,11 +6,12 @@ using Priqraph.Generator.Database;
 using Priqraph.Query.Builders;
 using Priqraph.Sql.Extensions;
 using System.Data.SqlClient;
+using Priqraph.Generator;
 
 namespace Priqraph.Sql.Generator;
 public class CommandQueryFragment : DatabaseCommandQueryFragment
 {
-    private void SetOptions(QueryOperationType operationType, CommandValueType commandValueType)
+    private void SetOptions(DatabaseQueryOperationType operationType, CommandValueType commandValueType)
     {
         OperationType = operationType;
         CommandValueType = commandValueType;
@@ -36,7 +37,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
 
     public static CommandQueryFragment Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
 
-    public static CommandQueryFragment Merge(QueryOperationType? operationType, ReturnType returnType = ReturnType.None, params CommandQueryFragment[] commandParts)
+    public static CommandQueryFragment Merge(DatabaseQueryOperationType? operationType, ReturnType returnType = ReturnType.None, params CommandQueryFragment[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
             throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
@@ -74,19 +75,19 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
     {
         switch (OperationType)
         {
-            case QueryOperationType.Add:
+            case DatabaseQueryOperationType.Add:
                 SetInsertQuery(returnType);
                 break;
-            case QueryOperationType.Edit:
+            case DatabaseQueryOperationType.Edit:
                 SetUpdateQuery(returnType);
                 break;
-            case QueryOperationType.Remove:
+            case DatabaseQueryOperationType.Remove:
                 SetDeleteQuery();
                 break;
-            case QueryOperationType.Merge:
+            case DatabaseQueryOperationType.Merge:
                 SetMergeQuery(returnType);
                 break;
-            case QueryOperationType.GetData:
+            case DatabaseQueryOperationType.GetData:
             default: throw new NotSupportedOperationException(""); // todo
         }
     }
@@ -218,6 +219,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
 
                             if (columnProperty.ColumnPropertyInfo.Key)
                             {
+                                
                                 recordsWhere.Add(new Tuple<int, string>(index, columnProperty.ColumnPropertyInfo.ParameterPhrase(parameterName)));
                                 continue;
                             }

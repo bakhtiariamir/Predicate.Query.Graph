@@ -1,19 +1,15 @@
 ﻿using Priqraph.Builder.Database;
 using Priqraph.Contract;
+using Priqraph.DataType;
+using Priqraph.Sql.Builder;
 
 namespace Priqraph.Sql.Manager;
 
-public class SqlServerQueryBuilder<TObject> : ISqlServerQueryBuilder<TObject> where TObject : IQueryableObject
+public class SqlServerQueryBuilder<TObject>(ICacheInfoCollection cacheInfoCollection) : ISqlServerQueryBuilder<TObject>
+    where TObject : IQueryableObject
 {
-    private readonly ICacheInfoCollection _cacheInfoCollection;
-
-    public SqlServerQueryBuilder(ICacheInfoCollection cacheInfoCollection)
+    public IQueryObject<TObject, ISqlQuery<TObject, DatabaseQueryOperationType>, DatabaseQueryResult, DatabaseQueryOperationType> Build(bool isObjectQuery = true)
     {
-        _cacheInfoCollection = cacheInfoCollection;
-    }
-
-    public IQueryObject<TObject, DatabaseQueryResult> Build(bool isObjectQuery = true)
-    {
-	    return isObjectQuery  ? new SqlServerQueryObject<TObject>(_cacheInfoCollection) : new SqlServerQueryableQueryObject<TObject>(_cacheInfoCollection);
+        throw new NotImplementedException();
     }
 }

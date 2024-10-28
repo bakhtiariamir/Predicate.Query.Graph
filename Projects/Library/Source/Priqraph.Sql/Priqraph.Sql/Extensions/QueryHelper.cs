@@ -36,11 +36,11 @@ internal static class QueryHelper
 
         return queryParts.CommandFragment.OperationType switch
         {
-            QueryOperationType.Add => queryParts.CommandFragment.Insert(queryParts),
-            QueryOperationType.Remove => queryParts.CommandFragment.Delete(),
-            QueryOperationType.Edit => queryParts.CommandFragment.Update(queryParts),
-            QueryOperationType.Merge => queryParts.CommandFragment.Merge(),
-            QueryOperationType.GetData or _ => throw new NotSupportedOperationException(ExceptionCode.QueryGenerator)
+            DatabaseQueryOperationType.Add => queryParts.CommandFragment.Insert(queryParts),
+            DatabaseQueryOperationType.Remove => queryParts.CommandFragment.Delete(),
+            DatabaseQueryOperationType.Edit => queryParts.CommandFragment.Update(queryParts),
+            DatabaseQueryOperationType.Merge => queryParts.CommandFragment.Merge(),
+            DatabaseQueryOperationType.GetData or _ => throw new NotSupportedOperationException(ExceptionCode.QueryGenerator)
         };
     }
 

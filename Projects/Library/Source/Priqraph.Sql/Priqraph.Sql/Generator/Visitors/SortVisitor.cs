@@ -3,6 +3,7 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using Priqraph.Generator.Database;
 using System.Linq.Expressions;
+using Priqraph.Generator;
 
 namespace Priqraph.Sql.Generator.Visitors;
 

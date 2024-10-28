@@ -6,4 +6,5 @@ namespace Priqraph.Generator.Database
     {
 
     }
+    
 }

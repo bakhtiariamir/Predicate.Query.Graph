@@ -9,7 +9,7 @@ public class PropertyInfo<TProperty> : PropertyInfo, IPropertyInfo<TProperty> wh
     {
     }
 
-    protected PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError)
+    protected PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, bool? isLabel = false) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError, isLabel)
     {
     }
 
@@ -112,12 +112,18 @@ public class PropertyInfo : IPropertyInfo
         get;
         set;
     }
+    
+    public bool IsLabel
+    {
+        get;
+        set;
+    }
 
     public PropertyInfo()
     {
     }
 
-    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null)
+    public PropertyInfo(bool key, string name, bool isUnique, bool readOnly, bool notMapped, ColumnDataType dataType, Type type, bool required = false, string? title = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, bool? isLabel = false)
     {
         Key = key;
         Name = name;
@@ -135,7 +141,8 @@ public class PropertyInfo : IPropertyInfo
         UniqueFieldGroup = uniqueFieldGroup;
         RegexValidator = regexValidator;
         RegexError = regexError;
+        IsLabel = isLabel!.Value;
     }
 
-    public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, DefaultValue, IsObject, MaxLength, MinLength, UniqueFieldGroup, RegexValidator, RegexError);
+    public IPropertyInfo ClonePropertyInfo() => new PropertyInfo(Key, Name, IsUnique, ReadOnly, NotMapped, DataType, Type, Required, Title, DefaultValue, IsObject, MaxLength, MinLength, UniqueFieldGroup, RegexValidator, RegexError, IsLabel);
 }

@@ -4,6 +4,7 @@ using Priqraph.Exception;
 using Priqraph.ExpressionHandler.Visitors;
 using Priqraph.Helper;
 using System.Linq.Expressions;
+using Priqraph.Generator;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Sql.Generator.Visitors;

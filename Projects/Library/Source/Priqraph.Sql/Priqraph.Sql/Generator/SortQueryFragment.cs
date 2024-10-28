@@ -1,6 +1,7 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
+using Priqraph.Generator;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Sql.Generator;

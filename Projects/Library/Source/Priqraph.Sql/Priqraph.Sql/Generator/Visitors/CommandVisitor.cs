@@ -7,6 +7,7 @@ using Priqraph.Helper;
 using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 using System.Reflection;
+using Priqraph.Generator;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Sql.Generator.Visitors;

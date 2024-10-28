@@ -1,7 +1,7 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 
-namespace Priqraph.Generator.Database;
+namespace Priqraph.Generator;
 
 
 public class FilterProperty

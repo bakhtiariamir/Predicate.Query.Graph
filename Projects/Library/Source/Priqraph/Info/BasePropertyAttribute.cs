@@ -75,8 +75,14 @@ public abstract class BasePropertyAttribute : Attribute
         get;
         set;
     }
+    
+    public bool IsLabel
+    {
+        get;
+        set;
+    }
 
-    protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, params string[]? errorMessage)
+    protected BasePropertyAttribute(bool key, string name, bool isUnique, ColumnDataType dataType, bool readOnly = false, bool notMapped = false, string? title = null, bool required = false, object? defaultValue = null, int maxLength = 0, int minLength = 0, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, bool? isLabel = false, params string[]? errorMessage)
     {
         Key = key;
         Name = name;
@@ -93,5 +99,6 @@ public abstract class BasePropertyAttribute : Attribute
         if (errorMessage == null) return;
         RegexValidator = regexValidator;
         RegexError = regexError;
+        IsLabel = isLabel!.Value;
     }
 }

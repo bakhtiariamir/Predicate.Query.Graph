@@ -63,12 +63,12 @@ public class ColumnPropertyInfo : PropertyInfo<IColumnPropertyInfo>, IColumnProp
         get;
         set;
     }
-
+    
     public ColumnPropertyInfo() 
     {
     }
 
-    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool key, bool identity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError)
+    public ColumnPropertyInfo(string schema, string dataSet, string columnName, string name, bool key, bool identity, ColumnDataType dataType, DatabaseFieldType fieldType, Type type, bool isUnique = false, bool readOnly = false, bool notMapped = false, string? functionName = null, AggregateFunctionType? aggregateFunctionType = null, RankingFunctionType? rankingFunctionType = null, bool required = false, string? title = null, string[]? windowPartitionColumns = null, string[]? windowOrderColumns = null, object? defaultValue = null, bool isObject = false, int? maxLength = null, int? minLength = null, string? uniqueFieldGroup = null, string? regexValidator = null, string? regexError = null, bool? isLabel = false) : base(key, name, isUnique, readOnly, notMapped, dataType, type, required, title, defaultValue, isObject, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError, isLabel)
     {
         Schema = schema;
         DataSet = dataSet;

@@ -25,9 +25,10 @@ public class ColumnInfoAttribute(
     int minLength = 0,
     string? uniqueFieldGroup = null,
     string? regexValidator = null,
-    string? regexError = null)
+    string? regexError = null,
+    bool? isLabel = false)
     : BasePropertyAttribute(key, name ?? columnName, isUnique, dataType, readOnly, notMapped, title, required,
-        defaultValue, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError)
+        defaultValue, maxLength, minLength, uniqueFieldGroup, regexValidator, regexError, isLabel: isLabel)
 {
     public string ColumnName
     {

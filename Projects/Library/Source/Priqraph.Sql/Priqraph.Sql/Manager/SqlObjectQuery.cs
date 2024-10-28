@@ -5,18 +5,13 @@ using System.Data.SqlClient;
 
 namespace Priqraph.Sql.Manager;
 
-public class SqlObjectQuery : ObjectQuery<SqlParameter>, ISqlQuery
+public class SqlObjectQuery(ICollection<SqlParameter>? parameters, string phrase) : ObjectQuery<SqlParameter>(parameters), ISqlQuery
 {
     public string Phrase
     {
         get;
-    }
-
-    public SqlObjectQuery(ICollection<SqlParameter>? parameters, string phrase) : base(parameters)
-    {
-        Phrase = phrase;
-    }
-
+    } = phrase;
+    
     public override void UpdateParameter(string type, params ParameterValue[] parameters) => Parameters?.ToList().ForEach(parameter =>
     {
         ParameterValue? newParam;

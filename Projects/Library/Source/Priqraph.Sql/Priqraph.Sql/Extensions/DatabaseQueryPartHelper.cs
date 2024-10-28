@@ -1,6 +1,5 @@
 ﻿using Priqraph.Builder.Database;
 using Priqraph.Exception;
-using Priqraph.Generator.Database;
 using System.Data.SqlClient;
 using Priqraph.Sql.Generator;
 

@@ -1,7 +1,4 @@
-﻿namespace Priqraph.Generator.Database
+﻿namespace Priqraph.Generator.Database;
+public class DatabaseSortQueryFragment : QueryFragment<ICollection<SortProperty>>
 {
-    public class DatabaseSortQueryFragment : QueryFragment<ICollection<SortProperty>>
-    {
-
-    }
 }

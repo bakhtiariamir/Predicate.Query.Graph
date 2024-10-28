@@ -2,21 +2,14 @@
 
 namespace Priqraph.Contract;
 
-public interface IQueryObject<TObject, out TQueryResult> where TObject : IQueryableObject
+public interface IQueryObject<TObject, TObjectQuery, out TQueryResult, TEnum> 
+    where TObject : IQueryableObject 
+    where TObjectQuery : IQuery<TObject, TEnum>
+    where TEnum : struct, IConvertible
 {
-    TQueryResult Build(IQuery<TObject> query);
-}
-
-public interface ISqlServerQueryObject<TObject> : IQueryObject<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
-
-}
-
-public interface ISqlServerQueryableQueryObject<TObject> : IQueryObject<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
-
-}
-
-public interface ISqlServerQueryBuilder<TObject> : IQueryBuilder<TObject, DatabaseQueryResult> where TObject : IQueryableObject
-{
+    TObjectQuery Query
+    {
+        get;
+    }
+    TQueryResult Build(TObjectQuery query);
 }

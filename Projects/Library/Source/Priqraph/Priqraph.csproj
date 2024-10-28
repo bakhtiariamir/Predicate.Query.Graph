@@ -30,6 +30,22 @@
     <Compile Remove="Priqraph.Test\**" />
     <EmbeddedResource Remove="Priqraph.Test\**" />
     <None Remove="Priqraph.Test\**" />
+    <Compile Remove="Manager\Result\Cache\**" />
+    <EmbeddedResource Remove="Manager\Result\Cache\**" />
+    <None Remove="Manager\Result\Cache\**" />
+    <Compile Remove="Helper\CacheQueryHelper.cs" />
+    <Compile Remove="Builder\Cache\**" />
+    <EmbeddedResource Remove="Builder\Cache\**" />
+    <None Remove="Builder\Cache\**" />
+    <Compile Remove="Generator\Cache\MemoryCache\**" />
+    <EmbeddedResource Remove="Generator\Cache\MemoryCache\**" />
+    <None Remove="Generator\Cache\MemoryCache\**" />
+    <Compile Remove="Generator\Cache\**" />
+    <EmbeddedResource Remove="Generator\Cache\**" />
+    <None Remove="Generator\Cache\**" />
+    <Compile Remove="Generator\Neo4j\**" />
+    <EmbeddedResource Remove="Generator\Neo4j\**" />
+    <None Remove="Generator\Neo4j\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,10 +77,6 @@
     <Compile Remove="Manager\Result\Cache\CacheQueryOperation.cs" />
     <Compile Remove="Query\QueryObjectGrouping.cs" />
     <Compile Remove="Query\QueryObjectInserting.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Manager\Service\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,9 +5,11 @@ using Priqraph.Setup;
 
 namespace Priqraph.Query;
 
-internal class Query<TObject> : IQuery<TObject> where TObject : IQueryableObject
+internal class Query<TObject, TEnum> : IQuery<TObject, TEnum> 
+    where TObject : IQueryableObject
+    where TEnum : struct, IConvertible  
 {
-    public QueryOperationType QueryOperationType
+    public DatabaseQueryOperationType DatabaseQueryOperationType
     {
         get;
         set;
@@ -61,6 +63,8 @@ internal class Query<TObject> : IQuery<TObject> where TObject : IQueryableObject
         set;
     }
 
+    public IQuery<TObject, TEnum> Init(TEnum operationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => throw new NotImplementedException();
+
     public Dictionary<string, string> QueryOptions
     {
         get;
@@ -73,21 +77,21 @@ internal class Query<TObject> : IQuery<TObject> where TObject : IQueryableObject
         set;
     } = new List<Type>();
 
-    private Query(QueryOperationType queryOperationType)
+    private Query(DatabaseQueryOperationType databaseQueryOperationType)
     {
-        QueryOperationType = queryOperationType;
+        DatabaseQueryOperationType = databaseQueryOperationType;
         ObjectTypeStructures.Add(typeof(Type));
     }
 
-    private Query(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null)
+    private Query(DatabaseQueryOperationType databaseQueryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null)
     {
         QueryProvider = queryProvider;
-        QueryOperationType = queryOperationType;
+        DatabaseQueryOperationType = databaseQueryOperationType;
         ObjectTypeStructures = objectTypeStructures?.ToList() ?? new List<Type>();
         //FIXME - What is this
         if (objectTypeStructures is not null && !objectTypeStructures.Contains(typeof(Type)))
             ObjectTypeStructures.Add(typeof(Type));
     }
 
-    public static Query<TObject> Init(QueryOperationType queryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => new(queryOperationType, queryProvider, objectTypeStructures);
+    public IQuery<TObject, TEnum> Init(DatabaseQueryOperationType databaseQueryOperationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => new Query<TObject, TEnum>(databaseQueryOperationType, queryProvider, objectTypeStructures);
 }

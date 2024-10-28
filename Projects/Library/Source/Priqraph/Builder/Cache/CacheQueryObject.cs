@@ -29,25 +29,25 @@ internal abstract class CacheQueryObject<TObject> : QueryObject<TObject, CacheQu
 
     public override CacheQueryResult Build(IQuery<TObject> query)
     {
-        switch (query.QueryOperationType)
+        switch (query.DatabaseQueryOperationType)
         {
-            case QueryOperationType.GetData:
+            case DatabaseQueryOperationType.GetData:
                 GenerateWhere(query);
                 GenerateOrderBy(query);
                 //await GenerateJoinAsync();
                 GeneratePaging(query);
                 break;
-            case QueryOperationType.GetCount:
+            case DatabaseQueryOperationType.GetCount:
                 GenerateWhere(query);
                 //await GenerateJoinAsync();
                 break;
-            case QueryOperationType.Add:
+            case DatabaseQueryOperationType.Add:
                 GenerateAdd(query);
                 break;
-            case QueryOperationType.Edit:
+            case DatabaseQueryOperationType.Edit:
                 GenerateUpdate(query);
                 break;
-            case QueryOperationType.Remove:
+            case DatabaseQueryOperationType.Remove:
                 GenerateRemove(query);
                 break;
         }

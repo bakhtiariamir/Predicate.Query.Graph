@@ -2,8 +2,11 @@
 
 namespace Priqraph.Contract
 {
-    public interface IQueryOperationFactory<TObject, out TResult> where TObject : IQueryableObject
+    public interface IQueryOperationFactory<TObject, TQueryObject, out TResult, TEnum>
+        where TObject : IQueryableObject
+        where TQueryObject : IQuery<TObject, TEnum>
+        where TEnum : struct, IConvertible
     {
-        IQueryObject<TObject, TResult> QueryProvider(ICacheInfoCollection cacheInfoCollection, QueryProvider provider);
+        IQueryObject<TObject, TQueryObject, TResult, TEnum> QueryProvider(ICacheInfoCollection cacheInfoCollection, QueryProvider provider);
     }
 }

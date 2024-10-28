@@ -7,29 +7,31 @@ using Priqraph.Setup;
 
 namespace Priqraph.Query;
 
-public class QueryBuilder<TObject> : IQueryObjectBuilder<TObject>
+public class QueryBuilder<TObject, TQueryObject, TEnum> : IQueryObjectBuilder<TObject, TQueryObject, TEnum>
     where TObject : IQueryableObject
+    where TQueryObject : IQuery<TObject, TEnum>
+    where TEnum : struct, IConvertible  
 {
-    private IQuery<TObject>? _query;
+    private TQueryObject? _query;
 
-    public void Init(QueryOperationType operationType, QueryProvider queryProvider, ICollection<Type>? objectTypeStructures = null) => _query = Query<TObject>.Init(operationType, queryProvider, objectTypeStructures);
-
-    public IQueryObjectBuilder<TObject> SetQuery(IQueryable query)
+    public void Init(TEnum operationType, QueryProvider queryProvider, TQueryObject query, ICollection<Type>? objectTypeStructures = null) => _query = (TQueryObject?)query.Init(operationType, queryProvider, objectTypeStructures);
+    
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetQuery(IQueryable query)
     {
         if (_query == null) 
             throw new QueryNullException(string.Format(ExceptionCode.QueryBuilder, nameof(query), ErrorCode.IsNull), "The query object is null.");
         _query.Queryable = query;
         return this;
     }
-
-    public IQueryObjectBuilder<TObject> SetCommand(CommandPredicateBuilder<TObject> objectCommandPredicateBuilder)
+    
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetCommand(CommandPredicateBuilder<TObject> objectCommandPredicateBuilder)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder,"The query object is null.");
         _query.CommandPredicates = objectCommandPredicateBuilder.Validate().Return();
         return this;
     }
-
-    public IQueryObjectBuilder<TObject> SetColumn(ColumnPredicateBuilder<TObject> objectSelecting)
+    
+    public IQueryObjectBuilder<TObject,TQueryObject, TEnum> SetColumn(ColumnPredicateBuilder<TObject> objectSelecting)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.ColumnPredicates = objectSelecting.Validate().Return();
@@ -37,49 +39,49 @@ public class QueryBuilder<TObject> : IQueryObjectBuilder<TObject>
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetColumns(ICollection<ColumnPredicate<TObject>> columns)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetColumns(ICollection<ColumnPredicate<TObject>> columns)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.ColumnPredicates = columns;
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetFilter(FilterPredicateBuilder<TObject> objectFiltering)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetFilter(FilterPredicateBuilder<TObject> objectFiltering)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.FilterPredicates = objectFiltering.Validate().Return();
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetFilter(FilterPredicate<TObject> filterPredicate)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetFilter(FilterPredicate<TObject> filterPredicate)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.FilterPredicates = filterPredicate;
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetSort(SortPredicateBuilder<TObject> objectSorting)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetSort(SortPredicateBuilder<TObject> objectSorting)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.SortPredicates = objectSorting.Validate().Return();
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetSorts(ICollection<SortPredicate<TObject>> sortPredicates)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetSorts(ICollection<SortPredicate<TObject>> sortPredicates)
     {
         if (_query == null) throw new QueryNullException(ExceptionCode.QueryBuilder, "The query object is null.");
         _query.SortPredicates = sortPredicates;
         return this;
     }
 
-    public IQueryObjectBuilder<TObject> SetPaging(PagePredicateBuilder paging)
+    public IQueryObjectBuilder<TObject, TQueryObject, TEnum> SetPaging(PagePredicateBuilder paging)
     {
         if (_query == null) throw new QueryNullException( ExceptionCode.QueryBuilder, "The query object is null.");
         _query.PagePredicate = paging.Validate().Return();
         return this;
     }
 
-    public IQuery<TObject> Generate()
+    public TQueryObject Generate()
     {
         if (_query == null)
             throw new NotValidException(string.Format(ExceptionCode.QueryBuilder, "query", ErrorCode.IsNull));

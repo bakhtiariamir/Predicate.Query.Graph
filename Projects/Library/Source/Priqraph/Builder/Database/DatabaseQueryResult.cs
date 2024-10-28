@@ -59,7 +59,3 @@ public class DatabaseQueryResult : IQueryResult
         set;
     }
 }
-
-public interface IQueryResult
-{
-}

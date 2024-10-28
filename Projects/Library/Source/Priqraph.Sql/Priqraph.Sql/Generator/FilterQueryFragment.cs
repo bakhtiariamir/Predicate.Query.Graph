@@ -2,12 +2,11 @@
 using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Generator.Database;
-using Priqraph.Query.Builders;
 using Priqraph.Setup;
 using Priqraph.Sql.Extensions;
 using System.Data;
 using System.Data.SqlClient;
-using static Priqraph.Query.Builders.ReturnType;
+using Priqraph.Generator;
 
 namespace Priqraph.Sql.Generator;
 public class FilterQueryFragment : DatabaseFilterQueryFragment
@@ -19,11 +18,11 @@ public class FilterQueryFragment : DatabaseFilterQueryFragment
 
     public static FilterQueryFragment Create(FilterProperty? property = null) => new(property);
 
-    public void SetText(ReturnType returnType = None, FilterProperty? returnClause = null) =>
+    public void SetText(ReturnType returnType = ReturnType.None, FilterProperty? returnClause = null) =>
         Text = returnType switch
         {
-            Record => ReturnResultRecordWhereClause(returnClause ?? throw new ArgumentNullException($"object prameter key can not be null.")),
-            _ or None => SetWhereClauseText(Parameter)
+            ReturnType.Record => ReturnResultRecordWhereClause(returnClause ?? throw new ArgumentNullException($"object prameter key can not be null.")),
+            _ or ReturnType.None => SetWhereClauseText(Parameter)
         };
 
     private static string ReturnResultRecordWhereClause(FilterProperty returnProperty) => $"{returnProperty.ColumnPropertyInfo?.GetSelector()}.[{returnProperty.ColumnPropertyInfo?.ColumnName}] = @ResultId";

@@ -1,7 +1,5 @@
-﻿namespace Priqraph.Generator.Database
+﻿namespace Priqraph.Generator.Database;
+public class DatabaseJoinQueryFragment : QueryFragment<ICollection<JoinProperty>>
 {
-    public class DatabaseJoinQueryFragment : QueryFragment<ICollection<JoinProperty>>
-    {
 
-    }
 }

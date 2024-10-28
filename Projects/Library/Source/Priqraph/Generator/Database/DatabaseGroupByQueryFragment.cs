@@ -1,12 +1,10 @@
-﻿namespace Priqraph.Generator.Database
+﻿namespace Priqraph.Generator.Database;
+public  class DatabaseGroupByQueryFragment : QueryFragment<GroupByProperty>
 {
-    public  class DatabaseGroupByQueryFragment : QueryFragment<GroupByProperty>
+    public string? Having
     {
-        public string? Having
-        {
-            get;
-            protected set;
-        }
-
+        get;
+        protected set;
     }
+
 }

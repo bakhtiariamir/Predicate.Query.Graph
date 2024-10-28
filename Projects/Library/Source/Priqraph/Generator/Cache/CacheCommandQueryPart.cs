@@ -14,11 +14,11 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         set => _commandParts = value;
     }
 
-    public QueryOperationType OperationType
+    public DatabaseQueryOperationType OperationType
     {
         get;
         private set;
-    } = QueryOperationType.Add;
+    } = DatabaseQueryOperationType.Add;
 
 
     public ICollection<BaseQueryParameter> Parameters
@@ -26,7 +26,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
         get;
     }
 
-    private void SetOptions(QueryOperationType operationType) => OperationType = operationType;
+    private void SetOptions(DatabaseQueryOperationType operationType) => OperationType = operationType;
 
     private CacheCommandQueryPart()
     {
@@ -38,7 +38,7 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
 
     public static CacheCommandQueryPart Create(ICollection<CacheClausePredicate> parameterCollections) => new(parameterCollections);
 
-    public static CacheCommandQueryPart Merge(QueryOperationType? operationType, params CacheCommandQueryPart[] commandParts)
+    public static CacheCommandQueryPart Merge(DatabaseQueryOperationType? operationType, params CacheCommandQueryPart[] commandParts)
     {
         //if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
         //    throw new NotSupported(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
@@ -81,16 +81,16 @@ public class CacheCommandQueryPart : CacheQueryPart<CacheParameterCollection>
     {
         switch (OperationType)
         {
-            case QueryOperationType.Add:
+            case DatabaseQueryOperationType.Add:
                 SetInsertQuery();
                 break;
-            case QueryOperationType.Edit:
+            case DatabaseQueryOperationType.Edit:
                 SetUpdateQuery();
                 break;
-            case QueryOperationType.Remove:
+            case DatabaseQueryOperationType.Remove:
                 SetDeleteQuery();
                 break;
-            case QueryOperationType.GetData:
+            case DatabaseQueryOperationType.GetData:
             default: throw new NotSupportedOperationException(""); // todo
         }
     }

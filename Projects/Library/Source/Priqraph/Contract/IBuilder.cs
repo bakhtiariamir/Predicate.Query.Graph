@@ -1,12 +1,15 @@
 ﻿namespace Priqraph.Contract;
-public interface IBuilder<TObject, out TMiddleware> where TObject : IQueryableObject where TMiddleware : IBuilderMiddleware<TObject>
+public interface IBuilder<TObject, out TMiddleware, in TEnum> 
+    where TObject : IQueryableObject 
+    where TMiddleware : IBuilderMiddleware<TObject, TEnum>
+    where TEnum : struct, IConvertible
 {
     public TMiddleware Middleware
     {
         get;
     }
 
-    IQuery<TObject> Build();
+    IQuery<TObject, TEnum> Build();
 }
 
 //public interface ICommandBuilder<TObject> : IBuilderMiddleware<TObject> where TObject : IQueryableObject

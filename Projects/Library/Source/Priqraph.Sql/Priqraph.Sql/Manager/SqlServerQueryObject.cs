@@ -1,7 +1,6 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
-using Priqraph.Generator.Database;
 using Priqraph.Helper;
 using Priqraph.Query;
 using Priqraph.Query.Builders;
@@ -9,16 +8,19 @@ using Priqraph.Query.Predicates;
 using Priqraph.Setup;
 using System.Linq.Expressions;
 using Priqraph.Builder.Database;
+using Priqraph.Generator;
 using Priqraph.Info;
+using Priqraph.Sql.Builder;
 using Priqraph.Sql.Generator;
 using Priqraph.Sql.Generator.Visitors;
 
 namespace Priqraph.Sql.Manager;
 
-internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISqlServerQueryObject<TObject> where TObject : IQueryableObject
+internal class SqlServerQueryObject<TObject> : SqlQueryObject<TObject, ISqlQuery<TObject, DatabaseQueryOperationType>> , ISqlServerQueryObject<TObject, DatabaseQueryOperationType>
+    where TObject : IQueryableObject
 {
     private readonly IDatabaseObjectInfo _objectInfo;
-
+    public override ISqlQuery<TObject, DatabaseQueryOperationType> Query { get; }
     public SqlServerQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ??
@@ -27,56 +29,55 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         QueryResult.DatabaseObjectInfo = _objectInfo;
     }
 
-    protected override void GenerateInsert(IQuery<TObject> query)
+    protected override void GenerateInsert(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         var command = query.CommandPredicates ?? throw new NotSupportedOperationException("a");
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, default);
-        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Add);
+        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Add);
 
         if (QueryResult.CommandFragment != null && command.ReturnType == ReturnType.Record && QueryResult.CommandFragment.CommandParts.ContainsKey("result"))
         {
             if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for insert query in return record mode for {typeof(TObject).Name} can not be null.");
 
-            var builder = new QueryBuilder<TObject>();
-            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            var builder = new QueryBuilder<TObject, ISqlQuery<TObject, DatabaseQueryOperationType>, DatabaseQueryOperationType>();
+            builder.Init(DatabaseQueryOperationType.GetData, QueryProvider.SqlServer, query, query.ObjectTypeStructures);
             var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = Build(selectQuery);
             QueryResult.ResultQuery = sqlQuery;
         }
     }
 
-    protected override void GenerateUpdate(IQuery<TObject> query)
+    protected override void GenerateUpdate(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         var command = query.CommandPredicates ??
                       throw new ArgumentNullException(nameof(query.CommandPredicates), "Command Predicate cannot null");
         
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Edit);
+        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Edit);
         if (QueryResult.CommandFragment != null && command.ReturnType == ReturnType.Record && QueryResult.CommandFragment.CommandParts.ContainsKey("result"))
         {
             if (query.ColumnPredicates == null)
                 throw new ArgumentNullException($"Columns for update query in return record mode for {typeof(TObject).Name} can not be null.");
 
-            var builder = new QueryBuilder<TObject>();
-            builder.Init(QueryOperationType.GetData, QueryProvider.SqlServer, query.ObjectTypeStructures);
+            var builder = new QueryBuilder<TObject, ISqlQuery<TObject,DatabaseQueryOperationType>, DatabaseQueryOperationType>();
+            builder.Init(DatabaseQueryOperationType.GetData, QueryProvider.SqlServer, query, query.ObjectTypeStructures);
             var selectQuery = builder.SetColumns(query.ColumnPredicates).SetFilter(FilterPredicateBuilder<TObject>.Init(ReturnType.Record).Return()).Generate();
             var sqlQuery = Build(selectQuery);
             QueryResult.ResultQuery = sqlQuery;
         }
     }
 
-    protected override void GenerateDelete(IQuery<TObject> query)
+    protected override void GenerateDelete(ISqlQuery<TObject,DatabaseQueryOperationType> query)
     {
         var command = query.CommandPredicates ??
                       throw new ArgumentNullException(nameof(query.CommandPredicates), "Command Predicate cannot null");
         
         var commandSqlVisitor = new CommandVisitor(Context.CacheInfoCollection, _objectInfo, null);
-        GenerateRecordCommand(command, commandSqlVisitor, QueryOperationType.Remove);
-
+        GenerateRecordCommand(command, commandSqlVisitor, DatabaseQueryOperationType.Remove);
     }
 
-    protected override void GenerateColumn(IQuery<TObject> query, bool getCount = false)
+    protected override void GenerateColumn(ISqlQuery<TObject, DatabaseQueryOperationType> query, bool getCount = false)
     {
         if (!getCount)
         {
@@ -127,7 +128,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     }
 
-    protected override void GenerateWhere(IQuery<TObject> query)
+    protected override void GenerateWhere(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         if (query.FilterPredicates?.ReturnType != ReturnType.None)
         {
@@ -179,7 +180,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
 
     }
 
-    protected override void GeneratePaging(IQuery<TObject> query)
+    protected override void GeneratePaging(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         var expression = query.PagePredicate?.Predicate;
         if (expression == null) return;
@@ -194,7 +195,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         QueryResult.PageFragment = pagingVisitor.Generate(body);
     }
 
-    protected override void GenerateOrderBy(IQuery<TObject> query)
+    protected override void GenerateOrderBy(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         var sortExpression = query.SortPredicates?.ToList();
         if (sortExpression == null) return;
@@ -217,7 +218,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         });
     }
 
-    protected override void GenerateJoin(IQuery<TObject> query)
+    protected override void GenerateJoin(ISqlQuery<TObject, DatabaseQueryOperationType> query)
     {
         var joins = new List<Tuple<IColumnPropertyInfo, int>>();
 
@@ -319,7 +320,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         }
     }
 
-    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, QueryOperationType operationType)
+    private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, DatabaseQueryOperationType operationType)
     {
         var commandQueries = new List<CommandQueryFragment>();
         switch (commandPredicate.CommandValueType)
@@ -339,7 +340,7 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
         QueryResult.CommandFragment = commandObject;
     }
 
-    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CommandQueryFragment> commandQueries, QueryOperationType operationType)
+    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<CommandQueryFragment> commandQueries, DatabaseQueryOperationType operationType)
     {
         if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null)
             throw new ArgumentNullException(nameof(commandPredicate.ObjectPredicate));
@@ -381,6 +382,4 @@ internal class SqlServerQueryObject<TObject> : DatabaseQueryObject<TObject>, ISq
             }
         }
     }
-
-
 }

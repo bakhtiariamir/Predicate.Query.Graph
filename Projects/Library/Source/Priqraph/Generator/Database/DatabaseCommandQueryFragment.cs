@@ -10,11 +10,11 @@ public  class DatabaseCommandQueryFragment : QueryFragment<CommandProperty>
         set;
     } = new();
 
-    public QueryOperationType OperationType
+    public DatabaseQueryOperationType OperationType
     {
         get;
         set;
-    } = QueryOperationType.Add;
+    } = DatabaseQueryOperationType.Add;
 
     public CommandValueType CommandValueType
     {
