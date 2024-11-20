@@ -10,7 +10,7 @@ namespace Priqraph.Builder;
         set;
     }
 
-    public Neo4jCommandQueryFragment? CommandFragment
+    public Neo4JCommandQueryFragment? CommandFragment
     {
         get;
         set;
@@ -34,7 +34,7 @@ namespace Priqraph.Builder;
         set;
     }
 
-    public Neo4jJoinQueryFragment? JoinFragment
+    public Neo4JJoinQueryFragment? JoinFragment
     {
         get;
         set;

@@ -19,7 +19,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
 
     private CommandQueryFragment()
     {
-        SqlParameters = new List<SqlParameter>();
+        Parameters = new List<SqlParameter>();
         CommandParts = new Dictionary<string, object>();
     }
 
@@ -136,7 +136,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                             {
                                 Value = columnValue ?? DBNull.Value
                             };
-                            SqlParameters.Add(sqlParameter);
+                            Parameters.Add(sqlParameter);
                             recordValue.Add(new Tuple<int, string?>(index, parameterName));
                             index += 1;
                         }
@@ -149,7 +149,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                         {
                             Value = columnProperty.Value ?? DBNull.Value
                         };
-                        SqlParameters.Add(sqlParameter);
+                        Parameters.Add(sqlParameter);
                         recordValue.Add(new Tuple<int, string?>(0, parameterName));
                     }
                 }
@@ -215,7 +215,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                             {
                                 Value = columnValue ?? DBNull.Value
                             };
-                            SqlParameters.Add(sqlParameter);
+                            Parameters.Add(sqlParameter);
 
                             if (columnProperty.ColumnPropertyInfo.Key)
                             {
@@ -251,7 +251,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                         {
                             Value = columnProperty.Value ?? DBNull.Value
                         };
-                        SqlParameters.Add(sqlParameter);
+                        Parameters.Add(sqlParameter);
 
                         if (columnProperty.ColumnPropertyInfo.Key)
                         {
@@ -303,7 +303,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                     var ids = records.Select(record => Dynamic.InvokeGet(record, primaryKeyColumn.Name)).ToArray() ?? throw new System.Exception(); //todo
 
                     foreach (var parameter in ParameterHelper.ArrayParameters(parameterName, ids, primaryKeyColumn.DataType))
-                        SqlParameters.Add(parameter);
+                        Parameters.Add(parameter);
 
                     where = primaryKeyColumn.ArrayParameterNames(parameterName, ids.Length);
                 }
@@ -316,7 +316,7 @@ public class CommandQueryFragment : DatabaseCommandQueryFragment
                     {
                         Value = primaryKey.Value
                     };
-                    SqlParameters.Add(sqlParameter);
+                    Parameters.Add(sqlParameter);
                 }
 
                 CommandParts["Where"] = where;

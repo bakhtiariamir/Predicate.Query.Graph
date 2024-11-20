@@ -12,7 +12,7 @@ public class ColumnPredicateBuilder<TObject> : IQueryObjectPart<ColumnPredicateB
     
     public static ColumnPredicateBuilder<TObject> Init() => new();
 
-    public ColumnPredicateBuilder<TObject> Add(Expression<Func<TObject, object>> expression)
+    private ColumnPredicateBuilder<TObject> Add(Expression<Func<TObject, object>> expression)
     {
         _columnPredicates.Add(new ColumnPredicate<TObject>(expression));
         return this;

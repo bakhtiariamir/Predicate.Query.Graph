@@ -2,7 +2,7 @@
 using Priqraph.DataType;
 using Priqraph.Query.Predicates;
 
-namespace Priqraph.Query
+namespace Priqraph.Query.Reduce
 {
     public  class QueryReducer<TObject, TQueryObject, TEnum> 
         where TObject : IQueryableObject 

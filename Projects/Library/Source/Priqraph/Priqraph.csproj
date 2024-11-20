@@ -65,7 +65,6 @@
     <Compile Remove="Contract\IDatabaseCacheObjectInfo.cs" />
     <Compile Remove="Contract\IDatabaseQuery.cs" />
     <Compile Remove="Contract\IDatabaseQueryOperation.cs" />
-    <Compile Remove="Contract\ISqlQuery.cs" />
     <Compile Remove="Contract\ISqlServerQueryContext.cs" />
     <Compile Remove="Generator\Database\DatabaseInsertQueryPart.cs" />
     <Compile Remove="Helper\SqlParameterHelper.cs" />
@@ -80,11 +79,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac" Version="8.1.1" />
     <PackageReference Include="Dynamitey" Version="3.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
-    <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,5 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
-using Priqraph.Query.Builders;
 using System.Linq.Expressions;
 
 namespace Priqraph.Query.Predicates

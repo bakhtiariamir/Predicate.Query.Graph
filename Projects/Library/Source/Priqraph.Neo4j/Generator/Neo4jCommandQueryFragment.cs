@@ -1,15 +1,13 @@
-﻿using System.Data;
-using Dynamitey;
+﻿using Dynamitey;
 using Priqraph.Contract;
 using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Generator.Database;
-using System.Data.SqlClient;
 using Priqraph.Generator;
 using Priqraph.Neo4j.Extensions;
 
 namespace Priqraph.Neo4j.Generator;
-public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
+public class Neo4JCommandQueryFragment : DatabaseCommandQueryFragment
 {
     public Neo4jQueryOperationType OperationType
     {
@@ -17,7 +15,7 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
         set;
     }
 
-    public List<Neo4jParameter> Neo4jParameters
+    public List<Neo4JParameter> Neo4jParameters
     {
         get;
         set;
@@ -29,34 +27,34 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
         CommandValueType = commandValueType;
     }
 
-    private Neo4jCommandQueryFragment()
+    private Neo4JCommandQueryFragment()
     {
-        Neo4jParameters = new List<Neo4jParameter>();
+        Neo4jParameters = new List<Neo4JParameter>();
         CommandParts = new Dictionary<string, object>();
     }
 
-    private Neo4jCommandQueryFragment(ColumnPropertyCollection columnPropertyCollection) : this()
+    private Neo4JCommandQueryFragment(ColumnPropertyCollection columnPropertyCollection) : this()
     {
         Parameter = new CommandProperty(new[] { columnPropertyCollection });
     }
 
-    private Neo4jCommandQueryFragment(ICollection<ColumnPropertyCollection> columnPropertyCollections) : this()
+    private Neo4JCommandQueryFragment(ICollection<ColumnPropertyCollection> columnPropertyCollections) : this()
     {
         Parameter = new CommandProperty(columnPropertyCollections);
     }
 
-    public static Neo4jCommandQueryFragment Create(ColumnPropertyCollection columnPropertyCollection) => new(columnPropertyCollection);
+    public static Neo4JCommandQueryFragment Create(ColumnPropertyCollection columnPropertyCollection) => new(columnPropertyCollection);
 
-    public static Neo4jCommandQueryFragment Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
+    public static Neo4JCommandQueryFragment Create(params ColumnProperty[] columnProperties) => new(new ColumnPropertyCollection(columnProperties));
 
-    public static Neo4jCommandQueryFragment Merge(Neo4jQueryOperationType? operationType, ReturnType returnType = ReturnType.None, params Neo4jCommandQueryFragment[] commandParts)
+    public static Neo4JCommandQueryFragment Merge(Neo4jQueryOperationType? operationType, ReturnType returnType = ReturnType.None, params Neo4JCommandQueryFragment[] commandParts)
     {
         if (commandParts.DistinctBy(item => item.CommandValueType).Count() > 1)
             throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryFilteringGenerator); //todo
 
         var commandType = commandParts.Select(item => item.CommandValueType).First();
         var commandPredicates = new List<ColumnPropertyCollection>();
-        Neo4jCommandQueryFragment? databaseCommandPart = null;
+        Neo4JCommandQueryFragment? databaseCommandPart = null;
         switch (commandType)
         {
             case CommandValueType.Record:
@@ -65,7 +63,7 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                 foreach (var columnPropertyCollection in commands)
                     commandPredicates.AddRange(columnPropertyCollection!);
 
-                databaseCommandPart = new Neo4jCommandQueryFragment(commandPredicates);
+                databaseCommandPart = new Neo4JCommandQueryFragment(commandPredicates);
                 break;
             case CommandValueType.Bulk:
 
@@ -135,7 +133,7 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                     if (!(string.IsNullOrWhiteSpace(columnProperty.ColumnPropertyInfo.FunctionName ?? string.Empty))) continue;
 
                     columnList.Add(columnProperty.ColumnPropertyInfo.ColumnName);
-                    var dataType = columnProperty.ColumnPropertyInfo.DataType();
+                    var dataType = columnProperty.ColumnPropertyInfo.DataType;
                     if (records?.Length > 1)
                     {
                         var index = 0;
@@ -144,7 +142,10 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
 
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-                            var sqlParameter = new Neo4jParameter(parameterName, columnValue, dataType);
+                            var sqlParameter = new Neo4JParameter(parameterName, columnValue)
+                            {
+                                DataType = dataType
+                            };
                             Neo4jParameters.Add(sqlParameter);
                             recordValue.Add(new Tuple<int, string?>(index, parameterName));
                             index += 1;
@@ -154,7 +155,10 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                     {
                         //1 if value is iqueryable object
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-                        var sqlParameter = new Neo4jParameter(parameterName, columnProperty.Value, dataType);
+                        var sqlParameter = new Neo4JParameter(parameterName, columnProperty.Value)
+                        {
+                            DataType = dataType
+                        };
                         Neo4jParameters.Add(sqlParameter);
                         recordValue.Add(new Tuple<int, string?>(0, parameterName));
                     }
@@ -217,7 +221,10 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                             var dataType = columnProperty.ColumnPropertyInfo.DataType;
                             var columnValue = Dynamic.InvokeGet(record, columnProperty.ColumnPropertyInfo.Name);
                             var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, index)}";
-                            var sqlParameter = new Neo4jParameter(parameterName, columnValue, dataType);
+                            var sqlParameter = new Neo4JParameter(parameterName, columnValue)
+                            {
+                                DataType = dataType
+                            };
                             Neo4jParameters.Add(sqlParameter);
                             if (columnProperty.ColumnPropertyInfo.Key)
                             {
@@ -248,7 +255,10 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
 
                         var dbType = columnProperty.ColumnPropertyInfo.DataType;
                         var parameterName = $"@{SetParameterName(columnProperty.ColumnPropertyInfo, 0)}";
-                        var sqlParameter = new Neo4jParameter(parameterName, columnProperty.Value ?? DBNull.Value, dbType);
+                        var sqlParameter = new Neo4JParameter(parameterName, columnProperty.Value ?? DBNull.Value)
+                        {
+                            DataType = dbType
+                        };
                         Neo4jParameters.Add(sqlParameter);
 
                         if (columnProperty.ColumnPropertyInfo.Key)
@@ -310,7 +320,10 @@ public class Neo4jCommandQueryFragment : DatabaseCommandQueryFragment
                     where = primaryKeyColumn.ParameterPhrase(parameterName);
                     var dbType = primaryKeyColumn?.DataType ?? ColumnDataType.Object;
 
-                    var parameter = new Neo4jParameter(parameterName, primaryKey.Value, dbType);
+                    var parameter = new Neo4JParameter(parameterName, primaryKey.Value)
+                    {
+                        DataType = dbType
+                    };
                     Neo4jParameters.Add(parameter);
                 }
 

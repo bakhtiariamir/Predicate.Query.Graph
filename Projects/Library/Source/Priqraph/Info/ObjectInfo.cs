@@ -33,7 +33,7 @@ public class ObjectInfo<TPropertyInfo>(IEnumerable<TPropertyInfo> propertyInfos,
         }
         catch (InvalidCastException)
         {
-            throw new InvalidCastException(); //todo
+            throw new InvalidCastException();
         }
     }
 }

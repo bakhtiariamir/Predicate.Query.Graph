@@ -1,6 +1,6 @@
 ﻿using Priqraph.Builder.Database;
 using Priqraph.Exception;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Priqraph.Sql.Generator;
 
 namespace Priqraph.Sql.Extensions;
@@ -10,13 +10,16 @@ public static class DatabaseQueryPartHelper
     {
         if (queryParts == null) throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryGenerator);
 
-        var sqlParameters = FilterQueryFragment.GetParameters(queryParts.FilterFragment?.Parameter, queryParts.FilterFragment?.QuerySetting).ToArray();
+        var sqlParameters = FilterQueryFragment.GetParameters(queryParts.FilterFragment?.Parameter, queryParts.FilterFragment?.QuerySetting!)?.ToArray();
 
         var pageParameters = PageQueryFragment.GetParameters(queryParts.PageFragment?.Parameter)?.ToArray();
 
 
-        var parameters = sqlParameters.Concat(pageParameters ?? Array.Empty<SqlParameter>());
+        var parameters = sqlParameters?.Concat(pageParameters ?? []);
 
+        if (parameters is null)
+            yield break;
+        
         foreach (var parameter in parameters)
             yield return parameter;
     }

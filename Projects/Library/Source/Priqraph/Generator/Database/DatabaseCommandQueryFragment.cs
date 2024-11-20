@@ -1,8 +1,7 @@
 ﻿using Priqraph.DataType;
-using System.Data.SqlClient;
 
 namespace Priqraph.Generator.Database;
-public  class DatabaseCommandQueryFragment : QueryFragment<CommandProperty>
+public  class DatabaseCommandQueryFragment<TParameter> : QueryFragment<CommandProperty>
 {
     public Dictionary<string, object> CommandParts
     {
@@ -22,9 +21,9 @@ public  class DatabaseCommandQueryFragment : QueryFragment<CommandProperty>
         set;
     } = CommandValueType.Record;
 
-    public ICollection<SqlParameter> SqlParameters
+    public ICollection<TParameter> Parameters
     {
         get;
         set;
-    } = new List<SqlParameter>();
+    } = new List<TParameter();
 }

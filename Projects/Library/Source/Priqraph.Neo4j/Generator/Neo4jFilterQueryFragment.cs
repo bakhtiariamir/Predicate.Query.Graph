@@ -80,7 +80,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
         return columnProperties;
     }
 
-    public static IEnumerable<SqlParameter>? GetParameters(FilterProperty? parameter, QuerySetting setting)
+    public static IEnumerable<Neo4JParameter>? GetParameters(FilterProperty? parameter, QuerySetting setting)
     {
         if (parameter == null) yield break;
 
@@ -90,7 +90,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
         switch (whereClause.PartType)
         {
             case PartType.WhereClause:
-                SqlParameter new4jParameter;
+                Neo4JParameter new4jParameter;
                 if (whereClause.Left?.PartType == PartType.ColumnInfo)
                 {
                     if (whereClause.Operator is not ConditionOperatorType.IsNotNull and not ConditionOperatorType.IsNull)
@@ -100,9 +100,8 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         new4jParameter.ParameterName = valueParameter.ParameterName;
                         if (whereClause.Right?.ValueType?.IsArray ?? false)
                         {
-                            new4jParameter.SqlDbType = SqlDbType.Structured;
+                            new4jParameter.DataType = ColumnDataType.Structure;
                             new4jParameter.Value = valueParameter.Value;
-                            new4jParameter.TypeName = valueParameter.TypeName;
                         }
                         else
                             new4jParameter.Value = valueParameter.Value;
@@ -139,7 +138,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         {
                             typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "Int")?.Type;
 
-                            new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                             {
                                 TypeName = typeParam,
                                 Value = CreateIntValueDataTable((IEnumerable<int>)parameter.Value!)
@@ -147,7 +146,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         }
                         else
                         {
-                            new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                             {
                                 TypeName = typeParam,
                                 Value = (IEnumerable<object>)parameter.Value!
@@ -160,11 +159,11 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         {
                             typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "Bigint")?.Type;
 
-                            new4jParameter = new Neo4jParameter(parameterName, (IEnumerable<long>)parameter.Value!, typeParam);
+                            new4jParameter = new Neo4JParameter(parameterName, (IEnumerable<long>)parameter.Value!, typeParam);
                         }
                         else
                         {
-                            new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                             {
                                 TypeName = typeParam,
                                 Value = (IEnumerable<object>)parameter.Value!
@@ -177,7 +176,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         {
                             typeParam = userDefinedTables?.FirstOrDefault(item => item.Key == "String")?.Type;
 
-                            new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                             {
                                 TypeName = typeParam,
                                 Value = (IEnumerable<string>)parameter.Value!
@@ -185,7 +184,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         }
                         else
                         {
-                            new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                            new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                             {
                                 TypeName = typeParam,
                                 Value = (IEnumerable<object>)parameter.Value!
@@ -194,7 +193,7 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                     }
                     else
                     {
-                        new4jParameter = new SqlParameter(parameterName, SqlDbType.Structured)
+                        new4jParameter = new Neo4JParameter(parameterName, ColumnDataType.Structure)
                         {
                             TypeName = typeParam,
                             Value = (IEnumerable<object>)parameter.Value!
@@ -225,14 +224,14 @@ public class Neo4jFilterQueryFragment : DatabaseFilterQueryFragment
                         parameterName = $"{dataSet}{columnName}";
                     }
 
-                    new4jParameter = new Neo4jParameter(parameterName, parameter.Value);
+                    new4jParameter = new Neo4JParameter(parameterName, parameter.Value);
                 }
 
                 yield return new4jParameter;
                 break;
             case PartType.ColumnInfo:
                 var dbType = whereClause.ColumnPropertyInfo?.DataType;
-                new4jParameter = new SqlParameter(null, dbType);
+                new4jParameter = new Neo4JParameter(default, dbType);
                 yield return new4jParameter;
                 break;
             default:

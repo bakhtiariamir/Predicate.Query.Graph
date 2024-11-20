@@ -7,7 +7,7 @@ namespace Priqraph.Query.Builders;
 
 public class JoinPredicateBuilder : IQueryObjectPart<JoinPredicateBuilder, ICollection<JoinPredicate>>
 {
-    private ICollection<JoinPredicate> _joinPredicates;
+    private readonly ICollection<JoinPredicate> _joinPredicates;
 
     private JoinPredicateBuilder()
     {

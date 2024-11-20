@@ -7,7 +7,7 @@ namespace Priqraph.Test.Query
 {
     public class QueryableFixture : IDisposable
     {
-        public QueryBuilder<Person, ISqlQuery<Person>> QueryBuilder
+        public QueryBuilder<Person, ISqlQuery<Person, DatabaseQueryOperationType>, DatabaseQueryOperationType> QueryBuilder
         {
             get;
             set;

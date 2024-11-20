@@ -3,25 +3,19 @@ using Priqraph.Setup;
 
 namespace Priqraph.Info
 {
-    public class CacheInfoCollection : ICacheInfoCollection
+    public class CacheInfoCollection(QuerySetting querySetting) : ICacheInfoCollection
     {
         public QuerySetting QuerySetting
         {
             get;
             set;
-        }
+        } = querySetting;
 
         public IDictionary<string, object> Cache
         {
             get;
             set;
-        }
-
-        public CacheInfoCollection(QuerySetting querySetting)
-        {
-            QuerySetting = querySetting;
-            Cache = new Dictionary<string, object>();
-        }
+        } = new Dictionary<string, object>();
 
         public void InitCache(string key, object value) => Cache.Add(key, value);
 

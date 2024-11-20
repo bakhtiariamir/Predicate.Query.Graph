@@ -1,5 +1,4 @@
 ﻿using Priqraph.DataType;
-using System;
 using System.Linq.Expressions;
 
 namespace Priqraph.Query.Predicates

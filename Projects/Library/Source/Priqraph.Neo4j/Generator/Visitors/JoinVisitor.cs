@@ -12,9 +12,9 @@ public class JoinVisitor(
     ICacheInfoCollection cacheObjectCollection,
     IDatabaseObjectInfo objectInfo,
     ParameterExpression? parameterExpression)
-    : DatabaseVisitor<Neo4jJoinQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
+    : DatabaseVisitor<Neo4JJoinQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
 {
-    protected override Neo4jJoinQueryFragment VisitMember(MemberExpression expression)
+    protected override Neo4JJoinQueryFragment VisitMember(MemberExpression expression)
     {
         var fields = GetProperty(expression, ObjectInfo, CacheObjectCollection, true)?.ToArray() ?? throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         var field = fields.FirstOrDefault() ?? throw new ArgumentNullException(expression.Member.Name);
@@ -27,6 +27,6 @@ public class JoinVisitor(
         if (GetOption("JoinType", out var joinTypeObject) && joinTypeObject != null)
             joinType = (JoinType)joinTypeObject;
 
-        return Neo4jJoinQueryFragment.Create(new JoinProperty(field, joinType, joinPropertyInfo));
+        return Neo4JJoinQueryFragment.Create(new JoinProperty(field, joinType, joinPropertyInfo));
     }
 }

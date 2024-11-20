@@ -9,7 +9,7 @@ namespace Priqraph.Query.Builders;
 
 public class FilterPredicateBuilder<TObject> : IQueryObjectPart<FilterPredicateBuilder<TObject>, FilterPredicate<TObject>> where TObject : IQueryableObject
 {
-    private FilterPredicate<TObject> _filterPredicate;
+    private readonly FilterPredicate<TObject> _filterPredicate;
 
     private FilterPredicateBuilder(ReturnType returnType)
     {

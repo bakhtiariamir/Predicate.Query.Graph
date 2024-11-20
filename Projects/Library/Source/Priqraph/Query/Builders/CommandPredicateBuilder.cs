@@ -8,9 +8,12 @@ namespace Priqraph.Query.Builders;
 
 public class CommandPredicateBuilder<TObject> : IQueryObjectPart<CommandPredicateBuilder<TObject>, CommandPredicate<TObject>> where TObject : IQueryableObject
 {
-    private CommandPredicate<TObject> _commandPredicate;
+    private readonly CommandPredicate<TObject> _commandPredicate;
 
-    private CommandPredicateBuilder(CommandValueType commandValueType, QueryPartType commandPartType, ReturnType returnType = ReturnType.None) => _commandPredicate = new CommandPredicate<TObject>(commandPartType, commandValueType, returnType);
+    private CommandPredicateBuilder(CommandValueType commandValueType, QueryPartType commandPartType, ReturnType returnType = ReturnType.None)
+    {
+        _commandPredicate = new CommandPredicate<TObject>(commandPartType, commandValueType, returnType);
+    }
 
     public static CommandPredicateBuilder<TObject> InitInsert(CommandValueType commandValueType, ReturnType returnType = ReturnType.None) => new(commandValueType, QueryPartType.Insert, returnType);
 

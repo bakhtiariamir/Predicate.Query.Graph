@@ -7,7 +7,7 @@ namespace Priqraph.Query.Builders;
 
 public class SortPredicateBuilder<TObject> : IQueryObjectPart<SortPredicateBuilder<TObject>, ICollection<SortPredicate<TObject>>> where TObject : IQueryableObject
 {
-    private ICollection<SortPredicate<TObject>> _sortPredicates;
+    private readonly ICollection<SortPredicate<TObject>> _sortPredicates;
 
     private SortPredicateBuilder()
     {

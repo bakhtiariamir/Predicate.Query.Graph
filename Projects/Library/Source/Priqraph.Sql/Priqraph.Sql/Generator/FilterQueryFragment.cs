@@ -5,7 +5,7 @@ using Priqraph.Generator.Database;
 using Priqraph.Setup;
 using Priqraph.Sql.Extensions;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Priqraph.Generator;
 
 namespace Priqraph.Sql.Generator;

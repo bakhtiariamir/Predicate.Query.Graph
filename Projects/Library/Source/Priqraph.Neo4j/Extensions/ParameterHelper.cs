@@ -7,7 +7,7 @@ public static class ParameterHelper
 {
     public static string ParameterPhrase(this IColumnPropertyInfo columnPropertyInfo, string parameterName) => $"[{columnPropertyInfo.ColumnName}] = {parameterName}";
 
-    public static IEnumerable<Neo4jParameter> ArrayParameters<TDataType>(
+    public static IEnumerable<Neo4JParameter> ArrayParameters<TDataType>(
         string baseParameterName, 
         IEnumerable<TDataType> values, 
         ColumnDataType columnDataType, 
@@ -16,7 +16,10 @@ public static class ParameterHelper
         foreach (var value in values)
         {
             var parameterName = $"@{baseParameterName}_{index++}";
-            var parameter = new Neo4jParameter(parameterName, value, columnDataType);
+            var parameter = new Neo4JParameter(parameterName, value)
+            {
+                DataType =  ColumnDataType.Object
+            };
             yield return parameter;
         }
     }

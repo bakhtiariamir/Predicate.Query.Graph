@@ -1,6 +1,5 @@
-﻿using Priqraph.Builder.Database;
-using Priqraph.Contract;
-using Priqraph.Query;
+﻿using Priqraph.Contract;
+using Priqraph.Query.Reduce;
 
 namespace Priqraph.Manager;
 
@@ -11,23 +10,14 @@ internal sealed class QueryOperation<TObject, TQueryObject, TResult, TEnum> : IQ
     where TEnum : struct, IConvertible
 {
     private bool Validate() => true;
-
-    private bool ValidateQuery() => true;
-
+    
     public TResult Run(TQueryObject query, IQueryObject<TObject, TQueryObject, TResult, TEnum> queryObject)
     {
         if (query is null)
             throw new ArgumentNullException(nameof(query), $"{nameof(query)} can not be null.");
 
         query = QueryReducer<TObject, TQueryObject, TEnum>.Init(query).Reduce().Return();
-
-        var validateQuery = Validate();
-        if (validateQuery)
-        {
-            return queryObject.Build(query);
-        }
-
-        throw new System.Exception("database query is not valid"); //ToDo
+        return queryObject.Build(query);    
     }
 
     public TResult RunQuery(TQueryObject query, IQueryObject<TObject, TQueryObject, TResult, TEnum> queryObject)
@@ -35,12 +25,12 @@ internal sealed class QueryOperation<TObject, TQueryObject, TResult, TEnum> : IQ
         if (query is null)
             throw new ArgumentNullException(nameof(query), $"{nameof(query)} can not be null.");
 
-        var validateQuery = ValidateQuery();
+        var validateQuery = Validate();
         if (validateQuery)
         {
             return queryObject.Build(query);
         }
 
-        throw new System.Exception("database query is not valid"); //ToDo
+        throw new System.Exception("database query is not valid");
     }
 }

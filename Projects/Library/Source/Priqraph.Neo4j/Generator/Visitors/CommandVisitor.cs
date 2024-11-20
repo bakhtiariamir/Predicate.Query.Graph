@@ -15,15 +15,15 @@ public class CommandVisitor(
     ICacheInfoCollection cacheObjectCollection,
     IDatabaseObjectInfo objectInfo,
     ParameterExpression? parameterExpression)
-    : DatabaseVisitor<Neo4jCommandQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
+    : DatabaseVisitor<Neo4JCommandQueryFragment>(cacheObjectCollection, objectInfo, parameterExpression)
 {
-    protected override Neo4jCommandQueryFragment VisitMember(MemberExpression expression)
+    protected override Neo4JCommandQueryFragment VisitMember(MemberExpression expression)
     {
         if (expression.Expression == null)
             throw new NotSupportedOperationException(ExceptionCode.ObjectInfo); //ToDo
 
         var columnProperties = ObjectInfo.PropertyInfos.Select(item => new ColumnProperty(item)).Where(item => item.ColumnPropertyInfo?.FieldType != DatabaseFieldType.Related).ToArray();
-        var columnCommandQueryPart = Neo4jCommandQueryFragment.Create(columnProperties);
+        var columnCommandQueryPart = Neo4JCommandQueryFragment.Create(columnProperties);
 
         var valueQueryPart = Visit(expression.Expression);
 
@@ -44,7 +44,7 @@ public class CommandVisitor(
             } ?? throw new NotFoundException("asd");
 
             if (value.GetType().IsArray)
-                return Neo4jCommandQueryFragment.Merge(null, ReturnType.Record, columnCommandQueryPart, Neo4jCommandQueryFragment.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
+                return Neo4JCommandQueryFragment.Merge(null, ReturnType.Record, columnCommandQueryPart, Neo4JCommandQueryFragment.Create(new ColumnPropertyCollection(value as IEnumerable<object>)));
 
             foreach (var column in columnProperties)
             {
@@ -82,16 +82,16 @@ public class CommandVisitor(
                 }
             }
 
-            return Neo4jCommandQueryFragment.Create(columnProperties);
+            return Neo4JCommandQueryFragment.Create(columnProperties);
         }
 
         throw new System.Exception(); //todo
     }
 
-    protected override Neo4jCommandQueryFragment VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
+    protected override Neo4JCommandQueryFragment VisitConstant(ConstantExpression expression, string? memberName = null, MemberExpression? memberExpression = null)
     {
         var value = expression.ObjectValue() ?? throw new NotSupportedOperationException("easd"); //todo
 
-        return Neo4jCommandQueryFragment.Create(new ColumnPropertyCollection(new[] {value}));
+        return Neo4JCommandQueryFragment.Create(new ColumnPropertyCollection(new[] {value}));
     }
 }

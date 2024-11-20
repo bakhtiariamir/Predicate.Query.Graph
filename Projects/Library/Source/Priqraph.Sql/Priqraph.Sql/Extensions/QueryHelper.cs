@@ -2,7 +2,7 @@
 using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Generator.Database;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text;
 
 namespace Priqraph.Sql.Extensions;
@@ -29,7 +29,7 @@ internal static class QueryHelper
     public static string Command(this DatabaseQueryResult queryParts, out ICollection<SqlParameter> parameters)
     {
         if (queryParts.CommandFragment == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
-        parameters = queryParts.CommandFragment.SqlParameters;
+        parameters = queryParts.CommandFragment.Parameters;
 
         if (parameters != null && !parameters.Any())
             throw new NotSupportedOperationException(ExceptionCode.DatabaseQueryGenerator);
@@ -44,7 +44,7 @@ internal static class QueryHelper
         };
     }
 
-    private static string Insert(this DatabaseCommandQueryFragment command, DatabaseQueryResult queryParts)
+    private static string Insert(this DatabaseCommandQueryFragment<SqlParameter> command, DatabaseQueryResult queryParts)
     {
         var commandParts = command.CommandParts;
         var insert = new StringBuilder();

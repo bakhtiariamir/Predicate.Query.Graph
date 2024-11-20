@@ -8,11 +8,11 @@ namespace Priqraph.Neo4j.Extensions;
 
 public static class QueryHelper
 {
-    public static IEnumerable<Neo4jParameter> SelectNeo4jParameters(this Neo4jQueryResult queryParts)
+    public static IEnumerable<Neo4JParameter> SelectNeo4jParameters(this Neo4jQueryResult queryParts)
     {
         yield break;
     }
-    public static string FindNode(this Neo4jQueryResult queryParts, out ICollection<Neo4jParameter>? parameters)
+    public static string FindNode(this Neo4jQueryResult queryParts, out ICollection<Neo4JParameter>? parameters)
     {
         //Move to project khodesh
         if (queryParts.ColumnFragment == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
@@ -30,7 +30,7 @@ public static class QueryHelper
         return select.ToString();
     }
 
-    public static string Command(this Neo4jQueryResult queryParts, out ICollection<Neo4jParameter> parameters)
+    public static string Command(this Neo4jQueryResult queryParts, out ICollection<Neo4JParameter> parameters)
     {
         if (queryParts.CommandFragment == null) throw new NotFoundException(ExceptionCode.DatabaseQuerySelectingGenerator);
         parameters = queryParts.CommandFragment.Neo4jParameters;
@@ -48,7 +48,7 @@ public static class QueryHelper
         };
     }
 
-    private static string Insert(this Neo4jCommandQueryFragment command, Neo4jQueryResult queryParts)
+    private static string Insert(this Neo4JCommandQueryFragment command, Neo4jQueryResult queryParts)
     {
         var commandParts = command.CommandParts;
         var insert = new StringBuilder();
@@ -90,7 +90,7 @@ public static class QueryHelper
         return insert.ToString();
     }
 
-    private static string Update(this Neo4jCommandQueryFragment command, Neo4jQueryResult queryParts)
+    private static string Update(this Neo4JCommandQueryFragment command, Neo4jQueryResult queryParts)
     {
         var commandParts = command.CommandParts;
         var update = new StringBuilder();
@@ -163,7 +163,7 @@ public static class QueryHelper
         return update.ToString();
     }
 
-    private static string Delete(this Neo4jCommandQueryFragment command)
+    private static string Delete(this Neo4JCommandQueryFragment command)
     {
         var commandParts = command.CommandParts;
         var delete = new StringBuilder();
@@ -188,7 +188,7 @@ public static class QueryHelper
         return delete.ToString();
     }
 
-    private static string Merge(this Neo4jCommandQueryFragment command)
+    private static string Merge(this Neo4JCommandQueryFragment command)
     {
         return string.Empty;
     }

@@ -288,7 +288,7 @@ internal class Neo4jQueryObject<TObject, TObjectQuery> : Neo4jQuery<TObject> , I
         });
 
         var joinPredicates = queryObjectJoining.Validate().Return().OrderBy(item => item.Order);
-        var databaseJoinClauses = new List<Neo4jJoinQueryFragment>();
+        var databaseJoinClauses = new List<Neo4JJoinQueryFragment>();
         foreach (var join in joinPredicates)
         {
             joinGenerator.AddOption("JoinType", join.Type);
@@ -296,7 +296,7 @@ internal class Neo4jQueryObject<TObject, TObjectQuery> : Neo4jQuery<TObject> , I
             joinGenerator.RemoveOption("JoinType");
         }
 
-        QueryResult.JoinFragment = Neo4jJoinQueryFragment.Merged(databaseJoinClauses);
+        QueryResult.JoinFragment = Neo4JJoinQueryFragment.Merged(databaseJoinClauses);
 
 
     }
@@ -330,7 +330,7 @@ internal class Neo4jQueryObject<TObject, TObjectQuery> : Neo4jQuery<TObject> , I
 
     private void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, Neo4jQueryOperationType operationType)
     {
-        var commandQueries = new List<Neo4jCommandQueryFragment>();
+        var commandQueries = new List<Neo4JCommandQueryFragment>();
         switch (commandPredicate.CommandValueType)
         {
             case CommandValueType.Record:
@@ -344,11 +344,11 @@ internal class Neo4jQueryObject<TObject, TObjectQuery> : Neo4jQuery<TObject> , I
                 throw new NotSupportedOperationException(ExceptionCode.ApiQueryBuilder); //Too
         }
         commandSqlVisitor.AddOption("returnRecord", commandPredicate.ReturnType);
-        var commandObject = Neo4jCommandQueryFragment.Merge(operationType, commandPredicate.ReturnType, commandQueries.ToArray());
+        var commandObject = Neo4JCommandQueryFragment.Merge(operationType, commandPredicate.ReturnType, commandQueries.ToArray());
         QueryResult.CommandFragment = commandObject;
     }
 
-    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<Neo4jCommandQueryFragment> commandQueries, Neo4jQueryOperationType operationType)
+    private static void GenerateRecordCommand(CommandPredicate<TObject> commandPredicate, CommandVisitor commandSqlVisitor, ICollection<Neo4JCommandQueryFragment> commandQueries, Neo4jQueryOperationType operationType)
     {
         if (commandPredicate.ObjectPredicate == null && commandPredicate.ObjectsPredicate == null)
             throw new ArgumentNullException(nameof(commandPredicate.ObjectPredicate));

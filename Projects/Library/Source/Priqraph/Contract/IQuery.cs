@@ -1,5 +1,4 @@
-﻿using Priqraph.DataType;
-using Priqraph.Query.Predicates;
+﻿using Priqraph.Query.Predicates;
 using Priqraph.Setup;
 
 namespace Priqraph.Contract
@@ -65,16 +64,4 @@ namespace Priqraph.Contract
         IQuery<TObject, TEnum> Init(TEnum operationType, QueryProvider queryProvider,
             ICollection<Type>? objectTypeStructures = null);
     }
-
-    public interface ISqlQuery<TObject, in TEnum> : IQuery<TObject, TEnum> 
-        where TObject : IQueryableObject
-        where TEnum : struct, IConvertible
-    {
-        DatabaseQueryOperationType DatabaseQueryOperationType
-        {
-            get;
-            set;
-        }
-    }
-
 }

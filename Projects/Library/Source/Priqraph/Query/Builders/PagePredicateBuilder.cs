@@ -6,9 +6,12 @@ namespace Priqraph.Query.Builders;
 
 public class PagePredicateBuilder : IQueryObjectPart<PagePredicateBuilder, PagePredicate>
 {
-    private PagePredicate _pagePredicate;
+    private readonly PagePredicate _pagePredicate;
 
-    private PagePredicateBuilder(Expression<Func<PageClause>> expression) => _pagePredicate = new PagePredicate(expression);
+    private PagePredicateBuilder(Expression<Func<PageClause>> expression)
+    {
+        _pagePredicate = new PagePredicate(expression);
+    }
 
     public static PagePredicateBuilder Init(int skip, int take) => new(() => new PageClause(skip, take));
 

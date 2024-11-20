@@ -1,8 +1,10 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
+using Priqraph.Query.Predicates;
+using Priqraph.Query.Reduce;
 using System.Linq.Expressions;
 
-namespace Priqraph.Query.Predicates;
+namespace Priqraph.Query.Reduce;
 
 internal class ColumnPredicateReducer<TObject,TQueryObject, TEnum> : PredicateReducer<TObject, TQueryObject, TEnum> 
     where TObject : IQueryableObject

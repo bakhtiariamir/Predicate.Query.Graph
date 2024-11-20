@@ -1,7 +1,7 @@
 ﻿using Priqraph.Generator.Database;
 using Priqraph.Query.Builders;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Priqraph.Sql.Generator;
 public class PageQueryFragment : DatabasePageQueryFragment

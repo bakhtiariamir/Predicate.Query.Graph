@@ -1,5 +1,4 @@
-﻿using Priqraph.Builder.Database;
-using Priqraph.Contract;
+﻿using Priqraph.Contract;
 using Priqraph.DataType;
 
 namespace Priqraph.Manager.Result

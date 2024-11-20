@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 
 namespace Priqraph.Sql.Manager;
 
-public class SqlObjectQuery(ICollection<SqlParameter>? parameters, string phrase) : ObjectQuery<SqlParameter>(parameters), ISqlQuery
+public class SqlObjectQuery(ICollection<SqlParameter>? parameters, string phrase) : ObjectQuery<SqlParameter>(parameters)
 {
     public string Phrase
     {

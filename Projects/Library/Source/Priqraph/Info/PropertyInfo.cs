@@ -21,7 +21,7 @@ public class PropertyInfo : IPropertyInfo
     public bool Key
     {
         get;
-        set;
+        init;
     }
 
     public string Name

@@ -23,6 +23,8 @@ public static class ParameterHelper
         DataType.ColumnDataType.Binary => System.Data.SqlDbType.VarBinary,
         _ => throw new ArgumentOutOfRangeException(nameof(columnDataType), columnDataType, null)
     };
+    
+    
 
     public static string GetTextBasedOnSqlDbType(this ColumnDataType columnDataType, object? value) => columnDataType switch
     {

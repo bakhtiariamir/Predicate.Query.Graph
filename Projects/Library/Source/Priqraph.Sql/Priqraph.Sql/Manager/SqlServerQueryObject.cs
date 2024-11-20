@@ -20,7 +20,7 @@ internal class SqlServerQueryObject<TObject> : SqlQueryObject<TObject, ISqlQuery
     where TObject : IQueryableObject
 {
     private readonly IDatabaseObjectInfo _objectInfo;
-    public override ISqlQuery<TObject, DatabaseQueryOperationType> Query { get; }
+    public override ISqlQuery<TObject, DatabaseQueryOperationType>? Query { get; }
     public SqlServerQueryObject(ICacheInfoCollection cacheInfoCollection) : base(cacheInfoCollection)
     {
         _objectInfo = cacheInfoCollection?.LastDatabaseObjectInfo<TObject>() ??

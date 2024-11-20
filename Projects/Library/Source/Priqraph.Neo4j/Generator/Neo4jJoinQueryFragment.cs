@@ -4,9 +4,9 @@ using Priqraph.Generator;
 using Priqraph.Generator.Database;
 
 namespace Priqraph.Neo4j.Generator;
-public class Neo4jJoinQueryFragment : DatabaseJoinQueryFragment
+public class Neo4JJoinQueryFragment : DatabaseJoinQueryFragment
 {
-    private Neo4jJoinQueryFragment(ICollection<JoinProperty> joinPredicates)
+    private Neo4JJoinQueryFragment(ICollection<JoinProperty> joinPredicates)
     {
         Parameter = joinPredicates;
     }
@@ -28,16 +28,16 @@ public class Neo4jJoinQueryFragment : DatabaseJoinQueryFragment
         return $"{joinString} {joinProperty.JoinObjectInfo} AS [{joinProperty.JoinColumn}] ON [{joinProperty.JoinColumn}].[{joinItem.ColumnName}] = {joinProperty.JoinColumn.GetSelector()}.[{joinProperty.JoinColumn.ColumnName}]";
     }
 
-    public static Neo4jJoinQueryFragment Create(params JoinProperty[] joinPredicates)
+    public static Neo4JJoinQueryFragment Create(params JoinProperty[] joinPredicates)
     {
-        var joinFragment = new Neo4jJoinQueryFragment(joinPredicates);
+        var joinFragment = new Neo4JJoinQueryFragment(joinPredicates);
         joinFragment.SetText();
         return joinFragment;
     }
 
-    public static Neo4jJoinQueryFragment Merged(IEnumerable<Neo4jJoinQueryFragment> sqlQueries)
+    public static Neo4JJoinQueryFragment Merged(IEnumerable<Neo4JJoinQueryFragment> sqlQueries)
     {
-        var joinFragment = new Neo4jJoinQueryFragment(sqlQueries.SelectMany(properties => properties.Parameter ?? new List<JoinProperty>()).DistinctBy(item => new
+        var joinFragment = new Neo4JJoinQueryFragment(sqlQueries.SelectMany(properties => properties.Parameter ?? new List<JoinProperty>()).DistinctBy(item => new
         {
             item.JoinColumn,
             item.JoinType

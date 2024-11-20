@@ -5,7 +5,7 @@ using Priqraph.Neo4j.Contracts;
 
 namespace Priqraph.Neo4j.Manager;
 
-public class Neo4jObjectQuery(ICollection<Neo4jParameter>? parameters, string phrase) : ObjectQuery<Neo4jParameter>(parameters), INeo4jQuery
+public class Neo4jObjectQuery(ICollection<Neo4JParameter>? parameters, string phrase) : ObjectQuery<Neo4JParameter>(parameters), INeo4jQuery
 {
     public string Phrase
     {

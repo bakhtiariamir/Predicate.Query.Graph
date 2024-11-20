@@ -1,7 +1,7 @@
 ﻿using Priqraph.Contract;
 using Priqraph.DataType;
 
-namespace Priqraph.Query.Predicates;
+namespace Priqraph.Query.Reduce;
 
 internal class FilterPredicateReducer<TObject, TQueryObject, TEnum> : PredicateReducer<TObject, TQueryObject, TEnum> 
     where TObject : IQueryableObject

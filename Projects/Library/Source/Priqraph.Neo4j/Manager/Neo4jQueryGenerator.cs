@@ -6,13 +6,13 @@ using Priqraph.Neo4j.Extensions;
 
 namespace Priqraph.Neo4j.Manager;
 
-public class Neo4jQueryGenerator : IObjectQueryGenerator<Neo4jParameter, Neo4jObjectQuery, Neo4jQueryResult>
+public class Neo4jQueryGenerator : IObjectQueryGenerator<Neo4JParameter, Neo4jObjectQuery, Neo4jQueryResult>
 {
 
     public Neo4jObjectQuery? GenerateResult(Neo4jQueryOperationType operationType, Neo4jQueryResult query)
     {
         var phrase = string.Empty;
-        ICollection<Neo4jParameter>? parameters = null;
+        ICollection<Neo4JParameter>? parameters = null;
         switch (operationType)
         {
             case Neo4jQueryOperationType.FindNode:

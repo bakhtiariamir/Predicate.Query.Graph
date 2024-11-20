@@ -1,5 +1,4 @@
 ﻿using Priqraph.Contract;
-using Priqraph.DataType;
 using Priqraph.Exception;
 using Priqraph.Query.Builders;
 using Priqraph.Query.Predicates;
